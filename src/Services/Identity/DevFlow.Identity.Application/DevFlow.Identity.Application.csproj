@@ -1,15 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AssemblyName>DevFlow.Identity.Application</AssemblyName>
+    <RootNamespace>DevFlow.Identity.Application</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Domain\DevFlow.Identity.Domain.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Contracts\DevFlow.Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Messaging\DevFlow.BuildingBlocks.Messaging.csproj" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
 
 </Project>
