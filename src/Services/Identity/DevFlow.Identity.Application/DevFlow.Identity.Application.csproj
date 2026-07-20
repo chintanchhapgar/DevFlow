@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\DevFlow.Identity.Domain\DevFlow.Identity.Domain.csproj" />
+    <ProjectReference Include="..\DevFlow.Identity.Contracts\DevFlow.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Messaging\DevFlow.BuildingBlocks.Messaging.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
