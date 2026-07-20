@@ -1,13 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AssemblyName>DevFlow.BuildingBlocks.Messaging</AssemblyName>
+    <RootNamespace>DevFlow.BuildingBlocks.Messaging</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DevFlow.BuildingBlocks.Infrastructure\DevFlow.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
+  </ItemGroup>
 
 </Project>
