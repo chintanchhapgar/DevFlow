@@ -18,4 +18,14 @@ public static class UserErrors
         AppError.Validation(
             "Users.InvalidCredentials",
             "Invalid email or password.");
+
+    public static readonly AppError EmailNotConfirmed =
+    new(
+        "Users.EmailNotConfirmed",
+        "Email address has not been verified.");
+
+    public static readonly AppError UserInactive =
+        new(
+            "Users.UserInactive",
+            "User account is inactive.");
 }

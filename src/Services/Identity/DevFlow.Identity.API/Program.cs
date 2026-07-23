@@ -17,4 +17,6 @@ app.UseSwaggerUI();
 
 app.MapGet("/", () => "DevFlow Identity Service");
 app.MapRegisterEndpoint();
+app.MapLoginEndpoint();
+
 app.Run();

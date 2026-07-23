@@ -21,9 +21,8 @@ public sealed class User : AggregateRoot<UserId>
         LastName = lastName;
 
         Role = UserRole.Member;
-        Status = UserStatus.Pending;
-
-        EmailConfirmed = false;
+        Status = UserStatus.Active;
+        EmailConfirmed = true;
         CreatedOnUtc = DateTime.UtcNow;
     }
 
@@ -42,7 +41,7 @@ public sealed class User : AggregateRoot<UserId>
 
     public UserRole Role { get; private set; }
 
-    public UserStatus Status { get; private set; }
+    public UserStatus Status { get; private set; } = UserStatus.Active;
 
     public bool EmailConfirmed { get; private set; }
 
@@ -50,6 +49,7 @@ public sealed class User : AggregateRoot<UserId>
 
     public DateTime? UpdatedOnUtc { get; private set; }
 
+    public bool IsActive => Status == UserStatus.Active;
     public static User Create(
         string email,
         string passwordHash,

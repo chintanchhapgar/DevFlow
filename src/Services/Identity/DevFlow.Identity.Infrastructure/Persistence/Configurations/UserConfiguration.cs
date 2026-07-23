@@ -42,10 +42,14 @@ internal sealed class UserConfiguration
             .IsRequired();
 
         builder.Property(x => x.Role)
-            .HasConversion<int>();
+            .HasConversion<int>()
+            .IsRequired();
 
         builder.Property(x => x.Status)
-            .HasConversion<int>();
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.Ignore(x => x.IsActive);
 
         builder.Property(x => x.EmailConfirmed);
 
