@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.Register;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -16,15 +17,16 @@ public static class RegisterEndpoint
             async (
                 RegisterCommand command,
                 ISender sender,
+                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
                     command,
                     cancellationToken);
 
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : Results.BadRequest(result.Error);
+                return result.ToApiResult(
+                    httpContext,
+                    "User registered successfully.");
             })
             .WithSummary("Register new user");
 

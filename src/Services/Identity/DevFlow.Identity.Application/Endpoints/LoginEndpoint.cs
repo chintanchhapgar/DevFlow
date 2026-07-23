@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.Login;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -19,15 +20,16 @@ public static class LoginEndpoint
             async (
                 LoginCommand command,
                 ISender sender,
+                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
                     command,
                     cancellationToken);
 
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : Results.BadRequest(result.Error);
+                return result.ToApiResult(
+                    httpContext,
+                    "Login successful.");
             })
         .WithName("Login")
         .WithSummary("Authenticate user")

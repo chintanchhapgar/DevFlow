@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.ChangePassword;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -19,25 +20,24 @@ public static class ChangePasswordEndpoint
             async (
                 ChangePasswordCommand command,
                 ISender sender,
+                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
                     command,
                     cancellationToken);
 
-                if (result.IsFailure)
-                {
-                    return Results.BadRequest(result.Error);
-                }
-
-                return Results.Ok(result.Value);
+                return result.ToApiResult(
+                    httpContext,
+                    "Password changed successfully.");
             })
             .RequireAuthorization()
             .WithName("ChangePassword")
             .WithSummary("Change current user's password")
-            .Produces<ChangePasswordResponse>()
+            .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
 
         return app;
     }

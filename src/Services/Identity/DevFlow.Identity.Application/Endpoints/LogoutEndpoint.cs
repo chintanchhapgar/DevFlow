@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.Logout;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -16,18 +17,16 @@ public static class LogoutEndpoint
             async (
                 LogoutCommand command,
                 ISender sender,
+                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
                     command,
                     cancellationToken);
 
-                if (result.IsFailure)
-                {
-                    return Results.BadRequest(result.Error);
-                }
-
-                return Results.Ok(result.Value);
+                return result.ToApiResult(
+                    httpContext,
+                    "Logged out successfully.");
             })
             .RequireAuthorization()
             .WithName("Logout")

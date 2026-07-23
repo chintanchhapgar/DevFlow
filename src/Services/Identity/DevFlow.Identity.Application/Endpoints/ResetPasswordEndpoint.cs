@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -16,18 +17,16 @@ public static class ResetPasswordEndpoint
             async (
                 ResetPasswordCommand command,
                 ISender sender,
+                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
                     command,
                     cancellationToken);
 
-                if (result.IsFailure)
-                {
-                    return Results.BadRequest(result.Error);
-                }
-
-                return Results.Ok(result.Value);
+                return result.ToApiResult(
+                    httpContext,
+                    "Password reset successfully.");
             })
             .AllowAnonymous()
             .WithName("ResetPassword")

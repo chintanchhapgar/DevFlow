@@ -1,56 +1,51 @@
-using DevFlow.BuildingBlocks.Api.ProblemDetails;
+using DevFlow.BuildingBlocks.Api.Responses;
 using DevFlow.SharedKernel.Results;
 using Microsoft.AspNetCore.Http;
 
 namespace DevFlow.BuildingBlocks.Api.Extensions;
 
-/// <summary>
-/// Extension methods for mapping Result types to IResult HTTP responses.
-/// </summary>
 public static class ResultExtensions
 {
-    /// <summary>
-    /// Maps a Result to an HTTP 200 OK or Problem Details response.
-    /// </summary>
-    public static IResult ToOkOrProblem(this Result result)
+    public static IResult ToApiResult<T>(
+     this Result<T> result,
+     HttpContext context,
+     string successMessage = "Success.")
     {
-        return result.IsSuccess
-            ? Results.Ok()
-            : ProblemDetailsFactory.ToProblemDetails(result.Error);
-    }
+        if (result.IsSuccess)
+        {
+            return Results.Ok(
+                new ApiResponse<T>
+                {
+                    Success = true,
+                    Message = successMessage,
+                    Data = result.Value,
+                    TraceId = context.TraceIdentifier
+                });
+        }
 
-    /// <summary>
-    /// Maps a ResultResult&lt;T&gt; to an HTTP 200 OK with value or Problem Details response.
-    /// </summary>
-    public static IResult ToOkOrProblem<TValue>(this Result<TValue> result)
-    {
-        return result.IsSuccess
-            ? Results.Ok(result.Value)
-            : ProblemDetailsFactory.ToProblemDetails(result.Error);
-    }
+        var statusCode = result.Error.Type switch
+        {
+            ErrorType.Validation => 400,
+            ErrorType.NotFound => 404,
+            ErrorType.Conflict => 409,
+            ErrorType.Unauthorized => 401,
+            ErrorType.Forbidden => 403,
+            _ => 400
+        };
 
-    /// <summary>
-    /// Maps a ResultResult&lt;T&gt; to an HTTP 201 Created or Problem Details response.
-    /// </summary>
-    public static IResult ToCreatedOrProblem<TValue>(
-        this Result<TValue> result,
-        string? uri = null)
-    {
-        if (result.IsFailure)
-            return ProblemDetailsFactory.ToProblemDetails(result.Error);
-
-        return uri is not null
-            ? Results.Created(uri, result.Value)
-            : Results.Created(string.Empty, result.Value);
-    }
-
-    /// <summary>
-    /// Maps a Result to an HTTP 204 No Content or Problem Details response.
-    /// </summary>
-    public static IResult ToNoContentOrProblem(this Result result)
-    {
-        return result.IsSuccess
-            ? Results.NoContent()
-            : ProblemDetailsFactory.ToProblemDetails(result.Error);
+        return Results.Json(
+            new ApiResponse<object>
+            {
+                Success = false,
+                Message = result.Error.Description,
+                TraceId = context.TraceIdentifier,
+                Error = new ApiError
+                {
+                    Code = result.Error.Code,
+                    Message = result.Error.Description,
+                    Type = result.Error.Type.ToString()
+                }
+            },
+            statusCode: statusCode);
     }
 }

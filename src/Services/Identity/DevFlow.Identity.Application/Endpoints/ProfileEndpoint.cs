@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Responses;
 using DevFlow.Identity.Application.Authentication.Profile;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -16,7 +17,7 @@ public static class ProfileEndpoint
     {
         app.MapGet(
             "/api/auth/profile",
-            (ICurrentUser currentUser) =>
+            (ICurrentUser currentUser, HttpContext httpContext) =>
             {
                 var response = new ProfileResponse(
                     currentUser.UserId,
@@ -24,12 +25,15 @@ public static class ProfileEndpoint
                     currentUser.Name,
                     currentUser.Role);
 
-                return Results.Ok(response);
+                return ApiResponseFactory.Success(
+                    httpContext,
+                    response,
+                    "Profile retrieved successfully.");
             })
             .RequireAuthorization()
-            .WithName("Profile")
-            .WithSummary("Current authenticated user")
-            .Produces<ProfileResponse>();
+                    .WithName("Profile")
+                    .WithSummary("Current authenticated user")
+                    .Produces<ProfileResponse>();
 
         return app;
     }
