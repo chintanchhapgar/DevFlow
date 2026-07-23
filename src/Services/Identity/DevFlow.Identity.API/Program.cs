@@ -75,6 +75,8 @@ app.MapLoginEndpoint();
 
 app.MapRefreshTokenEndpoint();
 
+app.MapLogoutEndpoint();
+
 app.MapProfileEndpoint();
 
 app.Run();
