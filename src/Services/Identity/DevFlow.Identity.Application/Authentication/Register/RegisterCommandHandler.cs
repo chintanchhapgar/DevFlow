@@ -1,6 +1,7 @@
-using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.EmailVerificationTokens;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -15,15 +16,21 @@ internal sealed class RegisterCommandHandler
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailVerificationTokenGenerator _verificationTokenGenerator;
+    private readonly IEmailVerificationTokenRepository _verificationRepository;
 
     public RegisterCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IEmailVerificationTokenGenerator verificationTokenGenerator,
+        IEmailVerificationTokenRepository verificationRepository)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _unitOfWork = unitOfWork;
+        _verificationTokenGenerator = verificationTokenGenerator;
+        _verificationRepository = verificationRepository;
     }
 
     public async Task<Result<RegisterResponse>> Handle(
@@ -50,12 +57,25 @@ internal sealed class RegisterCommandHandler
             user,
             cancellationToken);
 
+        var tokenValue =
+             _verificationTokenGenerator.Generate();
+
+        var verificationToken =
+            EmailVerificationToken.Create(
+                user.Id,
+                tokenValue,
+                DateTime.UtcNow.AddHours(24));
+
+        await _verificationRepository.AddAsync(
+            verificationToken,
+            cancellationToken);
+
         await _unitOfWork.SaveChangesAsync(
             cancellationToken);
 
-        return Result.Success(
-            new RegisterResponse(
-                user.Id.Value,
-                user.Email));
+
+        return new RegisterResponse(
+            user.Id.Value,
+            verificationToken.Token);
     }
 }

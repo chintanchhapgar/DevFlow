@@ -85,4 +85,6 @@ app.MapResetPasswordEndpoint();
 
 app.MapChangePasswordEndpoint();
 
+app.MapVerifyEmailEndpoint();
+
 app.Run();

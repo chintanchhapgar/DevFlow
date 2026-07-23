@@ -49,4 +49,14 @@ public static class UserErrors
         AppError.Failure(
             "Users.InvalidCurrentPassword",
             "Current password is incorrect.");
+
+    public static readonly AppError InvalidVerificationToken =
+    AppError.NotFound(
+        "Users.InvalidVerificationToken",
+        "The verification token is invalid or has expired.");
+
+    public static readonly AppError EmailAlreadyVerified =
+        AppError.Conflict(
+            "Users.EmailAlreadyVerified",
+            "Email has already been verified.");
 }

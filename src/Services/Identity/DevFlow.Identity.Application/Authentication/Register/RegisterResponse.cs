@@ -5,4 +5,4 @@ namespace DevFlow.Identity.Application.Authentication.Register;
 /// </summary>
 public sealed record RegisterResponse(
     Guid UserId,
-    string Email);
+    string VerificationToken);
