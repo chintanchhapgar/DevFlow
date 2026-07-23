@@ -2,7 +2,6 @@ using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication;
 using DevFlow.Identity.Infrastructure.Authentication;
-using DevFlow.Identity.Infrastructure.Options;
 using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<JwtOptions>(
-            configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<JwtSettings>(
+            configuration.GetSection(JwtSettings.SectionName));
 
         services.AddDbContext<IdentityDbContext>(options =>
             options.UseNpgsql(

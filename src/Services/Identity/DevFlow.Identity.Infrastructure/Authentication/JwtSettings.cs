@@ -1,9 +1,9 @@
-namespace DevFlow.Identity.Infrastructure.Options;
+namespace DevFlow.Identity.Infrastructure.Authentication;
 
 /// <summary>
 /// JWT configuration.
 /// </summary>
-public sealed class JwtOptions
+public sealed class JwtSettings
 {
     public const string SectionName = "Jwt";
 

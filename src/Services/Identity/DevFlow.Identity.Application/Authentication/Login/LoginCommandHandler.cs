@@ -53,7 +53,7 @@ internal sealed class LoginCommandHandler
                 UserErrors.UserInactive);
         }
 
-        var accessToken = _jwtProvider.GenerateAccessToken(user.Id.Value);
+        var accessToken = _jwtProvider.GenerateAccessToken(user);
 
         return Result.Success(
             new LoginResponse(

@@ -7,7 +7,9 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Observability\DevFlow.BuildingBlocks.Observability.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
