@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>DevFlow.Identity.Domain</AssemblyName>
-    <RootNamespace>DevFlow.Identity.Domain</RootNamespace>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
 </Project>

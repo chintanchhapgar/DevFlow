@@ -1,50 +1,71 @@
+using DevFlow.SharedKernel.Abstractions;
+
 namespace DevFlow.SharedKernel.Domain;
 
 /// <summary>
 /// Base class for all domain entities.
 /// Entities have identity and lifecycle.
-/// Equality is based on identity, not structural comparison.
+/// Equality is based on identity.
 /// </summary>
-/// <typeparam name="TId">The strongly-typed ID type.</typeparam>
+/// <typeparam name="TId">Strongly typed identifier.</typeparam>
 public abstract class Entity<TId> : IEquatable<Entity<TId>>
     where TId : notnull
 {
+    private readonly List<IDomainEvent> _domainEvents = [];
+
     protected Entity(TId id)
     {
         Id = id;
     }
 
-    // Required for EF Core
-    protected Entity() { }
+    // Required by EF Core
+    protected Entity()
+    {
+    }
 
     public TId Id { get; private set; } = default!;
 
+    /// <summary>
+    /// Domain events raised by this entity.
+    /// </summary>
+    public IReadOnlyCollection<IDomainEvent> DomainEvents
+        => _domainEvents.AsReadOnly();
+
+    protected void RaiseDomainEvent(IDomainEvent domainEvent)
+    {
+        ArgumentNullException.ThrowIfNull(domainEvent);
+
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+
     public bool Equals(Entity<TId>? other)
     {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        if (other.GetType() != GetType()) return false;
+        if (other is null)
+            return false;
 
-        return Id.Equals(other.Id);
+        if (ReferenceEquals(this, other))
+            return true;
+
+        if (GetType() != other.GetType())
+            return false;
+
+        return EqualityComparer<TId>.Default.Equals(Id, other.Id);
     }
 
     public override bool Equals(object? obj)
-    {
-        return obj is Entity<TId> entity && Equals(entity);
-    }
+        => obj is Entity<TId> entity && Equals(entity);
 
     public override int GetHashCode()
-    {
-        return Id.GetHashCode() * 41;
-    }
+        => HashCode.Combine(GetType(), Id);
 
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
-    {
-        return left is not null && right is not null && left.Equals(right);
-    }
+        => Equals(left, right);
 
     public static bool operator !=(Entity<TId>? left, Entity<TId>? right)
-    {
-        return !(left == right);
-    }
+        => !Equals(left, right);
 }

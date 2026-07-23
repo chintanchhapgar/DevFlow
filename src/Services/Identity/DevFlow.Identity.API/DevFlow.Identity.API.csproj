@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\DevFlow.Identity.Application\DevFlow.Identity.Application.csproj" />
+    <ProjectReference Include="..\DevFlow.Identity.Infrastructure\DevFlow.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\DevFlow.Identity.Contracts\DevFlow.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Observability\DevFlow.BuildingBlocks.Observability.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Swashbuckle.AspNetCore" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DevFlow.Identity.Application\DevFlow.Identity.Application.csproj" />
-    <ProjectReference Include="..\DevFlow.Identity.Infrastructure\DevFlow.Identity.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Observability\DevFlow.BuildingBlocks.Observability.csproj" />
-  </ItemGroup>
+
 </Project>

@@ -1,3 +1,5 @@
+using DevFlow.SharedKernel.Abstractions;
+
 namespace DevFlow.SharedKernel.Domain;
 
 /// <summary>

@@ -20,32 +20,7 @@
     <Project Path="src/Services/Identity/DevFlow.Identity.IntegrationTests/DevFlow.Identity.IntegrationTests.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.UnitTests/DevFlow.Identity.UnitTests.csproj" />
   </Folder>
-  <Folder Name="/src/Services/Notifications/">
-    <Project Path="src/Services/Notifications/DevFlow.Notifications.API/DevFlow.Notifications.API.csproj" />
-    <Project Path="src/Services/Notifications/DevFlow.Notifications.Application/DevFlow.Notifications.Application.csproj" />
-    <Project Path="src/Services/Notifications/DevFlow.Notifications.Contracts/DevFlow.Notifications.Contracts.csproj" />
-    <Project Path="src/Services/Notifications/DevFlow.Notifications.Infrastructure/DevFlow.Notifications.Infrastructure.csproj" />
-    <Project Path="src/Services/Notifications/DevFlow.Notifications.IntegrationTests/DevFlow.Notifications.IntegrationTests.csproj" />
-    <Project Path="src/Services/Notifications/DevFlow.Notifications.UnitTests/DevFlow.Notifications.UnitTests.csproj" />
-  </Folder>
-  <Folder Name="/src/Services/Projects/">
-    <Project Path="src/Services/Projects/DevFlow.Projects.API/DevFlow.Projects.API.csproj" />
-    <Project Path="src/Services/Projects/DevFlow.Projects.Application/DevFlow.Projects.Application.csproj" />
-    <Project Path="src/Services/Projects/DevFlow.Projects.Contracts/DevFlow.Projects.Contracts.csproj" />
-    <Project Path="src/Services/Projects/DevFlow.Projects.Domain/DevFlow.Projects.Domain.csproj" />
-    <Project Path="src/Services/Projects/DevFlow.Projects.Infrastructure/DevFlow.Projects.Infrastructure.csproj" />
-    <Project Path="src/Services/Projects/DevFlow.Projects.IntegrationTests/DevFlow.Projects.IntegrationTests.csproj" />
-    <Project Path="src/Services/Projects/DevFlow.Projects.UnitTests/DevFlow.Projects.UnitTests.csproj" />
-  </Folder>
-  <Folder Name="/src/Services/WorkManagement/">
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.API/DevFlow.WorkManagement.API.csproj" />
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.Application/DevFlow.WorkManagement.Application.csproj" />
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.Contracts/DevFlow.WorkManagement.Contracts.csproj" />
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.Domain/DevFlow.WorkManagement.Domain.csproj" />
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.Infrastructure/DevFlow.WorkManagement.Infrastructure.csproj" />
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.IntegrationTests/DevFlow.WorkManagement.IntegrationTests.csproj" />
-    <Project Path="src/Services/WorkManagement/DevFlow.WorkManagement.UnitTests/DevFlow.WorkManagement.UnitTests.csproj" />
-  </Folder>
+
   <Folder Name="/tests/" />
   <Folder Name="/tests/ArchitectureTests/">
     <Project Path="tests/ArchitectureTests/DevFlow.ArchitectureTests.csproj" />

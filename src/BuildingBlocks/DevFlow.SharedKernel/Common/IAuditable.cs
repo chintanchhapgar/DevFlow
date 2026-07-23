@@ -1,4 +1,4 @@
-namespace DevFlow.SharedKernel.Common;
+namespace DevFlow.SharedKernel.Abstractions;
 
 /// <summary>
 /// Marks an entity as auditable with created/modified tracking.

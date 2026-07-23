@@ -1,4 +1,5 @@
 using DevFlow.SharedKernel.Domain;
+using DevFlow.SharedKernel.Abstractions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

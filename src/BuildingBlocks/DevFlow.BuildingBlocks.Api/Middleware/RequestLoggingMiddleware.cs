@@ -27,8 +27,8 @@ public sealed class RequestLoggingMiddleware
         var stopwatch = Stopwatch.StartNew();
 
         _logger.LogRequestStarted(
-            context.Request.Method,
-            context.Request.Path);
+         context.Request.Method,
+         context.Request.Path.Value ?? "/");
 
         try
         {
@@ -38,9 +38,10 @@ public sealed class RequestLoggingMiddleware
 
             _logger.LogRequestCompleted(
                 context.Request.Method,
-                context.Request.Path,
+                context.Request.Path.Value ?? "/",
                 context.Response.StatusCode,
                 stopwatch.ElapsedMilliseconds);
+
         }
         catch (Exception exception)
         {

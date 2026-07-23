@@ -8,7 +8,7 @@ public sealed class Result<TValue> : Result
 {
     private readonly TValue? _value;
 
-    internal Result(TValue? value, bool isSuccess, Errors error)
+    internal Result(TValue? value, bool isSuccess, AppError error)
         : base(isSuccess, error)
     {
         _value = value;
@@ -35,6 +35,6 @@ public sealed class Result<TValue> : Result
     /// Implicitly converts an Error to a failed Result.
     /// Enables: return SomeError;
     /// </summary>
-    public static implicit operator Result<TValue>(Errors error) =>
+    public static implicit operator Result<TValue>(AppError error) =>
         Failure<TValue>(error);
 }

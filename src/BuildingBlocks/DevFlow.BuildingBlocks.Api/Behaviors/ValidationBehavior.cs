@@ -58,7 +58,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>
         // Build a combined error description
         var errorDescription = string.Join("; ", failures.Select(f => $"{f.PropertyName}: {f.ErrorMessage}"));
 
-        var error = Errors.Validation(
+        var error = AppError.Validation(
             "Validation.Failed",
             errorDescription);
 
@@ -73,7 +73,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>
         var failureMethod = typeof(Result)
             .GetMethod(nameof(Result.Failure),
                 System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
-                [typeof(Errors)])!
+                [typeof(AppError)])!
             .MakeGenericMethod(resultType);
 
         return (TResponse)failureMethod.Invoke(null, [error])!;

@@ -1,6 +1,0 @@
-@DevFlow.WorkManagement.API_HostAddress = http://localhost:5210
-
-GET {{DevFlow.WorkManagement.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,12 +1,10 @@
-using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Identity.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// EF Core implementation of IUserRepository.
-/// Only one repository for the User aggregate root.
+/// EF Core implementation of the user repository.
 /// </summary>
 internal sealed class UserRepository : IUserRepository
 {
@@ -22,30 +20,46 @@ internal sealed class UserRepository : IUserRepository
         CancellationToken cancellationToken = default)
     {
         return await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(
+                x => x.Id == id,
+                cancellationToken);
     }
 
     public async Task<User?> GetByEmailAsync(
         string email,
         CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = email.Trim().ToLowerInvariant();
-
         return await _context.Users
-            .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+            .FirstOrDefaultAsync(
+                x => x.Email == email,
+                cancellationToken);
     }
 
     public async Task<bool> ExistsByEmailAsync(
         string email,
         CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = email.Trim().ToLowerInvariant();
-
         return await _context.Users
-            .AnyAsync(u => u.Email == normalizedEmail, cancellationToken);
+            .AnyAsync(
+                x => x.Email == email,
+                cancellationToken);
     }
 
-    public void Add(User user) => _context.Users.Add(user);
+    public async Task AddAsync(
+        User user,
+        CancellationToken cancellationToken = default)
+    {
+        await _context.Users.AddAsync(
+            user,
+            cancellationToken);
+    }
 
-    public void Update(User user) => _context.Users.Update(user);
+    public Task UpdateAsync(
+        User user,
+        CancellationToken cancellationToken = default)
+    {
+        _context.Users.Update(user);
+
+        return Task.CompletedTask;
+    }
 }

@@ -1,4 +1,4 @@
-using DevFlow.SharedKernel.Common;
+using DevFlow.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 

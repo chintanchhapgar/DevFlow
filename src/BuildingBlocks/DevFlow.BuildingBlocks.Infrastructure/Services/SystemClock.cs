@@ -1,4 +1,4 @@
-using DevFlow.SharedKernel.Common;
+using DevFlow.SharedKernel.Abstractions;
 
 namespace DevFlow.BuildingBlocks.Infrastructure.Services;
 

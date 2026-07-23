@@ -1,6 +1,6 @@
 using DevFlow.BuildingBlocks.Infrastructure.Persistence.Interceptors;
 using DevFlow.BuildingBlocks.Infrastructure.Services;
-using DevFlow.SharedKernel.Common;
+using DevFlow.SharedKernel.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 

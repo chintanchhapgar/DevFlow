@@ -1,18 +1,24 @@
+using BCrypt.Net;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Infrastructure.Authentication;
 
+/// <summary>
+/// BCrypt password hasher.
+/// </summary>
 internal sealed class PasswordHasher : IPasswordHasher
 {
-    private const int WorkFactor = 12;
-
     public string Hash(string password)
     {
-        return BCrypt.Net.BCrypt.HashPassword(password, WorkFactor);
+        return BCrypt.Net.BCrypt.HashPassword(password);
     }
 
-    public bool Verify(string password, string passwordHash)
+    public bool Verify(
+        string password,
+        string passwordHash)
     {
-        return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+        return BCrypt.Net.BCrypt.Verify(
+            password,
+            passwordHash);
     }
 }

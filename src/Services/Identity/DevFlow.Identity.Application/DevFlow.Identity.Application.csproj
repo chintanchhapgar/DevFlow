@@ -1,22 +1,28 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <AssemblyName>DevFlow.Identity.Application</AssemblyName>
     <RootNamespace>DevFlow.Identity.Application</RootNamespace>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>D:\Projects\DevFlow\Backup\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <ProjectGuid>{0B91DFD0-86D3-342D-E008-4B50431F56AB}</ProjectGuid>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MediatR" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Domain\DevFlow.Identity.Domain.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Contracts\DevFlow.Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Messaging\DevFlow.BuildingBlocks.Messaging.csproj" />
   </ItemGroup>
-
 </Project>

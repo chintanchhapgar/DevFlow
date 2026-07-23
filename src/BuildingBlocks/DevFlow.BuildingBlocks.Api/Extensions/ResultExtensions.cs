@@ -20,7 +20,7 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Maps a Result<T> to an HTTP 200 OK with value or Problem Details response.
+    /// Maps a ResultResult&lt;T&gt; to an HTTP 200 OK with value or Problem Details response.
     /// </summary>
     public static IResult ToOkOrProblem<TValue>(this Result<TValue> result)
     {
@@ -30,7 +30,7 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Maps a Result<T> to an HTTP 201 Created or Problem Details response.
+    /// Maps a ResultResult&lt;T&gt; to an HTTP 201 Created or Problem Details response.
     /// </summary>
     public static IResult ToCreatedOrProblem<TValue>(
         this Result<TValue> result,

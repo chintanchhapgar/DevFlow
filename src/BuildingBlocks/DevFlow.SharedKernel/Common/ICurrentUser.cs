@@ -1,4 +1,4 @@
-namespace DevFlow.SharedKernel.Common;
+namespace DevFlow.SharedKernel.Abstractions;
 
 /// <summary>
 /// Provides access to the currently authenticated user's context.

@@ -4,94 +4,53 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DevFlow.Identity.Infrastructure.Persistence.Configurations;
 
-internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
+/// <summary>
+/// EF configuration for User.
+/// </summary>
+internal sealed class UserConfiguration
+    : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(
+        EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("users");
+        builder.ToTable("Users");
 
-        builder.HasKey(u => u.Id);
+        builder.HasKey(x => x.Id);
 
-        // Strongly-typed ID conversion
-        builder.Property(u => u.Id)
+        builder.Property(x => x.Id)
             .HasConversion(
                 id => id.Value,
-                value => UserId.From(value))
-            .HasColumnName("id")
-            .ValueGeneratedNever();
+                value => new UserId(value));
 
-        builder.Property(u => u.Email)
-            .HasColumnName("email")
-            .HasMaxLength(User.EmailMaxLength)
+        builder.Property(x => x.Email)
+            .HasMaxLength(256)
             .IsRequired();
 
-        builder.Property(u => u.FirstName)
-            .HasColumnName("first_name")
-            .HasMaxLength(User.FirstNameMaxLength)
+        builder.HasIndex(x => x.Email)
+            .IsUnique();
+
+        builder.Property(x => x.PasswordHash)
+            .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(u => u.LastName)
-            .HasColumnName("last_name")
-            .HasMaxLength(User.LastNameMaxLength)
+        builder.Property(x => x.FirstName)
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(u => u.PasswordHash)
-            .HasColumnName("password_hash")
-            .HasMaxLength(User.PasswordHashMaxLength)
+        builder.Property(x => x.LastName)
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(u => u.RefreshToken)
-            .HasColumnName("refresh_token")
-            .HasMaxLength(500);
+        builder.Property(x => x.Role)
+            .HasConversion<int>();
 
-        builder.Property(u => u.RefreshTokenExpiresAtUtc)
-            .HasColumnName("refresh_token_expires_at_utc");
+        builder.Property(x => x.Status)
+            .HasConversion<int>();
 
-        builder.Property(u => u.IsEmailVerified)
-            .HasColumnName("is_email_verified")
-            .HasDefaultValue(false);
+        builder.Property(x => x.EmailConfirmed);
 
-        builder.Property(u => u.FailedLoginAttempts)
-            .HasColumnName("failed_login_attempts")
-            .HasDefaultValue(0);
+        builder.Property(x => x.CreatedOnUtc);
 
-        builder.Property(u => u.IsLockedOut)
-            .HasColumnName("is_locked_out")
-            .HasDefaultValue(false);
-
-        builder.Property(u => u.LockedOutUntilUtc)
-            .HasColumnName("locked_out_until_utc");
-
-        builder.Property(u => u.LastLoginAtUtc)
-            .HasColumnName("last_login_at_utc");
-
-        // IAuditable
-        builder.Property(u => u.CreatedOnUtc)
-            .HasColumnName("created_on_utc")
-            .IsRequired();
-
-        builder.Property(u => u.ModifiedOnUtc)
-            .HasColumnName("modified_on_utc");
-
-        // ISoftDelete
-        builder.Property(u => u.IsDeleted)
-            .HasColumnName("is_deleted")
-            .HasDefaultValue(false)
-            .IsRequired();
-
-        builder.Property(u => u.DeletedOnUtc)
-            .HasColumnName("deleted_on_utc");
-
-        // Indexes
-        builder.HasIndex(u => u.Email)
-            .IsUnique()
-            .HasDatabaseName("ix_users_email");
-
-        builder.HasIndex(u => u.IsDeleted)
-            .HasFilter("is_deleted = false")
-            .HasDatabaseName("ix_users_active");
-
-        // Global query filter: exclude soft-deleted users
-        builder.HasQueryFilter(u => !u.IsDeleted);
+        builder.Property(x => x.UpdatedOnUtc);
     }
 }

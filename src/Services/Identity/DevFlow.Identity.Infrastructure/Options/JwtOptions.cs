@@ -1,5 +1,8 @@
 namespace DevFlow.Identity.Infrastructure.Options;
 
+/// <summary>
+/// JWT configuration.
+/// </summary>
 public sealed class JwtOptions
 {
     public const string SectionName = "Jwt";
@@ -10,7 +13,5 @@ public sealed class JwtOptions
 
     public string SecretKey { get; init; } = string.Empty;
 
-    public int AccessTokenExpirationMinutes { get; init; }
-
-    public int RefreshTokenExpirationDays { get; init; }
+    public int ExpirationMinutes { get; init; } = 60;
 }

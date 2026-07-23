@@ -10,7 +10,7 @@ namespace DevFlow.BuildingBlocks.Api.ProblemDetails;
 /// </summary>
 public static class ProblemDetailsFactory
 {
-    public static IResult ToProblemDetails(Errors error)
+    public static IResult ToProblemDetails(AppError error)
     {
         return error.Type switch
         {
