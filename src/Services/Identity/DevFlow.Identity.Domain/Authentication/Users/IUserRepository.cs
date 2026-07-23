@@ -1,4 +1,4 @@
-namespace DevFlow.Identity.Domain.Authentication;
+namespace DevFlow.Authentication.Users;
 
 /// <summary>
 /// Repository for managing users.

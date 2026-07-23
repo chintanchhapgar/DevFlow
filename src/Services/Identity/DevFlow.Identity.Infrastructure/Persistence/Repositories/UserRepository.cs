@@ -1,4 +1,4 @@
-using DevFlow.Identity.Domain.Authentication;
+using DevFlow.Authentication.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Identity.Infrastructure.Persistence.Repositories;

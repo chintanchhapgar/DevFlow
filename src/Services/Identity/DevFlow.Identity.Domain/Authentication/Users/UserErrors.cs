@@ -1,6 +1,6 @@
 using DevFlow.SharedKernel.Results;
 
-namespace DevFlow.Identity.Domain.Authentication;
+namespace DevFlow.Authentication.Users;
 
 public static class UserErrors
 {
@@ -28,4 +28,11 @@ public static class UserErrors
         new(
             "Users.UserInactive",
             "User account is inactive.");
+
+    public static readonly AppError InvalidRefreshToken =
+        AppError.Validation(
+            "Users.InvalidRefreshToken",
+            "Invalid token.");
+
+    
 }

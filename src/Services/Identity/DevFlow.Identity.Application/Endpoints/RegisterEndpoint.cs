@@ -25,7 +25,8 @@ public static class RegisterEndpoint
                 return result.IsSuccess
                     ? Results.Ok(result.Value)
                     : Results.BadRequest(result.Error);
-            });
+            })
+            .WithSummary("Register new user");
 
         return app;
     }

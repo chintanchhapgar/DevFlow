@@ -1,4 +1,4 @@
-namespace DevFlow.Identity.Domain.Authentication;
+namespace DevFlow.Authentication.Users;
 
 public enum UserStatus
 {

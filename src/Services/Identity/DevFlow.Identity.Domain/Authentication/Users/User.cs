@@ -1,6 +1,8 @@
+using DevFlow.Identity.Domain.Authentication;
+using DevFlow.Identity.Domain.Authentication.RefreshTokens;
 using DevFlow.SharedKernel.Domain;
 
-namespace DevFlow.Identity.Domain.Authentication;
+namespace DevFlow.Authentication.Users;
 
 /// <summary>
 /// Represents a system user.
@@ -50,6 +52,12 @@ public sealed class User : AggregateRoot<UserId>
     public DateTime? UpdatedOnUtc { get; private set; }
 
     public bool IsActive => Status == UserStatus.Active;
+
+    private readonly List<RefreshToken> _refreshTokens = [];
+
+    public IReadOnlyCollection<RefreshToken> RefreshTokens =>
+    _refreshTokens.AsReadOnly();
+
     public static User Create(
         string email,
         string passwordHash,
@@ -114,5 +122,18 @@ public sealed class User : AggregateRoot<UserId>
     {
         Status = UserStatus.Disabled;
         UpdatedOnUtc = DateTime.UtcNow;
+    }
+    public RefreshToken CreateRefreshToken(
+    string token,
+    DateTime expiresOnUtc)
+    {
+        var refreshToken = RefreshToken.Create(
+            Id,
+            token,
+            expiresOnUtc);
+
+        _refreshTokens.Add(refreshToken);
+
+        return refreshToken;
     }
 }

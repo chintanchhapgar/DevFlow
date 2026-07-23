@@ -1,6 +1,6 @@
+using DevFlow.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
-using DevFlow.Identity.Domain.Authentication;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 

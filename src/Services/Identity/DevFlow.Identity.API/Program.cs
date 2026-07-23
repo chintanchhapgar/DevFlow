@@ -73,6 +73,8 @@ app.MapRegisterEndpoint();
 
 app.MapLoginEndpoint();
 
+app.MapRefreshTokenEndpoint();
+
 app.MapProfileEndpoint();
 
 app.Run();

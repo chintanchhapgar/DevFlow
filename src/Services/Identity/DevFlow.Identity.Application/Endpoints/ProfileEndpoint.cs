@@ -15,7 +15,7 @@ public static class ProfileEndpoint
         this IEndpointRouteBuilder app)
     {
         app.MapGet(
-            "/api/auth/Profile",
+            "/api/auth/profile",
             (ICurrentUser currentUser) =>
             {
                 var response = new ProfileResponse(

@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using DevFlow.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
-using DevFlow.Identity.Domain.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

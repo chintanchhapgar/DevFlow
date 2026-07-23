@@ -1,6 +1,6 @@
+using DevFlow.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
-using DevFlow.Identity.Domain.Authentication;
 using DevFlow.Identity.Infrastructure.Authentication;
 using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
@@ -30,6 +30,10 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         services.AddScoped<IJwtProvider, JwtProvider>();
+
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+        services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 
         return services;
     }

@@ -1,6 +1,6 @@
 using DevFlow.SharedKernel.Domain;
 
-namespace DevFlow.Identity.Domain.Authentication;
+namespace DevFlow.Authentication.Users;
 
 /// <summary>
 /// Raised when a new user is registered.

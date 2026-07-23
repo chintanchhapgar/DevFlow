@@ -1,5 +1,6 @@
+using DevFlow.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
-using DevFlow.Identity.Domain.Authentication;
+using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -14,15 +15,21 @@ internal sealed class LoginCommandHandler
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtProvider _jwtProvider;
-
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     public LoginCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
-        IJwtProvider jwtProvider)
+        IJwtProvider jwtProvider,
+        IRefreshTokenRepository refreshTokenRepository,
+        IRefreshTokenGenerator refreshTokenGenerator
+        )
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtProvider = jwtProvider;
+        _refreshTokenRepository = refreshTokenRepository;
+        _refreshTokenGenerator = refreshTokenGenerator;
     }
 
     public async Task<Result<LoginResponse>> Handle(
@@ -53,11 +60,23 @@ internal sealed class LoginCommandHandler
                 UserErrors.UserInactive);
         }
 
-        var accessToken = _jwtProvider.GenerateAccessToken(user);
+        var refreshTokenValue =
+            _refreshTokenGenerator.Generate();
 
-        return Result.Success(
-            new LoginResponse(
-                user.Id.Value,
-                accessToken));
+        var refreshToken = user.CreateRefreshToken(
+            refreshTokenValue,
+            DateTime.UtcNow.AddDays(30));
+
+        await _refreshTokenRepository.AddAsync(
+            refreshToken,
+            cancellationToken);
+
+        var accessToken =
+            _jwtProvider.GenerateAccessToken(user);
+
+        return new LoginResponse(
+            accessToken,
+            refreshToken.Token,
+            refreshToken.ExpiresOnUtc);
     }
 }
