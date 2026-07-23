@@ -79,4 +79,6 @@ app.MapLogoutEndpoint();
 
 app.MapProfileEndpoint();
 
+app.MapForgotPasswordEndpoint();
+
 app.Run();

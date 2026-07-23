@@ -1,7 +1,9 @@
-using DevFlow.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.Identity.Application.Common.Abstractions.Notifications;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Infrastructure.Authentication;
+using DevFlow.Identity.Infrastructure.Notifications;
 using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +36,12 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
+
+        services.AddScoped<IPasswordResetTokenRepository,PasswordResetTokenRepository>();
+
+        services.AddSingleton<IPasswordResetTokenGenerator,PasswordResetTokenGenerator>();
+
+        services.AddScoped<IEmailSender, ConsoleEmailSender>();
 
         return services;
     }

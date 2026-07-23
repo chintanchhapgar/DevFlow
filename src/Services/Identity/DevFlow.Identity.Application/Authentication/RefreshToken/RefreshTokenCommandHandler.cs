@@ -1,4 +1,4 @@
-using DevFlow.Authentication.Users;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.SharedKernel.Results;

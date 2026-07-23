@@ -1,6 +1,6 @@
 using DevFlow.SharedKernel.Results;
 
-namespace DevFlow.Authentication.Users;
+namespace DevFlow.Identity.Domain.Authentication.Users;
 
 public static class UserErrors
 {

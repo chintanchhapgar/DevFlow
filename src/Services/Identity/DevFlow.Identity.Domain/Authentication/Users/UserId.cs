@@ -1,6 +1,6 @@
 using DevFlow.SharedKernel.Domain;
 
-namespace DevFlow.Authentication.Users;
+namespace DevFlow.Identity.Domain.Authentication.Users;
 
 public sealed record UserId(Guid Value)
     : StronglyTypedId<Guid>(Value)

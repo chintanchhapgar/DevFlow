@@ -1,5 +1,6 @@
-using DevFlow.Authentication.Users;
+using DevFlow.Identity.Domain.Authentication.PasswordResetTokens;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+using DevFlow.Identity.Domain.Authentication.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Identity.Infrastructure.Persistence;
@@ -17,8 +18,7 @@ public sealed class IdentityDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-
-
+    public DbSet<PasswordResetToken> PasswordResetTokens  => Set<PasswordResetToken>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("identity");

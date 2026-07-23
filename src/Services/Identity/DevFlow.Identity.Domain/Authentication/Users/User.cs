@@ -2,7 +2,7 @@ using DevFlow.Identity.Domain.Authentication;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
 using DevFlow.SharedKernel.Domain;
 
-namespace DevFlow.Authentication.Users;
+namespace DevFlow.Identity.Domain.Authentication.Users;
 
 /// <summary>
 /// Represents a system user.

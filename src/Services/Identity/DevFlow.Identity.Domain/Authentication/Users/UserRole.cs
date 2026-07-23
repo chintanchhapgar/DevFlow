@@ -1,4 +1,4 @@
-namespace DevFlow.Authentication.Users;
+namespace DevFlow.Identity.Domain.Authentication.Users;
 
 public enum UserRole
 {

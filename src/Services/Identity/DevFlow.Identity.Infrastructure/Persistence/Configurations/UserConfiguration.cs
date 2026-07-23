@@ -1,4 +1,4 @@
-using DevFlow.Authentication.Users;
+using DevFlow.Identity.Domain.Authentication.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

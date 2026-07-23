@@ -1,4 +1,4 @@
-using DevFlow.Authentication.Users;
+using DevFlow.Identity.Domain.Authentication.Users;
 
 namespace DevFlow.Identity.Application.Common.Abstractions.Authentication;
 

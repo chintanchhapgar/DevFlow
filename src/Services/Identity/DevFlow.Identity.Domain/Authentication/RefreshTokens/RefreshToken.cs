@@ -1,5 +1,6 @@
-using DevFlow.Authentication.Users;
-using DevFlow.SharedKernel.Domain;
+
+
+using DevFlow.Identity.Domain.Authentication.Users;
 
 namespace DevFlow.Identity.Domain.Authentication.RefreshTokens;
 
