@@ -44,4 +44,9 @@ public static class UserErrors
         AppError.NotFound(
             "Users.UserNotFound",
             "User not found.");
+
+    public static readonly AppError InvalidCurrentPassword =
+        AppError.Failure(
+            "Users.InvalidCurrentPassword",
+            "Current password is incorrect.");
 }

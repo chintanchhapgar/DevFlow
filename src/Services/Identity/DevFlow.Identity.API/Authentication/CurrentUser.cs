@@ -1,5 +1,6 @@
-using System.Security.Claims;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.Identity.Domain.Authentication.Users;
+using System.Security.Claims;
 
 namespace DevFlow.Identity.API.Authentication;
 
@@ -18,12 +19,11 @@ internal sealed class CurrentUser : ICurrentUser
     public bool IsAuthenticated =>
         User?.Identity?.IsAuthenticated ?? false;
 
-    public Guid UserId =>
-        Guid.TryParse(
-            User?.FindFirstValue(ClaimTypes.NameIdentifier),
-            out var id)
-            ? id
-            : Guid.Empty;
+    public UserId UserId =>
+        new UserId(Guid.Parse(
+            _httpContextAccessor.HttpContext!
+                .User
+                .FindFirstValue(ClaimTypes.NameIdentifier)!));
 
     public string Email =>
         User?.FindFirstValue(ClaimTypes.Email)

@@ -1,3 +1,5 @@
+using DevFlow.Identity.Domain.Authentication.Users;
+
 namespace DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace DevFlow.Identity.Application.Common.Abstractions.Authentication;
 /// </summary>
 public interface ICurrentUser
 {
-    Guid UserId { get; }
+    UserId UserId { get; }
 
     string Email { get; }
 
