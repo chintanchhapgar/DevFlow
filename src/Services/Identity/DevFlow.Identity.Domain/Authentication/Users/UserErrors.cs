@@ -1,4 +1,5 @@
 using DevFlow.SharedKernel.Results;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DevFlow.Identity.Domain.Authentication.Users;
 
@@ -34,5 +35,13 @@ public static class UserErrors
             "Users.InvalidRefreshToken",
             "Invalid token.");
 
-    
+    public static readonly AppError InvalidResetToken =
+        AppError.NotFound(
+            "Users.InvalidResetToken",
+            "Password reset token is invalid or expired.");
+
+    public static readonly AppError UserNotFound =
+        AppError.NotFound(
+            "Users.UserNotFound",
+            "User not found.");
 }

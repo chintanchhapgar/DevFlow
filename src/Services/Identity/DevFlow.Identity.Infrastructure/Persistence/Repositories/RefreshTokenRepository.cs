@@ -1,5 +1,6 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+using DevFlow.Identity.Domain.Authentication.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Identity.Infrastructure.Persistence.Repositories;
@@ -43,5 +44,16 @@ internal sealed class RefreshTokenRepository
         _context.RefreshTokens.Update(refreshToken);
 
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<RefreshToken>> GetActiveByUserIdAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.RefreshTokens
+            .Where(x =>
+                x.UserId == userId &&
+                x.Status == RefreshTokenStatus.Active)
+            .ToListAsync(cancellationToken);
     }
 }

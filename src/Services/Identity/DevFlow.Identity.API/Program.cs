@@ -81,4 +81,6 @@ app.MapProfileEndpoint();
 
 app.MapForgotPasswordEndpoint();
 
+app.MapResetPasswordEndpoint();
+
 app.Run();

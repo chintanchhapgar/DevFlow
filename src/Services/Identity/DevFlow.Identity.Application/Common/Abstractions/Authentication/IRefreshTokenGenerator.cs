@@ -1,18 +1,6 @@
-using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+namespace DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
-namespace DevFlow.Identity.Application.Common.Abstractions.Persistence;
-
-public interface IRefreshTokenRepository
+public interface IRefreshTokenGenerator
 {
-    Task<RefreshToken?> GetByTokenAsync(
-        string token,
-        CancellationToken cancellationToken = default);
-
-    Task AddAsync(
-        RefreshToken refreshToken,
-        CancellationToken cancellationToken = default);
-
-    Task UpdateAsync(
-        RefreshToken refreshToken,
-        CancellationToken cancellationToken = default);
+    string Generate();
 }
