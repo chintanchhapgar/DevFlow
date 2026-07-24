@@ -29,7 +29,7 @@ internal sealed class LogoutCommandHandler
         // still return success.
         if (refreshToken is null)
         {
-            return new LogoutResponse(true);
+            return new LogoutResponse();
         }
 
         if (refreshToken.IsActive)
@@ -41,6 +41,6 @@ internal sealed class LogoutCommandHandler
                 cancellationToken);
         }
 
-        return new LogoutResponse(true);
+        return new LogoutResponse();
     }
 }

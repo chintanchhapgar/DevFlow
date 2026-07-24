@@ -24,9 +24,7 @@ public static class ForgotPasswordEndpoint
                     command,
                     cancellationToken);
 
-                return result.ToApiResult(
-                    httpContext,
-                    "Password reset instructions sent.");
+                return result.ToApiResult(httpContext);
             })
             .AllowAnonymous()
             .WithName("ForgotPassword")

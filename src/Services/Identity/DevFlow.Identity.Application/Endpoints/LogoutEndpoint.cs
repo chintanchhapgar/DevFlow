@@ -24,9 +24,7 @@ public static class LogoutEndpoint
                     command,
                     cancellationToken);
 
-                return result.ToApiResult(
-                    httpContext,
-                    "Logged out successfully.");
+                return result.ToApiResult(httpContext);
             })
             .RequireAuthorization()
             .WithName("Logout")

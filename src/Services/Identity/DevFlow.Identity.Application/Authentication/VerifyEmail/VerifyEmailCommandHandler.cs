@@ -61,7 +61,6 @@ internal sealed class VerifyEmailCommandHandler
             cancellationToken);
 
         return new VerifyEmailResponse(
-            user.Id.Value,
-            "Email verified successfully.");
+            user.Id.Value);
     }
 }

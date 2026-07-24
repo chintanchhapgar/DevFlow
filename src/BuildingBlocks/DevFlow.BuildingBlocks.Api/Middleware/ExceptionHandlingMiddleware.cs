@@ -1,33 +1,32 @@
-using System.Text.Json;
 using DevFlow.BuildingBlocks.Api.Logging;
-using DevFlow.BuildingBlocks.Api.ProblemDetails;
+using DevFlow.BuildingBlocks.Api.Responses;
 using DevFlow.SharedKernel.Exceptions;
+using DevFlow.SharedKernel.Results;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace DevFlow.BuildingBlocks.Api.Middleware;
 
 /// <summary>
-/// Global exception handler middleware.
-/// Converts unhandled exceptions into RFC 7807 Problem Details responses.
-/// Prevents stack traces from leaking to clients.
+/// Global exception handling middleware.
+/// Returns standardized API responses for all unhandled exceptions.
 /// </summary>
 public sealed class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private readonly IHostEnvironment _environment;
 
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
-        ILogger<ExceptionHandlingMiddleware> logger)
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
+        _environment = environment;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -45,53 +44,72 @@ public sealed class ExceptionHandlingMiddleware
 
             await HandleExceptionAsync(
                 context,
-                exception);
+                exception,
+                _environment);
         }
     }
 
     private static async Task HandleExceptionAsync(
         HttpContext context,
-        Exception exception)
+        Exception exception,
+        IHostEnvironment environment)
     {
-        var (statusCode, title, detail) = exception switch
+        var (statusCode, message, code, type) = exception switch
         {
+            ValidationException validation => (
+                StatusCodes.Status400BadRequest,
+                validation.Message,
+                "Validation.Error",
+                ErrorType.Validation),
+
             NotFoundException notFound => (
                 StatusCodes.Status404NotFound,
-                "Not Found",
-                notFound.Message),
+                notFound.Message,
+                "Resource.NotFound",
+                ErrorType.NotFound),
 
             DomainException domain => (
                 StatusCodes.Status400BadRequest,
-                "Domain Rule Violation",
-                domain.Message),
+                domain.Message,
+                "Domain.Error",
+                ErrorType.Failure),
 
             UnauthorizedAccessException => (
                 StatusCodes.Status401Unauthorized,
-                "Unauthorized",
-                "Authentication is required."),
+                "Authentication is required.",
+                "Authentication.Unauthorized",
+                ErrorType.Unauthorized),
 
             _ => (
                 StatusCodes.Status500InternalServerError,
-                "Internal Server Error",
-                "An unexpected error occurred. Please try again later.")
+                "An unexpected error occurred.",
+                "Internal.ServerError",
+                ErrorType.Unexpected)
         };
 
-        var problemDetails = new ProblemDetailsViewModel
+        if (environment.IsDevelopment() &&
+            exception is not DomainException &&
+            exception is not NotFoundException)
         {
-            Status = statusCode,
-            Title = title,
-            Detail = detail,
-            Instance =
-                $"{context.Request.Method} {context.Request.Path}"
-        };
-
-        context.Response.ContentType =
-            "application/problem+json";
+            message = exception.Message;
+        }
 
         context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/json";
 
         await context.Response.WriteAsJsonAsync(
-            problemDetails,
-            JsonOptions);
+            new ApiResponse<object?>
+            {
+                Success = false,
+                Message = message,
+                Data = null,
+                Error = new ApiError
+                {
+                    Code = code,
+                    Type = type
+                },
+                TraceId = context.TraceIdentifier,
+                Timestamp = DateTime.UtcNow
+            });
     }
 }

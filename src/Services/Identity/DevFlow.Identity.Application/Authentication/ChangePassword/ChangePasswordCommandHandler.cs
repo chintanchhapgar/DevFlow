@@ -64,6 +64,6 @@ internal sealed class ChangePasswordCommandHandler
                 cancellationToken);
         }
 
-        return new ChangePasswordResponse(true);
+        return new ChangePasswordResponse();
     }
 }

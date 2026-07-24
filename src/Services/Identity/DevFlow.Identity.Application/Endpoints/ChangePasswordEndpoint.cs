@@ -27,9 +27,7 @@ public static class ChangePasswordEndpoint
                     command,
                     cancellationToken);
 
-                return result.ToApiResult(
-                    httpContext,
-                    "Password changed successfully.");
+                return result.ToApiResult(httpContext);
             })
             .RequireAuthorization()
             .WithName("ChangePassword")

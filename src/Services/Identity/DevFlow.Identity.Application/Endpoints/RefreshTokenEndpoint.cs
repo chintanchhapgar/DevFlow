@@ -24,9 +24,7 @@ public static class RefreshTokenEndpoint
                     command,
                     cancellationToken);
 
-                return result.ToApiResult(
-                    httpContext,
-                    "Token refreshed successfully.");
+                return result.ToApiResult(httpContext);
             })
             .AllowAnonymous()
             .WithName("RefreshToken")

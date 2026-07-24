@@ -75,6 +75,6 @@ internal sealed class ResetPasswordCommandHandler
                 cancellationToken);
         }
 
-        return new ResetPasswordResponse(true);
+        return new ResetPasswordResponse();
     }
 }

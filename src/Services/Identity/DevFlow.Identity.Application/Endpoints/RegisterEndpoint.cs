@@ -24,9 +24,7 @@ public static class RegisterEndpoint
                     command,
                     cancellationToken);
 
-                return result.ToApiResult(
-                    httpContext,
-                    "User registered successfully.");
+                return result.ToApiResult(httpContext);
             })
             .WithSummary("Register new user");
 

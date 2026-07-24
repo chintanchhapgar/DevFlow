@@ -39,7 +39,7 @@ internal sealed class ForgotPasswordCommandHandler
         // Prevent email enumeration
         if (user is null)
         {
-            return new ForgotPasswordResponse(true);
+            return new ForgotPasswordResponse();
         }
 
         var tokenValue = _tokenGenerator.Generate();
@@ -61,6 +61,6 @@ internal sealed class ForgotPasswordCommandHandler
         // Email sending will be implemented next.
         // For now, the token is persisted.
 
-        return new ForgotPasswordResponse(true);
+        return new ForgotPasswordResponse();
     }
 }

@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Middleware;
 using DevFlow.Identity.API.Authentication;
 using DevFlow.Identity.API.Endpoints;
 using DevFlow.Identity.Application;
@@ -57,11 +58,13 @@ builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 var app = builder.Build();
 
-app.UseSwagger();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-app.UseSwaggerUI();
-
-app.MapGet("/", () => "DevFlow Identity Service");
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
@@ -86,5 +89,7 @@ app.MapResetPasswordEndpoint();
 app.MapChangePasswordEndpoint();
 
 app.MapVerifyEmailEndpoint();
+
+app.MapResendVerificationEndpoint();
 
 app.Run();

@@ -27,9 +27,7 @@ public static class VerifyEmailEndpoint
                     command,
                     cancellationToken);
 
-                return result.ToApiResult(
-                    httpContext,
-                    "Email verified successfully.");
+                return result.ToApiResult(httpContext);
             })
             .AllowAnonymous()
             .WithName("VerifyEmail")

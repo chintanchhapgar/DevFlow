@@ -1,5 +1,5 @@
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.Login;
+using DevFlow.Identity.Application.Authentication.ResendVerification;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -8,17 +8,17 @@ using Microsoft.AspNetCore.Routing;
 namespace DevFlow.Identity.API.Endpoints;
 
 /// <summary>
-/// Authentication endpoints.
+/// Resend email verification endpoint.
 /// </summary>
-public static class LoginEndpoint
+public static class ResendVerificationEndpoint
 {
-    public static IEndpointRouteBuilder MapLoginEndpoint(
+    public static IEndpointRouteBuilder MapResendVerificationEndpoint(
         this IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/login",
+            "/api/auth/resend-verification",
             async (
-                LoginCommand command,
+                ResendVerificationCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -29,11 +29,11 @@ public static class LoginEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-        .WithName("Login")
-        .WithSummary("Authenticate user")
-        .WithDescription("Authenticates a user and returns a JWT access token.")
-        .Produces<LoginResponse>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status400BadRequest);
+            .AllowAnonymous()
+            .WithName("ResendVerification")
+            .WithSummary("Resend email verification")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
 
         return app;
     }
