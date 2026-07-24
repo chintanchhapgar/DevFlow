@@ -54,12 +54,14 @@ internal sealed class UserRepository : IUserRepository
             cancellationToken);
     }
 
-    public Task UpdateAsync(
+    public async Task UpdateAsync(
         User user,
-        CancellationToken cancellationToken = default)
+    CancellationToken cancellationToken = default)
     {
         _context.Users.Update(user);
 
-        return Task.CompletedTask;
+        Console.WriteLine(_context.ChangeTracker.DebugView.LongView);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

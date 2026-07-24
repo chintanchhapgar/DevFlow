@@ -1,16 +1,15 @@
 using System.Security.Cryptography;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Infrastructure.Authentication.MultiFactor;
 
-/// <summary>
-/// Generates one-time recovery codes.
-/// </summary>
-internal static class RecoveryCodeGenerator
+internal sealed class RecoveryCodeGenerator
+    : IRecoveryCodeGenerator
 {
     private const string Alphabet =
         "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-    public static IReadOnlyList<string> Generate(
+    public IReadOnlyList<string> Generate(
         int count = 10)
     {
         var codes = new List<string>(count);

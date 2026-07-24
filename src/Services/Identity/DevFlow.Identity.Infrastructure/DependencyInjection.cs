@@ -48,6 +48,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IEmailVerificationTokenGenerator,EmailVerificationTokenGenerator>();
 
+        services.AddSingleton<IRecoveryCodeGenerator, RecoveryCodeGenerator>();
+
         services.AddSingleton<ITotpService, TotpService>();
 
         return services;

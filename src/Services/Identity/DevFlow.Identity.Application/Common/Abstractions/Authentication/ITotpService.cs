@@ -7,22 +7,18 @@ namespace DevFlow.Identity.Application.Common.Abstractions.Authentication;
 /// </summary>
 public interface ITotpService
 {
-    /// <summary>
-    /// Generates a new Base32 encoded secret.
-    /// </summary>
     string GenerateSecret();
 
-    /// <summary>
-    /// Builds the otpauth:// URI used by authenticator apps.
-    /// </summary>
     string GenerateQrCodeUri(
         string issuer,
         string email,
         string secret);
 
-    /// <summary>
-    /// Verifies a 6-digit TOTP code.
-    /// </summary>
+    string GenerateQrCodeImage(
+        string issuer,
+        string email,
+        string secret);
+
     Result VerifyCode(
         string secret,
         string code);

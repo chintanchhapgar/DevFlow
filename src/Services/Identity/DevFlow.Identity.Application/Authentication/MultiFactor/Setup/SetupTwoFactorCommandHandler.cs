@@ -46,6 +46,9 @@ internal sealed class SetupTwoFactorCommandHandler
                 result.Error);
         }
 
+        Console.WriteLine($"Pending: {user.MultiFactor.Pending}");
+        Console.WriteLine($"Secret : {user.MultiFactor.Secret}");
+
         await _users.UpdateAsync(
             user,
             cancellationToken);
@@ -55,8 +58,15 @@ internal sealed class SetupTwoFactorCommandHandler
             user.Email,
             secret);
 
-        return new SetupTwoFactorResponse(
-            secret,
-            qrUri);
+        var qrImage = _totp.GenerateQrCodeImage(
+            "DevFlow",
+            user.Email,
+            secret);
+
+        return Result.Success(
+            new SetupTwoFactorResponse(
+                ManualEntryKey: secret,
+                QrCodeUri: qrUri,
+                QrCodeImage: qrImage));
     }
 }

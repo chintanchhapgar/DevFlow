@@ -1,6 +1,7 @@
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.SharedKernel.Results;
 using OtpNet;
+using QRCoder;
 using System.Security.Cryptography;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -65,5 +66,29 @@ internal sealed class TotpService : ITotpService
         }
 
         return Result.Success();
+    }
+
+    public string GenerateQrCodeImage(
+    string issuer,
+    string email,
+    string secret)
+    {
+        var uri = GenerateQrCodeUri(
+            issuer,
+            email,
+            secret);
+
+        using var qrGenerator = new QRCodeGenerator();
+
+        using var qrData =
+            qrGenerator.CreateQrCode(
+                uri,
+                QRCodeGenerator.ECCLevel.Q);
+
+        var png = new PngByteQRCode(qrData);
+
+        byte[] bytes = png.GetGraphic(20);
+
+        return $"data:image/png;base64,{Convert.ToBase64String(bytes)}";
     }
 }

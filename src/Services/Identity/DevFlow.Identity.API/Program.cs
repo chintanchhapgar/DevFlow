@@ -95,4 +95,6 @@ app.MapResendVerificationEndpoint();
 
 app.MapSetupTwoFactorEndpoint();
 
+app.MapVerifyTwoFactorEndpoint();
+
 app.Run();
