@@ -3,6 +3,7 @@ using DevFlow.Identity.Application.Common.Abstractions.Notifications;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Infrastructure.Authentication;
+using DevFlow.Identity.Infrastructure.Authentication.MultiFactor;
 using DevFlow.Identity.Infrastructure.Notifications;
 using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
@@ -46,6 +47,8 @@ public static class DependencyInjection
         services.AddScoped<IEmailVerificationTokenRepository,EmailVerificationTokenRepository>();
 
         services.AddSingleton<IEmailVerificationTokenGenerator,EmailVerificationTokenGenerator>();
+
+        services.AddSingleton<ITotpService, TotpService>();
 
         return services;
     }

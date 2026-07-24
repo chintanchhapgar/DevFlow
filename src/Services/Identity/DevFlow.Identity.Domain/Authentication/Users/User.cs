@@ -1,14 +1,18 @@
-using DevFlow.Identity.Domain.Authentication;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
-using DevFlow.SharedKernel.Domain;
+using DevFlow.Identity.Domain.Authentication.Users.Owned;
+using DevFlow.Identity.Domain.Authentication.Users.ValueObjects;
+using DevFlow.SharedKernel.Results;
 
 namespace DevFlow.Identity.Domain.Authentication.Users;
 
 /// <summary>
 /// Represents a system user.
+/// Aggregate Root for authentication.
 /// </summary>
-public sealed class User : AggregateRoot<UserId>
+public sealed partial class User : AggregateRoot<UserId>
 {
+    private readonly List<RefreshToken> _refreshTokens = [];
+
     private User(
         UserId id,
         string email,
@@ -25,12 +29,16 @@ public sealed class User : AggregateRoot<UserId>
         Role = UserRole.Member;
         Status = UserStatus.Active;
         EmailConfirmed = true;
+
         CreatedOnUtc = DateTime.UtcNow;
+
+        MultiFactor = MultiFactorSettings.Disabled();
     }
 
-    // Required by EF Core
+    // EF Core
     private User()
     {
+        MultiFactor = MultiFactorSettings.Disabled();
     }
 
     public string Email { get; private set; } = string.Empty;
@@ -43,7 +51,7 @@ public sealed class User : AggregateRoot<UserId>
 
     public UserRole Role { get; private set; }
 
-    public UserStatus Status { get; private set; } = UserStatus.Active;
+    public UserStatus Status { get; private set; }
 
     public bool EmailConfirmed { get; private set; }
 
@@ -53,10 +61,25 @@ public sealed class User : AggregateRoot<UserId>
 
     public bool IsActive => Status == UserStatus.Active;
 
-    private readonly List<RefreshToken> _refreshTokens = [];
+    public string FullName => $"{FirstName} {LastName}";
+
+    /// <summary>
+    /// Multi-factor authentication settings.
+    /// EF Core Owned Type.
+    /// </summary>
+    public MultiFactorSettings MultiFactor { get; private set; }
+
+    public bool IsTwoFactorEnabled => MultiFactor.Enabled;
+
+    public bool IsTwoFactorSetupPending => MultiFactor.Pending;
+
+    public string? TwoFactorSecret => MultiFactor.Secret;
+
+    public DateTime? TwoFactorEnabledOnUtc =>
+        MultiFactor.EnabledOnUtc;
 
     public IReadOnlyCollection<RefreshToken> RefreshTokens =>
-    _refreshTokens.AsReadOnly();
+        _refreshTokens.AsReadOnly();
 
     public static User Create(
         string email,
@@ -115,18 +138,25 @@ public sealed class User : AggregateRoot<UserId>
     public void Activate()
     {
         Status = UserStatus.Active;
+
         UpdatedOnUtc = DateTime.UtcNow;
     }
 
     public void Deactivate()
     {
         Status = UserStatus.Disabled;
+
         UpdatedOnUtc = DateTime.UtcNow;
     }
+    /// <summary>
+    /// Creates a new refresh token.
+    /// </summary>
     public RefreshToken CreateRefreshToken(
-    string token,
-    DateTime expiresOnUtc)
+        string token,
+        DateTime expiresOnUtc)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(token);
+
         var refreshToken = RefreshToken.Create(
             Id,
             token,
@@ -134,6 +164,101 @@ public sealed class User : AggregateRoot<UserId>
 
         _refreshTokens.Add(refreshToken);
 
+        UpdatedOnUtc = DateTime.UtcNow;
+
         return refreshToken;
+    }
+
+    /// <summary>
+    /// Starts the MFA enrollment process by storing a TOTP secret.
+    /// </summary>
+    public Result BeginTwoFactorSetup(string secret)
+    {
+        var result = MultiFactor.BeginSetup(secret);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Completes MFA enrollment after the verification code
+    /// has been successfully validated.
+    /// </summary>
+    public Result CompleteTwoFactorSetup()
+    {
+        var result = MultiFactor.CompleteSetup();
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Disables MFA for the user.
+    /// </summary>
+    public Result DisableTwoFactor()
+    {
+        var result = MultiFactor.Disable();
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Replaces all recovery codes with a newly generated set.
+    /// </summary>
+    public void ReplaceRecoveryCodes(
+        IEnumerable<RecoveryCode> recoveryCodes)
+    {
+        ArgumentNullException.ThrowIfNull(recoveryCodes);
+
+        MultiFactor.ReplaceRecoveryCodes(recoveryCodes);
+
+        UpdatedOnUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Attempts to consume a recovery code.
+    /// </summary>
+    public Result TryUseRecoveryCode(string code)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(code);
+
+        var recoveryCode = MultiFactor.RecoveryCodes
+            .FirstOrDefault(x => x.Matches(code));
+
+        if (recoveryCode is null)
+        {
+            return Result.Failure(
+                MultiFactorErrors.InvalidRecoveryCode);
+        }
+
+        var result = recoveryCode.TryUse();
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

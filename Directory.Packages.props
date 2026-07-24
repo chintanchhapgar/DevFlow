@@ -1,104 +1,82 @@
 <Project>
-
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <!-- ========================================================= -->
   <!-- ASP.NET Core -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="ASP.NET Core">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.20" />
+    <PackageVersion Include="Otp.NET" Version="1.4.1" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- API Versioning -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="API Versioning">
     <PackageVersion Include="Asp.Versioning.Http" Version="8.1.0" />
     <PackageVersion Include="Asp.Versioning.ApiExplorer" Version="8.1.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Entity Framework Core -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Entity Framework Core">
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageVersion Include="EFCore.NamingConventions" Version="8.0.3" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Identity -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Identity">
     <PackageVersion Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- MediatR -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="MediatR">
     <PackageVersion Include="MediatR" Version="12.5.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- FluentValidation -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="FluentValidation">
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- MassTransit -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="MassTransit">
     <PackageVersion Include="MassTransit" Version="8.3.6" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.3.6" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Redis -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Redis">
     <PackageVersion Include="StackExchange.Redis" Version="2.8.31" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.20" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- SignalR -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="SignalR">
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.20" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- YARP -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="YARP">
     <PackageVersion Include="Yarp.ReverseProxy" Version="2.2.1" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Serilog -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Serilog">
     <PackageVersion Include="Serilog" Version="4.2.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
@@ -108,11 +86,9 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="8.0.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- OpenTelemetry -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="OpenTelemetry">
     <PackageVersion Include="OpenTelemetry" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
@@ -123,11 +99,9 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Health Checks -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Health Checks">
     <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="8.0.1" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
@@ -135,55 +109,43 @@
     <PackageVersion Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
     <PackageVersion Include="AspNetCore.HealthChecks.RabbitMQ" Version="8.0.1" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Security -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Security">
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
     <PackageVersion Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Serialization -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Serialization">
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Resilience -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Resilience">
     <PackageVersion Include="Microsoft.Extensions.Resilience" Version="8.10.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Mapping -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Mapping">
     <PackageVersion Include="Mapster" Version="7.4.0" />
     <PackageVersion Include="Mapster.DependencyInjection" Version="1.0.2" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Utilities -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Utilities">
     <PackageVersion Include="Scrutor" Version="6.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.9.0" />
   </ItemGroup>
-
   <!-- ========================================================= -->
   <!-- Testing -->
   <!-- ========================================================= -->
-
   <ItemGroup Label="Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
@@ -198,5 +160,4 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.8.1" />
     <PackageVersion Include="Testcontainers.RabbitMq" Version="4.8.1" />
   </ItemGroup>
-
 </Project>

@@ -7,11 +7,9 @@ namespace DevFlow.Identity.Infrastructure.Persistence.Configurations;
 /// <summary>
 /// EF configuration for User.
 /// </summary>
-internal sealed class UserConfiguration
-    : IEntityTypeConfiguration<User>
+internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
-    public void Configure(
-        EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
 
@@ -42,19 +40,77 @@ internal sealed class UserConfiguration
             .IsRequired();
 
         builder.Property(x => x.Role)
-            .HasConversion<int>()
-            .IsRequired();
+            .HasConversion<int>();
 
         builder.Property(x => x.Status)
-            .HasConversion<int>()
-            .IsRequired();
-
-        builder.Ignore(x => x.IsActive);
+            .HasConversion<int>();
 
         builder.Property(x => x.EmailConfirmed);
 
         builder.Property(x => x.CreatedOnUtc);
 
         builder.Property(x => x.UpdatedOnUtc);
+
+        // Computed properties
+        builder.Ignore(x => x.IsActive);
+        builder.Ignore(x => x.FullName);
+        builder.Ignore(x => x.IsTwoFactorEnabled);
+        builder.Ignore(x => x.IsTwoFactorSetupPending);
+        builder.Ignore(x => x.TwoFactorSecret);
+        builder.Ignore(x => x.TwoFactorEnabledOnUtc);
+
+        //------------------------------------------------------
+        // Refresh Tokens
+        //------------------------------------------------------
+
+        builder.HasMany(x => x.RefreshTokens)
+            .WithOne()
+            .HasForeignKey(x => x.UserId);
+
+        //------------------------------------------------------
+        // Multi Factor (Owned)
+        //------------------------------------------------------
+
+        builder.OwnsOne(
+            x => x.MultiFactor,
+            multiFactor =>
+            {
+                multiFactor.Property(x => x.Enabled)
+                    .HasColumnName("TwoFactorEnabled");
+
+                multiFactor.Property(x => x.Pending)
+                    .HasColumnName("TwoFactorPending");
+
+                multiFactor.Property(x => x.Secret)
+                    .HasColumnName("TwoFactorSecret")
+                    .HasMaxLength(256);
+
+                multiFactor.Property(x => x.EnabledOnUtc)
+                    .HasColumnName("TwoFactorEnabledOnUtc");
+
+                multiFactor.Ignore(x => x.IsDisabled);
+
+                multiFactor.OwnsMany(
+                    x => x.RecoveryCodes,
+                    recovery =>
+                    {
+                        recovery.ToTable("UserRecoveryCodes");
+
+                        recovery.WithOwner()
+                            .HasForeignKey("UserId");
+
+                        recovery.Property<int>("RecoveryCodeId");
+
+                        recovery.HasKey("RecoveryCodeId");
+
+                        recovery.Property(x => x.Code)
+                            .HasMaxLength(64)
+                            .IsRequired();
+
+                        recovery.Property(x => x.IsUsed);
+
+                        recovery.Property(x => x.UsedOnUtc);
+                    });
+            });
     }
 }
