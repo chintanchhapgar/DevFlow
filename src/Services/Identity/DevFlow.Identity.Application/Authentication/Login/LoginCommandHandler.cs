@@ -1,6 +1,7 @@
-using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.Identity.Application.Authentication.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -10,7 +11,7 @@ namespace DevFlow.Identity.Application.Authentication.Login;
 /// Handles user login.
 /// </summary>
 internal sealed class LoginCommandHandler
-    : IRequestHandler<LoginCommand, Result<LoginResponse>>
+    : IRequestHandler<LoginCommand, Result<AuthenticationResponse>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -32,7 +33,7 @@ internal sealed class LoginCommandHandler
         _refreshTokenGenerator = refreshTokenGenerator;
     }
 
-    public async Task<Result<LoginResponse>> Handle(
+    public async Task<Result<AuthenticationResponse>> Handle(
         LoginCommand request,
         CancellationToken cancellationToken)
     {
@@ -42,7 +43,7 @@ internal sealed class LoginCommandHandler
 
         if (user is null)
         {
-            return Result.Failure<LoginResponse>(
+            return Result.Failure<AuthenticationResponse>(
                 UserErrors.InvalidCredentials);
         }
 
@@ -50,14 +51,20 @@ internal sealed class LoginCommandHandler
                 request.Password,
                 user.PasswordHash))
         {
-            return Result.Failure<LoginResponse>(
+            return Result.Failure<AuthenticationResponse>(
                 UserErrors.InvalidCredentials);
         }
 
         if (!user.IsActive)
         {
-            return Result.Failure<LoginResponse>(
+            return Result.Failure<AuthenticationResponse>(
                 UserErrors.UserInactive);
+        }
+
+        if (user.IsTwoFactorEnabled)
+        {
+            return AuthenticationResponse.Challenge(
+                user.Id.Value);
         }
 
         var refreshTokenValue =
@@ -74,7 +81,7 @@ internal sealed class LoginCommandHandler
         var accessToken =
             _jwtProvider.GenerateAccessToken(user);
 
-        return new LoginResponse(
+        return AuthenticationResponse.Success(
             accessToken,
             refreshToken.Token,
             refreshToken.ExpiresOnUtc);

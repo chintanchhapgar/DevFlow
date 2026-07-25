@@ -1,3 +1,4 @@
+using DevFlow.Identity.Application.Authentication.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -9,4 +10,4 @@ namespace DevFlow.Identity.Application.Authentication.Login;
 public sealed record LoginCommand(
     string Email,
     string Password)
-    : IRequest<Result<LoginResponse>>;
+    : IRequest<Result<AuthenticationResponse>>;

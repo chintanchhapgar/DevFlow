@@ -1,6 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.Common;
-using DevFlow.Identity.Application.Authentication.Login;
+using DevFlow.Identity.Application.Authentication.MultiFactor.Login;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -9,17 +9,17 @@ using Microsoft.AspNetCore.Routing;
 namespace DevFlow.Identity.API.Endpoints;
 
 /// <summary>
-/// Authentication endpoints.
+/// Completes two-factor authentication login.
 /// </summary>
-public static class LoginEndpoint
+public static class CompleteTwoFactorLoginEndpoint
 {
-    public static IEndpointRouteBuilder MapLoginEndpoint(
+    public static IEndpointRouteBuilder MapCompleteTwoFactorLoginEndpoint(
         this IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/login",
+            "/api/auth/mfa/login",
             async (
-                LoginCommand command,
+                CompleteTwoFactorLoginCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -30,11 +30,13 @@ public static class LoginEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-        .WithName("Login")
-        .WithSummary("Authenticate user")
-        .WithDescription("Authenticates a user and returns a JWT access token.")
+        .WithName("CompleteTwoFactorLogin")
+        .WithSummary("Complete two-factor authentication login")
+        .WithDescription(
+            "Verifies a TOTP or recovery code and returns JWT tokens.")
         .Produces<AuthenticationResponse>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .AllowAnonymous();
 
         return app;
     }

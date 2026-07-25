@@ -97,4 +97,6 @@ app.MapSetupTwoFactorEndpoint();
 
 app.MapVerifyTwoFactorEndpoint();
 
+app.MapCompleteTwoFactorLoginEndpoint();
+
 app.Run();

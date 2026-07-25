@@ -33,4 +33,9 @@ public static class MultiFactorErrors
         AppError.Validation(
             "MultiFactor.RecoveryCodeAlreadyUsed",
             "The recovery code has already been used.");
+
+    public static readonly AppError NotEnabled =
+        AppError.Validation(
+            "MultiFactor.NotEnabled",
+            "Two-factor authentication is not enabled.");
 }
