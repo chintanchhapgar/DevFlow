@@ -1,7 +1,7 @@
 using DevFlow.BuildingBlocks.Api.Middleware;
 using DevFlow.Identity.Api.Authentication;
 using DevFlow.Identity.Api.Endpoints;
-using DevFlow.Identity.Api.Endpoints.MultiFactor;
+using DevFlow.Identity.Application.Endpoints.MultiFactor;
 using DevFlow.Identity.Application;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Infrastructure;
@@ -98,5 +98,7 @@ app.MapSetupTwoFactorEndpoint();
 app.MapVerifyTwoFactorEndpoint();
 
 app.MapCompleteTwoFactorLoginEndpoint();
+
+app.MapDisableTwoFactorEndpoint();
 
 app.Run();

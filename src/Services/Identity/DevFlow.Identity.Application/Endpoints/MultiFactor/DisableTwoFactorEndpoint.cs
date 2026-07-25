@@ -1,6 +1,5 @@
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.Common;
-using DevFlow.Identity.Application.Authentication.MultiFactor.Login;
+using DevFlow.Identity.Application.Authentication.MultiFactor.Disable;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -9,17 +8,17 @@ using Microsoft.AspNetCore.Routing;
 namespace DevFlow.Identity.Application.Endpoints.MultiFactor;
 
 /// <summary>
-/// Completes two-factor authentication login.
+/// Disables two-factor authentication.
 /// </summary>
-public static class CompleteTwoFactorLoginEndpoint
+public static class DisableTwoFactorEndpoint
 {
-    public static IEndpointRouteBuilder MapCompleteTwoFactorLoginEndpoint(
+    public static IEndpointRouteBuilder MapDisableTwoFactorEndpoint(
         this IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/mfa/login",
+            "/api/auth/mfa/disable",
             async (
-                CompleteTwoFactorLoginCommand command,
+                DisableTwoFactorCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -30,13 +29,13 @@ public static class CompleteTwoFactorLoginEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-        .WithName("CompleteTwoFactorLogin")
-        .WithSummary("Complete two-factor authentication login")
+        .WithName("DisableTwoFactor")
+        .WithSummary("Disable two-factor authentication")
         .WithDescription(
-            "Verifies a TOTP or recovery code and returns JWT tokens.")
-        .Produces<AuthenticationResponse>(StatusCodes.Status200OK)
+            "Disables two-factor authentication after verifying a TOTP or recovery code.")
+        .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
-        .AllowAnonymous();
+        .RequireAuthorization();
 
         return app;
     }
