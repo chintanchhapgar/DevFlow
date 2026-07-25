@@ -1,5 +1,5 @@
-using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+using DevFlow.Identity.Domain.Authentication.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -32,13 +32,26 @@ internal sealed class RefreshTokenConfiguration
             .IsUnique();
 
         builder.Property(x => x.Status)
-            .HasConversion<int>();
+            .HasConversion<int>()
+            .IsRequired();
 
-        builder.Property(x => x.CreatedOnUtc);
+        builder.Property(x => x.CreatedOnUtc)
+            .IsRequired();
 
-        builder.Property(x => x.ExpiresOnUtc);
+        builder.Property(x => x.ExpiresOnUtc)
+            .IsRequired();
 
         builder.Property(x => x.RevokedOnUtc);
+
+        // NEW (for rotation)
+        builder.Property(x => x.ReplacedByToken)
+            .HasMaxLength(200);
+
+        builder.Property(x => x.RevokedReason)
+            .HasMaxLength(200);
+
+        // Computed property
+        builder.Ignore(x => x.IsActive);
 
         builder.HasOne<User>()
             .WithMany(x => x.RefreshTokens)

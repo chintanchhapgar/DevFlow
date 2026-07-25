@@ -50,18 +50,20 @@ internal sealed class RefreshTokenCommandHandler
                 UserErrors.NotFound);
         }
 
-        refreshToken.Revoke();
-
-        await _refreshTokenRepository.UpdateAsync(
-            refreshToken,
-            cancellationToken);
-
         var newRefreshTokenValue =
             _refreshTokenGenerator.Generate();
 
         var newRefreshToken = user.CreateRefreshToken(
             newRefreshTokenValue,
             DateTime.UtcNow.AddDays(30));
+
+        refreshToken.Revoke(
+            newRefreshToken.Token,
+            "Refresh token rotated");
+
+        await _refreshTokenRepository.UpdateAsync(
+            refreshToken,
+            cancellationToken);
 
         await _refreshTokenRepository.AddAsync(
             newRefreshToken,
@@ -70,9 +72,10 @@ internal sealed class RefreshTokenCommandHandler
         var accessToken =
             _jwtProvider.GenerateAccessToken(user);
 
-        return new RefreshTokenResponse(
-            accessToken,
-            newRefreshToken.Token,
-            newRefreshToken.ExpiresOnUtc);
+        return Result.Success(
+            new RefreshTokenResponse(
+                accessToken,
+                newRefreshToken.Token,
+                newRefreshToken.ExpiresOnUtc));
     }
 }

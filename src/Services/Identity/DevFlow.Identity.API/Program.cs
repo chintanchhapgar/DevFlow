@@ -101,4 +101,6 @@ app.MapCompleteTwoFactorLoginEndpoint();
 
 app.MapDisableTwoFactorEndpoint();
 
+app.MapRegenerateRecoveryCodesEndpoint();
+
 app.Run();

@@ -40,6 +40,10 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
 
     public DateTime? RevokedOnUtc { get; private set; }
 
+    public string? ReplacedByToken { get; private set; }
+
+    public string? RevokedReason { get; private set; }
+
     public bool IsActive =>
         Status == RefreshTokenStatus.Active &&
         ExpiresOnUtc > DateTime.UtcNow;
@@ -58,7 +62,9 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
             expiresOnUtc);
     }
 
-    public void Revoke()
+    public void Revoke(
+    string? replacedByToken = null,
+    string? reason = null)
     {
         if (Status != RefreshTokenStatus.Active)
         {
@@ -67,6 +73,8 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
 
         Status = RefreshTokenStatus.Revoked;
         RevokedOnUtc = DateTime.UtcNow;
+        ReplacedByToken = replacedByToken;
+        RevokedReason = reason;
     }
 
     public void Expire()
