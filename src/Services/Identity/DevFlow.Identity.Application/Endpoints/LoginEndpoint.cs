@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.API.Endpoints;
+namespace DevFlow.Identity.Api.Endpoints;
 
 /// <summary>
 /// Authentication endpoints.

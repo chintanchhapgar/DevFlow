@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.API.Endpoints.MultiFactor;
+namespace DevFlow.Identity.Api.Endpoints.MultiFactor;
 
 public static class VerifyTwoFactorEndpoint
 {

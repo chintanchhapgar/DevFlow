@@ -12,7 +12,7 @@
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Identity/">
-    <Project Path="src/Services/Identity/DevFlow.Identity.API/DevFlow.Identity.API.csproj" />
+    <Project Path="src/Services/Identity/DevFlow.Identity.Api/DevFlow.Identity.Api.csproj" DisplayName="DevFlow.Identity.Api" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Application/DevFlow.Identity.Application.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Contracts/DevFlow.Identity.Contracts.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Domain/DevFlow.Identity.Domain.csproj" />

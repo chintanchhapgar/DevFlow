@@ -2,7 +2,7 @@ using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Domain.Authentication.Users;
 using System.Security.Claims;
 
-namespace DevFlow.Identity.API.Authentication;
+namespace DevFlow.Identity.Api.Authentication;
 
 internal sealed class CurrentUser : ICurrentUser
 {

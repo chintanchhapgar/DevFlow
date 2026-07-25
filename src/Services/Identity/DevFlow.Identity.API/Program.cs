@@ -1,7 +1,7 @@
 using DevFlow.BuildingBlocks.Api.Middleware;
-using DevFlow.Identity.API.Authentication;
-using DevFlow.Identity.API.Endpoints;
-using DevFlow.Identity.API.Endpoints.MultiFactor;
+using DevFlow.Identity.Api.Authentication;
+using DevFlow.Identity.Api.Endpoints;
+using DevFlow.Identity.Api.Endpoints.MultiFactor;
 using DevFlow.Identity.Application;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Infrastructure;
