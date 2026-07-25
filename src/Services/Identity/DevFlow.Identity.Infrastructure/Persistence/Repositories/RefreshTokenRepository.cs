@@ -46,7 +46,7 @@ internal sealed class RefreshTokenRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<List<RefreshToken>> GetActiveByUserIdAsync(
+    public async Task<IReadOnlyList<RefreshToken>> GetActiveByUserIdAsync(
         UserId userId,
         CancellationToken cancellationToken = default)
     {
@@ -55,5 +55,14 @@ internal sealed class RefreshTokenRepository
                 x.UserId == userId &&
                 x.Status == RefreshTokenStatus.Active)
             .ToListAsync(cancellationToken);
+    }
+
+    public Task UpdateRangeAsync(
+        IEnumerable<RefreshToken> refreshTokens,
+        CancellationToken cancellationToken = default)
+    {
+        _context.RefreshTokens.UpdateRange(refreshTokens);
+
+        return Task.CompletedTask;
     }
 }

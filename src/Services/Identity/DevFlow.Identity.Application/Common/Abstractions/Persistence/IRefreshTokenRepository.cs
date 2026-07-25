@@ -17,7 +17,11 @@ public interface IRefreshTokenRepository
         RefreshToken refreshToken,
         CancellationToken cancellationToken = default);
 
-    Task<List<RefreshToken>> GetActiveByUserIdAsync(
+    Task<IReadOnlyList<RefreshToken>> GetActiveByUserIdAsync(
         UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task UpdateRangeAsync(
+        IEnumerable<RefreshToken> refreshTokens,
         CancellationToken cancellationToken = default);
 }

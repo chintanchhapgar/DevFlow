@@ -1,6 +1,7 @@
-using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -34,8 +35,34 @@ internal sealed class RefreshTokenCommandHandler
             request.RefreshToken,
             cancellationToken);
 
-        if (refreshToken is null || !refreshToken.IsActive)
+        if (refreshToken is null)
         {
+            return Result.Failure<RefreshTokenResponse>(
+                UserErrors.InvalidRefreshToken);
+        }
+
+        if (!refreshToken.IsActive)
+        {
+            // Was this token rotated?
+            if (refreshToken.Status == RefreshTokenStatus.Revoked &&
+                !string.IsNullOrWhiteSpace(refreshToken.ReplacedByToken))
+            {
+                var activeTokens =
+                    await _refreshTokenRepository.GetActiveByUserIdAsync(
+                        refreshToken.UserId,
+                        cancellationToken);
+
+                foreach (var token in activeTokens)
+                {
+                    token.Revoke(
+                        reason: "Refresh token reuse detected");
+                }
+
+                await _refreshTokenRepository.UpdateRangeAsync(
+                    activeTokens,
+                    cancellationToken);
+            }
+
             return Result.Failure<RefreshTokenResponse>(
                 UserErrors.InvalidRefreshToken);
         }
