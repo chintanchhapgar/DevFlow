@@ -152,15 +152,27 @@ public sealed partial class User : AggregateRoot<UserId>
     /// Creates a new refresh token.
     /// </summary>
     public RefreshToken CreateRefreshToken(
-        string token,
-        DateTime expiresOnUtc)
+    string token,
+    DateTime expiresOnUtc,
+    Guid sessionId,
+    string? deviceName,
+    string? browser,
+    string? operatingSystem,
+    string? ipAddress,
+    string? userAgent)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(token);
 
         var refreshToken = RefreshToken.Create(
             Id,
             token,
-            expiresOnUtc);
+            expiresOnUtc,
+            sessionId,
+            deviceName,
+            browser,
+            operatingSystem,
+            ipAddress,
+            userAgent);
 
         _refreshTokens.Add(refreshToken);
 

@@ -17,16 +17,19 @@ internal sealed class JwtProvider : IJwtProvider
         _options = options.Value;
     }
 
-    public string GenerateAccessToken(User user)
+    public string GenerateAccessToken(
+        User user,
+        Guid sessionId)
     {
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+            new Claim(ClaimTypes.Name, user.FullName),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
 
-            // Standard JWT claims
+            new Claim("sid", sessionId.ToString()),
+
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

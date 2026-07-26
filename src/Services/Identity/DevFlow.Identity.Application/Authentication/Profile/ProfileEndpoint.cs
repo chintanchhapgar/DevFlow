@@ -1,26 +1,29 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Responses;
-using DevFlow.Identity.Application.Authentication.Profile;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.Profile;
 
 /// <summary>
 /// Current user endpoint.
 /// </summary>
-public static class ProfileEndpoint
+internal sealed class ProfileEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapProfileEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(
             "/api/auth/profile",
             (ICurrentUser currentUser, HttpContext httpContext) =>
             {
+
+                var userId = new UserId(currentUser.UserId);
+
                 var response = new ProfileResponse(
-                    currentUser.UserId,
+                    new UserId(currentUser.UserId),
                     currentUser.Email,
                     currentUser.Name,
                     currentUser.Role);
@@ -35,6 +38,5 @@ public static class ProfileEndpoint
                     .WithSummary("Current authenticated user")
                     .Produces<ProfileResponse>();
 
-        return app;
     }
 }

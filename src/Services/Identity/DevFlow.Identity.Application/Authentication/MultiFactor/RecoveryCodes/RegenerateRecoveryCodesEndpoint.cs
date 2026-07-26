@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.MultiFactor.RecoveryCodes;
 using MediatR;
@@ -5,14 +6,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Application.Endpoints.MultiFactor;
+namespace DevFlow.Identity.Application.Authentication.MultiFactor.RecoveryCodes;
 /// <summary>
 /// Regenerates MFA recovery codes.
 /// </summary>
-public static class RegenerateRecoveryCodesEndpoint
+internal sealed class RegenerateRecoveryCodesEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapRegenerateRecoveryCodesEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
             "/api/auth/mfa/recovery-codes/regenerate",
@@ -36,6 +36,5 @@ public static class RegenerateRecoveryCodesEndpoint
         .Produces(StatusCodes.Status400BadRequest)
         .RequireAuthorization();
 
-        return app;
     }
 }

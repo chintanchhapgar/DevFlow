@@ -1,12 +1,14 @@
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Notifications;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Infrastructure.Authentication;
 using DevFlow.Identity.Infrastructure.Authentication.MultiFactor;
 using DevFlow.Identity.Infrastructure.Notifications;
 using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
+using DevFlow.Identity.Infrastructure.Requests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

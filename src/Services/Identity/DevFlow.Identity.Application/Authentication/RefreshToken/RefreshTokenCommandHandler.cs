@@ -1,9 +1,11 @@
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.SharedKernel.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.RefreshToken;
 
@@ -14,17 +16,19 @@ internal sealed class RefreshTokenCommandHandler
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtProvider _jwtProvider;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
-
+    private readonly ICurrentRequestInfo _currentRequestInfo;
     public RefreshTokenCommandHandler(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtProvider jwtProvider,
-        IRefreshTokenGenerator refreshTokenGenerator)
+        IRefreshTokenGenerator refreshTokenGenerator,
+        ICurrentRequestInfo currentRequestInfo)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtProvider = jwtProvider;
         _refreshTokenGenerator = refreshTokenGenerator;
+        _currentRequestInfo = currentRequestInfo;
     }
 
     public async Task<Result<RefreshTokenResponse>> Handle(
@@ -80,9 +84,17 @@ internal sealed class RefreshTokenCommandHandler
         var newRefreshTokenValue =
             _refreshTokenGenerator.Generate();
 
+        var expiresOnUtc = DateTime.UtcNow.AddDays(30);
+
         var newRefreshToken = user.CreateRefreshToken(
             newRefreshTokenValue,
-            DateTime.UtcNow.AddDays(30));
+            expiresOnUtc,
+            refreshToken.SessionId,
+            refreshToken.DeviceName,
+            refreshToken.Browser,
+            refreshToken.OperatingSystem,
+            refreshToken.IpAddress,
+            refreshToken.UserAgent);
 
         refreshToken.Revoke(
             newRefreshToken.Token,
@@ -97,7 +109,9 @@ internal sealed class RefreshTokenCommandHandler
             cancellationToken);
 
         var accessToken =
-            _jwtProvider.GenerateAccessToken(user);
+            _jwtProvider.GenerateAccessToken(
+                user,
+                refreshToken.SessionId);
 
         return Result.Success(
             new RefreshTokenResponse(

@@ -65,4 +65,16 @@ internal sealed class RefreshTokenRepository
 
         return Task.CompletedTask;
     }
+
+    public async Task<IReadOnlyList<RefreshToken>> GetByUserIdAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.RefreshTokens
+            .Where(x =>
+                x.UserId == userId &&
+                x.Status == RefreshTokenStatus.Active)
+            .OrderByDescending(x => x.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+    }
 }

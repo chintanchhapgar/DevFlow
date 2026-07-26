@@ -13,7 +13,13 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
         RefreshTokenId id,
         UserId userId,
         string token,
-        DateTime expiresOnUtc)
+        DateTime expiresOnUtc,
+        string? deviceName,
+        string? browser,
+        string? operatingSystem,
+        string? ipAddress,
+        string? userAgent,
+        Guid sessionId)
         : base(id)
     {
         UserId = userId;
@@ -21,6 +27,12 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
         ExpiresOnUtc = expiresOnUtc;
         Status = RefreshTokenStatus.Active;
         CreatedOnUtc = DateTime.UtcNow;
+        DeviceName = deviceName;
+        Browser = browser;
+        OperatingSystem = operatingSystem;
+        IpAddress = ipAddress;
+        UserAgent = userAgent;
+        SessionId = sessionId;
     }
 
     // EF Core
@@ -44,14 +56,33 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
 
     public string? RevokedReason { get; private set; }
 
+    public string? DeviceName { get; private set; }
+
+    public string? Browser { get; private set; }
+
+    public string? OperatingSystem { get; private set; }
+
+    public string? IpAddress { get; private set; }
+
+    public string? UserAgent { get; private set; }
+
+    public DateTime? LastUsedOnUtc { get; private set; }
+
+    public Guid SessionId { get; private set; }
     public bool IsActive =>
         Status == RefreshTokenStatus.Active &&
         ExpiresOnUtc > DateTime.UtcNow;
 
     public static RefreshToken Create(
-        UserId userId,
-        string token,
-        DateTime expiresOnUtc)
+         UserId userId,
+         string token,
+         DateTime expiresOnUtc,
+         Guid sessionId,
+         string? deviceName,
+         string? browser,
+         string? operatingSystem,
+         string? ipAddress,
+         string? userAgent)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(token);
 
@@ -59,7 +90,13 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
             RefreshTokenId.New(),
             userId,
             token,
-            expiresOnUtc);
+            expiresOnUtc,
+            deviceName,
+            browser,
+            operatingSystem,
+            ipAddress,
+            userAgent,
+            sessionId);
     }
 
     public void Revoke(
@@ -85,5 +122,10 @@ public sealed class RefreshToken : Entity<RefreshTokenId>
         }
 
         Status = RefreshTokenStatus.Expired;
+    }
+
+    public void MarkAsUsed()
+    {
+        LastUsedOnUtc = DateTime.UtcNow;
     }
 }

@@ -24,4 +24,8 @@ public interface IRefreshTokenRepository
     Task UpdateRangeAsync(
         IEnumerable<RefreshToken> refreshTokens,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<RefreshToken>> GetByUserIdAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default);
 }

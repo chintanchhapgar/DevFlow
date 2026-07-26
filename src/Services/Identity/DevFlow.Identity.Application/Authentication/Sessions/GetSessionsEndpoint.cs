@@ -1,36 +1,34 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.Logout;
+using DevFlow.Identity.Application.Authentication.Sessions;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.Sessions;
 
-public static class LogoutEndpoint
+internal sealed class GetSessionsEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapLogoutEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost(
-            "/api/auth/logout",
+        app.MapGet(
+            "/api/auth/sessions",
             async (
-                LogoutCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
-                    command,
+                    new GetSessionsQuery(),
                     cancellationToken);
 
                 return result.ToApiResult(httpContext);
             })
             .RequireAuthorization()
-            .WithName("Logout")
-            .WithSummary("Logout current user")
-            .Produces<LogoutResponse>();
+            .WithName("GetSessions")
+            .WithSummary("Get active sessions")
+            .Produces<IReadOnlyList<SessionResponse>>(StatusCodes.Status200OK);
 
-        return app;
     }
 }

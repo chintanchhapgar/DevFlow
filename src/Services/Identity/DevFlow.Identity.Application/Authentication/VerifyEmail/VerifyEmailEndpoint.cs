@@ -1,24 +1,24 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.ChangePassword;
+using DevFlow.Identity.Application.Authentication.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.VerifyEmail;
 
 /// <summary>
-/// Change password endpoint.
+/// Email verification endpoint.
 /// </summary>
-public static class ChangePasswordEndpoint
+internal sealed class VerifyEmailEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapChangePasswordEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/change-password",
+            "/api/auth/verify-email",
             async (
-                ChangePasswordCommand command,
+                VerifyEmailCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -29,14 +29,12 @@ public static class ChangePasswordEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-            .RequireAuthorization()
-            .WithName("ChangePassword")
-            .WithSummary("Change current user's password")
+            .AllowAnonymous()
+            .WithName("VerifyEmail")
+            .WithSummary("Verify user email")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden);
+            .Produces(StatusCodes.Status404NotFound);
 
-        return app;
     }
 }

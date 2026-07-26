@@ -1,9 +1,11 @@
 using DevFlow.Identity.Application.Authentication.Common;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.SharedKernel.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.Login;
 
@@ -18,12 +20,14 @@ internal sealed class LoginCommandHandler
     private readonly IJwtProvider _jwtProvider;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
+    private readonly ICurrentRequestInfo _currentRequestInfo;
     public LoginCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider,
         IRefreshTokenRepository refreshTokenRepository,
-        IRefreshTokenGenerator refreshTokenGenerator
+        IRefreshTokenGenerator refreshTokenGenerator,
+        ICurrentRequestInfo currentRequestInfo
         )
     {
         _userRepository = userRepository;
@@ -31,6 +35,7 @@ internal sealed class LoginCommandHandler
         _jwtProvider = jwtProvider;
         _refreshTokenRepository = refreshTokenRepository;
         _refreshTokenGenerator = refreshTokenGenerator;
+        _currentRequestInfo = currentRequestInfo;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
@@ -70,16 +75,26 @@ internal sealed class LoginCommandHandler
         var refreshTokenValue =
             _refreshTokenGenerator.Generate();
 
+        var sessionId = Guid.NewGuid();
+
         var refreshToken = user.CreateRefreshToken(
             refreshTokenValue,
-            DateTime.UtcNow.AddDays(30));
+            DateTime.UtcNow.AddDays(30),
+            sessionId,
+            _currentRequestInfo.DeviceName,
+            _currentRequestInfo.Browser,
+            _currentRequestInfo.OperatingSystem,
+            _currentRequestInfo.IpAddress,
+            _currentRequestInfo.UserAgent);
 
         await _refreshTokenRepository.AddAsync(
             refreshToken,
             cancellationToken);
 
         var accessToken =
-            _jwtProvider.GenerateAccessToken(user);
+            _jwtProvider.GenerateAccessToken(
+                user,
+                sessionId);
 
         return AuthenticationResponse.Success(
             accessToken,

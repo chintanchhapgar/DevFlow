@@ -1,6 +1,7 @@
 using DevFlow.BuildingBlocks.Infrastructure.Persistence.Interceptors;
 using DevFlow.BuildingBlocks.Infrastructure.Services;
 using DevFlow.SharedKernel.Abstractions;
+using DevFlow.SharedKernel.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,8 +19,6 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
 
         services.AddSingleton<IClock, SystemClock>();
-
-        services.AddScoped<ICurrentUser, CurrentUserService>();
 
         // Interceptors are registered as singletons in EF Core
         services.AddSingleton<AuditableInterceptor>();

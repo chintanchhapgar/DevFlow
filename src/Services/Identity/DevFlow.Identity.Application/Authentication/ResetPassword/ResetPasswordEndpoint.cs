@@ -1,21 +1,21 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.Register;
+using DevFlow.Identity.Application.Authentication.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.ResetPassword;
 
-public static class RegisterEndpoint
+internal sealed class ResetPasswordEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapRegisterEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/register",
+            "/api/auth/reset-password",
             async (
-                RegisterCommand command,
+                ResetPasswordCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -26,8 +26,10 @@ public static class RegisterEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-            .WithSummary("Register new user");
+            .AllowAnonymous()
+            .WithName("ResetPassword")
+            .WithSummary("Reset password")
+            .Produces<ResetPasswordResponse>();
 
-        return app;
     }
 }

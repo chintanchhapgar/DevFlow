@@ -1,35 +1,38 @@
-using System.Security.Claims;
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.MultiFactor.Setup;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using System.Security.Claims;
 
-namespace DevFlow.Identity.Application.Endpoints.MultiFactor;
+namespace DevFlow.Identity.Application.Authentication.MultiFactor.Verify;
 
-public static class SetupTwoFactorEndpoint
+internal sealed class VerifyTwoFactorEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapSetupTwoFactorEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/mfa/setup",
+            "/api/auth/mfa/verify",
             [Authorize] async (
+                VerifyTwoFactorRequest request,
                 ClaimsPrincipal user,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
-                var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userIdClaim =
+                    user.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (!Guid.TryParse(userIdClaim, out var userId))
                 {
                     return Results.Unauthorized();
                 }
 
-                var command = new SetupTwoFactorCommand(userId);
+                var command = new VerifyTwoFactorCommand(
+                    userId,
+                    request.Code);
 
                 var result = await sender.Send(
                     command,
@@ -37,15 +40,18 @@ public static class SetupTwoFactorEndpoint
 
                 return result.ToApiResult(
                     httpContext,
-                    "Two-factor authentication setup initialized.");
+                    "Two-factor authentication enabled successfully.");
             })
-            .WithName("SetupTwoFactor")
-            .WithSummary("Starts MFA setup")
-            .WithDescription("Generates a TOTP secret and QR code URI for authenticator apps.")
+            .WithName("VerifyTwoFactor")
+            .WithSummary("Verifies MFA setup")
+            .WithDescription("Verifies the authenticator code and enables MFA.")
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .RequireAuthorization();
 
-        return app;
     }
 }
+
+public sealed record VerifyTwoFactorRequest(
+    string Code);

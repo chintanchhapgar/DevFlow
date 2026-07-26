@@ -1,8 +1,9 @@
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.SharedKernel.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.MultiFactor.Setup;
 

@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.MultiFactor.Disable;
 using MediatR;
@@ -5,15 +6,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Application.Endpoints.MultiFactor;
+namespace DevFlow.Identity.Application.Authentication.MultiFactor.Disable;
 
 /// <summary>
 /// Disables two-factor authentication.
 /// </summary>
-public static class DisableTwoFactorEndpoint
+internal sealed class DisableTwoFactorEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapDisableTwoFactorEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
             "/api/auth/mfa/disable",
@@ -37,6 +37,5 @@ public static class DisableTwoFactorEndpoint
         .Produces(StatusCodes.Status400BadRequest)
         .RequireAuthorization();
 
-        return app;
     }
 }

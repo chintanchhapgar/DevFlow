@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.ResendVerification;
 using MediatR;
@@ -5,15 +6,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.ResendVerification;
 
 /// <summary>
 /// Resend email verification endpoint.
 /// </summary>
-public static class ResendVerificationEndpoint
+internal sealed class ResendVerificationEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapResendVerificationEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
             "/api/auth/resend-verification",
@@ -34,7 +34,5 @@ public static class ResendVerificationEndpoint
             .WithSummary("Resend email verification")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
-
-        return app;
     }
 }

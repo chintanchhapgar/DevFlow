@@ -31,6 +31,23 @@ internal sealed class RefreshTokenConfiguration
         builder.HasIndex(x => x.Token)
             .IsUnique();
 
+        builder.Property(x => x.DeviceName)
+            .HasMaxLength(100);
+
+        builder.Property(x => x.Browser)
+            .HasMaxLength(100);
+
+        builder.Property(x => x.OperatingSystem)
+            .HasMaxLength(100);
+
+        builder.Property(x => x.IpAddress)
+            .HasMaxLength(50);
+
+        builder.Property(x => x.UserAgent)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.LastUsedOnUtc);
+
         builder.Property(x => x.Status)
             .HasConversion<int>()
             .IsRequired();
@@ -57,5 +74,10 @@ internal sealed class RefreshTokenConfiguration
             .WithMany(x => x.RefreshTokens)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(x => x.SessionId)
+            .IsRequired();
+
+        builder.HasIndex(x => x.SessionId);
     }
 }

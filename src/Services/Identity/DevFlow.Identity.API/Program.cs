@@ -1,12 +1,11 @@
 using DevFlow.BuildingBlocks.Api.Middleware;
 using DevFlow.Identity.Api.Authentication;
-using DevFlow.Identity.Api.Endpoints;
-using DevFlow.Identity.Application.Endpoints.MultiFactor;
+using DevFlow.Identity.Api.Extensions;
 using DevFlow.Identity.Application;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Infrastructure;
-
-
+using DevFlow.Identity.Infrastructure.Requests;
+using DevFlow.SharedKernel.Common;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +56,8 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
+builder.Services.AddScoped<ICurrentRequestInfo, CurrentRequestInfo>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -73,34 +74,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapRegisterEndpoint();
-
-app.MapLoginEndpoint();
-
-app.MapRefreshTokenEndpoint();
-
-app.MapLogoutEndpoint();
-
-app.MapProfileEndpoint();
-
-app.MapForgotPasswordEndpoint();
-
-app.MapResetPasswordEndpoint();
-
-app.MapChangePasswordEndpoint();
-
-app.MapVerifyEmailEndpoint();
-
-app.MapResendVerificationEndpoint();
-
-app.MapSetupTwoFactorEndpoint();
-
-app.MapVerifyTwoFactorEndpoint();
-
-app.MapCompleteTwoFactorLoginEndpoint();
-
-app.MapDisableTwoFactorEndpoint();
-
-app.MapRegenerateRecoveryCodesEndpoint();
+app.MapEndpoints();
 
 app.Run();

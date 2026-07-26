@@ -1,21 +1,21 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.RefreshToken;
+using DevFlow.Identity.Application.Authentication.ForgotPassword;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.ForgotPassword;
 
-public static class RefreshTokenEndpoint
+internal sealed class ForgotPasswordEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapRefreshTokenEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/refresh",
+            "/api/auth/forgot-password",
             async (
-                RefreshTokenCommand command,
+                ForgotPasswordCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -27,11 +27,9 @@ public static class RefreshTokenEndpoint
                 return result.ToApiResult(httpContext);
             })
             .AllowAnonymous()
-            .WithName("RefreshToken")
-            .WithSummary("Refresh expired access token")
-            .Produces<RefreshTokenResponse>()
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .WithName("ForgotPassword")
+            .WithSummary("Request password reset")
+            .Produces<ForgotPasswordResponse>();
 
-        return app;
     }
 }

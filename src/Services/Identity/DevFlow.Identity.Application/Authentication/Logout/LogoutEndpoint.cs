@@ -1,21 +1,21 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.ForgotPassword;
+using DevFlow.Identity.Application.Authentication.Logout;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Api.Endpoints;
+namespace DevFlow.Identity.Application.Authentication.Logout;
 
-public static class ForgotPasswordEndpoint
+internal sealed class LogoutEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapForgotPasswordEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/forgot-password",
+            "/api/auth/logout",
             async (
-                ForgotPasswordCommand command,
+                LogoutCommand command,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
@@ -26,11 +26,10 @@ public static class ForgotPasswordEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-            .AllowAnonymous()
-            .WithName("ForgotPassword")
-            .WithSummary("Request password reset")
-            .Produces<ForgotPasswordResponse>();
+            .RequireAuthorization()
+            .WithName("Logout")
+            .WithSummary("Logout current user")
+            .Produces<LogoutResponse>();
 
-        return app;
     }
 }

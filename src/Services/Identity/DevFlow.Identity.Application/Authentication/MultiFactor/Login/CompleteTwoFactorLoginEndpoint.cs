@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.Identity.Application.Authentication.Common;
 using DevFlow.Identity.Application.Authentication.MultiFactor.Login;
@@ -6,15 +7,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Application.Endpoints.MultiFactor;
+namespace DevFlow.Identity.Application.Authentication.MultiFactor.Login;
 
 /// <summary>
 /// Completes two-factor authentication login.
 /// </summary>
-public static class CompleteTwoFactorLoginEndpoint
+internal sealed class CompleteTwoFactorLoginEndpoint : IEndpoint
 {
-    public static IEndpointRouteBuilder MapCompleteTwoFactorLoginEndpoint(
-        this IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
             "/api/auth/mfa/login",
@@ -38,6 +38,5 @@ public static class CompleteTwoFactorLoginEndpoint
         .Produces(StatusCodes.Status400BadRequest)
         .AllowAnonymous();
 
-        return app;
     }
 }

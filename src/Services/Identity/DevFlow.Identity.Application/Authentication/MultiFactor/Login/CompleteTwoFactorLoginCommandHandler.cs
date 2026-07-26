@@ -1,10 +1,12 @@
 using DevFlow.Identity.Application.Authentication.Common;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.SharedKernel.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 using System.Linq;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.MultiFactor.Login;
 
@@ -18,18 +20,21 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly ITotpService _totp;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly ICurrentRequestInfo _currentRequestInfo;
     public CompleteTwoFactorLoginCommandHandler(
         IUserRepository users,
         IJwtProvider jwtProvider,
         IRefreshTokenGenerator refreshTokenGenerator,
         ITotpService totp,
-        IRefreshTokenRepository refreshTokenRepository)
+        IRefreshTokenRepository refreshTokenRepository,
+        ICurrentRequestInfo currentRequestInfo)
     {
         _users = users;
         _jwtProvider = jwtProvider;
         _refreshTokenGenerator = refreshTokenGenerator;
         _totp = totp;
         _refreshTokenRepository = refreshTokenRepository;
+        _currentRequestInfo = currentRequestInfo;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
@@ -72,9 +77,7 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
             return Result.Failure<AuthenticationResponse>(
                 verificationResult.Error);
         }
-
-        var accessToken =
-    _jwtProvider.GenerateAccessToken(user);
+      
 
         var refreshTokenValue =
             _refreshTokenGenerator.Generate();
@@ -82,9 +85,22 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
         var expiresOnUtc =
             DateTime.UtcNow.AddDays(30);
 
+        var sessionId = Guid.NewGuid();
         var refreshToken = user.CreateRefreshToken(
             refreshTokenValue,
-            expiresOnUtc);
+            expiresOnUtc,
+            sessionId,
+            _currentRequestInfo.DeviceName,
+            _currentRequestInfo.Browser,
+            _currentRequestInfo.OperatingSystem,
+            _currentRequestInfo.IpAddress,
+            _currentRequestInfo.UserAgent);
+
+
+        var accessToken =
+          _jwtProvider.GenerateAccessToken(
+              user,
+              sessionId);
 
         await _refreshTokenRepository.AddAsync(
             refreshToken,

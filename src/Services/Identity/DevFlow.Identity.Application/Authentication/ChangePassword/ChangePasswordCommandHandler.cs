@@ -1,6 +1,7 @@
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -31,7 +32,7 @@ internal sealed class ChangePasswordCommandHandler
         CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(
-            _currentUser.UserId,
+            new UserId(_currentUser.UserId),
             cancellationToken);
 
         if (user is null)

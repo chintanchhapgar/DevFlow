@@ -4,5 +4,7 @@ namespace DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 public interface IJwtProvider
 {
-    string GenerateAccessToken(User user);
+    string GenerateAccessToken(
+    User user,
+    Guid sessionId);
 }
