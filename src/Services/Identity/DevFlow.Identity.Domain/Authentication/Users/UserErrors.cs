@@ -5,9 +5,12 @@ namespace DevFlow.Identity.Domain.Authentication.Users;
 
 public static class UserErrors
 {
+    public static readonly AppError AccountLocked =
+        AppError.Failure(
+            "User.AccountLocked",
+            "Your account is temporarily locked. Please try again later.");
 
 
-    
     public static readonly AppError Unauthorized =
         AppError.NotFound(
             "Users.Unauthorized",

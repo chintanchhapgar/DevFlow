@@ -81,6 +81,15 @@ public sealed partial class User : AggregateRoot<UserId>
     public IReadOnlyCollection<RefreshToken> RefreshTokens =>
         _refreshTokens.AsReadOnly();
 
+
+    public int AccessFailedCount { get; private set; }
+
+    public DateTime? LockoutEndUtc { get; private set; }
+
+    public bool IsLockedOut =>
+        LockoutEndUtc.HasValue &&
+        LockoutEndUtc > DateTime.UtcNow;
+
     public static User Create(
         string email,
         string passwordHash,
@@ -272,5 +281,30 @@ public sealed partial class User : AggregateRoot<UserId>
         UpdatedOnUtc = DateTime.UtcNow;
 
         return Result.Success();
+    }
+
+    public void RecordFailedLogin(
+    int maxAttempts,
+    TimeSpan lockoutDuration)
+    {
+        AccessFailedCount++;
+
+        if (AccessFailedCount >= maxAttempts)
+        {
+            LockoutEndUtc =
+                DateTime.UtcNow.Add(lockoutDuration);
+
+            AccessFailedCount = 0;
+        }
+
+        UpdatedOnUtc = DateTime.UtcNow;
+    }
+
+    public void ResetFailedLogin()
+    {
+        AccessFailedCount = 0;
+        LockoutEndUtc = null;
+
+        UpdatedOnUtc = DateTime.UtcNow;
     }
 }

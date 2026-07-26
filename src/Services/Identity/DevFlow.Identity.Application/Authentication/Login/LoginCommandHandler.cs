@@ -1,11 +1,15 @@
 using DevFlow.Identity.Application.Authentication.Common;
-using DevFlow.SharedKernel.Common;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
+using DevFlow.Identity.Application.Common.Abstractions.Options;
+
 using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using Microsoft.Extensions.Options;
+
 
 namespace DevFlow.Identity.Application.Authentication.Login;
 
@@ -21,13 +25,16 @@ internal sealed class LoginCommandHandler
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly ICurrentRequestInfo _currentRequestInfo;
+    private readonly LockoutOptions _lockoutOptions;
+
     public LoginCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider,
         IRefreshTokenRepository refreshTokenRepository,
         IRefreshTokenGenerator refreshTokenGenerator,
-        ICurrentRequestInfo currentRequestInfo
+        ICurrentRequestInfo currentRequestInfo,
+        IOptions<LockoutOptions> lockoutOptions
         )
     {
         _userRepository = userRepository;
@@ -36,6 +43,7 @@ internal sealed class LoginCommandHandler
         _refreshTokenRepository = refreshTokenRepository;
         _refreshTokenGenerator = refreshTokenGenerator;
         _currentRequestInfo = currentRequestInfo;
+        _lockoutOptions = lockoutOptions.Value;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
@@ -52,10 +60,25 @@ internal sealed class LoginCommandHandler
                 UserErrors.InvalidCredentials);
         }
 
+        if (user.IsLockedOut)
+        {
+            return Result.Failure<AuthenticationResponse>(
+                UserErrors.AccountLocked);
+        }
+
         if (!_passwordHasher.Verify(
                 request.Password,
                 user.PasswordHash))
         {
+            user.RecordFailedLogin(
+                _lockoutOptions.MaxFailedAttempts,
+                TimeSpan.FromMinutes(
+                    _lockoutOptions.DurationMinutes));
+
+            await _userRepository.UpdateAsync(
+                user,
+                cancellationToken);
+
             return Result.Failure<AuthenticationResponse>(
                 UserErrors.InvalidCredentials);
         }
@@ -70,6 +93,15 @@ internal sealed class LoginCommandHandler
         {
             return AuthenticationResponse.Challenge(
                 user.Id.Value);
+        }
+
+        if (user.AccessFailedCount > 0 || user.LockoutEndUtc is not null)
+        {
+            user.ResetFailedLogin();
+
+            await _userRepository.UpdateAsync(
+                user,
+                cancellationToken);
         }
 
         var refreshTokenValue =

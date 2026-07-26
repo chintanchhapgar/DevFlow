@@ -1,5 +1,6 @@
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Notifications;
+using DevFlow.Identity.Application.Common.Abstractions.Options;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Domain.Authentication.Users;
@@ -53,6 +54,8 @@ public static class DependencyInjection
         services.AddSingleton<IRecoveryCodeGenerator, RecoveryCodeGenerator>();
 
         services.AddSingleton<ITotpService, TotpService>();
+
+        services.Configure<LockoutOptions>(configuration.GetSection(LockoutOptions.SectionName));
 
         return services;
     }
