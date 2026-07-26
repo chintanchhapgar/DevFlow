@@ -19,3 +19,8 @@ trim_trailing_whitespace = false
 
 [Makefile]
 indent_style = tab
+
+[**/*Tests.cs]
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1708.severity = none
+dotnet_diagnostic.CA1822.severity = suggestion

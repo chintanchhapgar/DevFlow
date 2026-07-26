@@ -1,12 +1,27 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+
+    <PackageReference Include="Testcontainers.PostgreSql" />
+
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="NSubstitute" />
+
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
@@ -31,10 +46,12 @@
         buildtransitive
       </IncludeAssets>
     </PackageReference>
-
-    <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="Bogus" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DevFlow.Identity.Infrastructure\DevFlow.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\DevFlow.Identity.Api\DevFlow.Identity.Api.csproj" />
+  </ItemGroup>
+
 
 </Project>

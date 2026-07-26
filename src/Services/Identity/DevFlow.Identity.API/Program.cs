@@ -58,6 +58,9 @@ builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 builder.Services.AddScoped<ICurrentRequestInfo, CurrentRequestInfo>();
 
+
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
