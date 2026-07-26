@@ -1,6 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Responses;
 
-namespace DevFlow.Identity.Application.Authentication.Sessions;
+namespace DevFlow.Identity.Application.Authentication.Sessions.GetSessions;
 
 public sealed record SessionResponse(
     Guid SessionId,

@@ -59,11 +59,11 @@ internal sealed class RefreshTokenRepository
 
     public Task UpdateRangeAsync(
         IEnumerable<RefreshToken> refreshTokens,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         _context.RefreshTokens.UpdateRange(refreshTokens);
 
-        return Task.CompletedTask;
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<RefreshToken>> GetByUserIdAsync(
@@ -75,6 +75,28 @@ internal sealed class RefreshTokenRepository
                 x.UserId == userId &&
                 x.Status == RefreshTokenStatus.Active)
             .OrderByDescending(x => x.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<RefreshToken>> GetBySessionIdAsync(
+        Guid sessionId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.RefreshTokens
+            .Where(x => x.SessionId == sessionId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<RefreshToken>> GetActiveOtherSessionsAsync(
+        UserId userId,
+        Guid currentSessionId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.RefreshTokens
+            .Where(x =>
+                x.UserId == userId &&
+                x.Status == RefreshTokenStatus.Active &&
+                x.SessionId != currentSessionId)
             .ToListAsync(cancellationToken);
     }
 }

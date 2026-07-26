@@ -28,4 +28,14 @@ public interface IRefreshTokenRepository
     Task<IReadOnlyList<RefreshToken>> GetByUserIdAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
+
+    Task<List<RefreshToken>> GetBySessionIdAsync(
+        Guid sessionId,
+        CancellationToken cancellationToken);
+
+    Task<List<RefreshToken>> GetActiveOtherSessionsAsync(
+        UserId userId,
+        Guid currentSessionId,
+        CancellationToken cancellationToken);
+
 }

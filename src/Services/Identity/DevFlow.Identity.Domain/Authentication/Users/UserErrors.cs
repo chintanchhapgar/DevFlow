@@ -5,6 +5,14 @@ namespace DevFlow.Identity.Domain.Authentication.Users;
 
 public static class UserErrors
 {
+
+
+    
+    public static readonly AppError Unauthorized =
+        AppError.NotFound(
+            "Users.Unauthorized",
+            "Unauthorized user.");
+
     public static readonly AppError NotFound =
         AppError.NotFound(
             "Users.NotFound",

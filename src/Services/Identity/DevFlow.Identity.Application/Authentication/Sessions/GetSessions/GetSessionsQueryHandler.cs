@@ -5,7 +5,7 @@ using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
-namespace DevFlow.Identity.Application.Authentication.Sessions;
+namespace DevFlow.Identity.Application.Authentication.Sessions.GetSessions;
 
 internal sealed class GetSessionsQueryHandler
     : IRequestHandler<

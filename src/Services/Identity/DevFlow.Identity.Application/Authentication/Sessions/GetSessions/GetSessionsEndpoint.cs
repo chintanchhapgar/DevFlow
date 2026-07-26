@@ -1,12 +1,11 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.Sessions;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Identity.Application.Authentication.Sessions;
+namespace DevFlow.Identity.Application.Authentication.Sessions.GetSessions;
 
 internal sealed class GetSessionsEndpoint : IEndpoint
 {
