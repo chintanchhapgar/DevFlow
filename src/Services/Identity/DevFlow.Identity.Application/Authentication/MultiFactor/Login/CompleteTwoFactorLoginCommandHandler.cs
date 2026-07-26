@@ -1,12 +1,14 @@
 using DevFlow.Identity.Application.Authentication.Common;
-using DevFlow.SharedKernel.Common;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 using System.Linq;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.MultiFactor.Login;
 
@@ -21,13 +23,15 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
     private readonly ITotpService _totp;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly ICurrentRequestInfo _currentRequestInfo;
+    private readonly ISecurityEventLogger _securityEventLogger;
     public CompleteTwoFactorLoginCommandHandler(
         IUserRepository users,
         IJwtProvider jwtProvider,
         IRefreshTokenGenerator refreshTokenGenerator,
         ITotpService totp,
         IRefreshTokenRepository refreshTokenRepository,
-        ICurrentRequestInfo currentRequestInfo)
+        ICurrentRequestInfo currentRequestInfo,
+        ISecurityEventLogger securityEventLogger)
     {
         _users = users;
         _jwtProvider = jwtProvider;
@@ -35,6 +39,7 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
         _totp = totp;
         _refreshTokenRepository = refreshTokenRepository;
         _currentRequestInfo = currentRequestInfo;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
@@ -96,6 +101,7 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
             _currentRequestInfo.IpAddress,
             _currentRequestInfo.UserAgent);
 
+        
 
         var accessToken =
           _jwtProvider.GenerateAccessToken(
@@ -105,6 +111,14 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
         await _refreshTokenRepository.AddAsync(
             refreshToken,
             cancellationToken);
+
+        if (request.IsRecoveryCode)
+        {
+            await _securityEventLogger.LogAsync(
+                user.Id,
+                SecurityEventType.RecoveryCodeUsed,
+                cancellationToken: cancellationToken);
+        }
 
         return AuthenticationResponse.Success(
             accessToken,

@@ -1,6 +1,8 @@
 using DevFlow.Identity.Application.Authentication.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
@@ -14,13 +16,15 @@ internal sealed class DisableTwoFactorCommandHandler
 {
     private readonly IUserRepository _users;
     private readonly ITotpService _totp;
-
+    private readonly ISecurityEventLogger _securityEventLogger;
     public DisableTwoFactorCommandHandler(
         IUserRepository users,
-        ITotpService totp)
+        ITotpService totp,
+        ISecurityEventLogger securityEventLogger)
     {
         _users = users;
         _totp = totp;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<DisableTwoFactorResponse>> Handle(
@@ -76,7 +80,12 @@ internal sealed class DisableTwoFactorCommandHandler
             user,
             cancellationToken);
 
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.TwoFactorDisabled,
+            cancellationToken: cancellationToken);
+
         return Result.Success(
-            new DisableTwoFactorResponse());
-            }
+             new DisableTwoFactorResponse());
+        }
 }

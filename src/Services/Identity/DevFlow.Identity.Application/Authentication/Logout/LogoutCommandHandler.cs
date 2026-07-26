@@ -1,4 +1,5 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -8,11 +9,15 @@ internal sealed class LogoutCommandHandler
     : IRequestHandler<LogoutCommand, Result<LogoutResponse>>
 {
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly ISecurityEventLogger _securityEventLogger;
 
     public LogoutCommandHandler(
-        IRefreshTokenRepository refreshTokenRepository)
+        IRefreshTokenRepository refreshTokenRepository,
+        ISecurityEventLogger securityEventLogger
+        )
     {
         _refreshTokenRepository = refreshTokenRepository;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<LogoutResponse>> Handle(
@@ -40,6 +45,11 @@ internal sealed class LogoutCommandHandler
                 refreshToken,
                 cancellationToken);
         }
+
+        await _securityEventLogger.LogAsync(
+            refreshToken.UserId,
+            SecurityEventType.Logout,
+            cancellationToken: cancellationToken);
 
         return new LogoutResponse();
     }

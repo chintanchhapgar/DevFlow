@@ -1,9 +1,10 @@
 using DevFlow.Identity.Application.Authentication.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
+using DevFlow.Identity.Application.Common.Abstractions.Options;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
-using DevFlow.Identity.Application.Common.Abstractions.Options;
-
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
@@ -26,6 +27,7 @@ internal sealed class LoginCommandHandler
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly ICurrentRequestInfo _currentRequestInfo;
     private readonly LockoutOptions _lockoutOptions;
+    private readonly ISecurityEventLogger _securityEventLogger;
 
     public LoginCommandHandler(
         IUserRepository userRepository,
@@ -34,7 +36,8 @@ internal sealed class LoginCommandHandler
         IRefreshTokenRepository refreshTokenRepository,
         IRefreshTokenGenerator refreshTokenGenerator,
         ICurrentRequestInfo currentRequestInfo,
-        IOptions<LockoutOptions> lockoutOptions
+        IOptions<LockoutOptions> lockoutOptions,
+        ISecurityEventLogger securityEventLogger
         )
     {
         _userRepository = userRepository;
@@ -44,6 +47,7 @@ internal sealed class LoginCommandHandler
         _refreshTokenGenerator = refreshTokenGenerator;
         _currentRequestInfo = currentRequestInfo;
         _lockoutOptions = lockoutOptions.Value;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
@@ -62,21 +66,32 @@ internal sealed class LoginCommandHandler
 
         if (user.IsLockedOut)
         {
+
+            await _securityEventLogger.LogAsync(
+                user.Id,
+                SecurityEventType.AccountLocked,
+                cancellationToken: cancellationToken);
+
             return Result.Failure<AuthenticationResponse>(
                 UserErrors.AccountLocked);
         }
 
         if (!_passwordHasher.Verify(
-                request.Password,
-                user.PasswordHash))
+            request.Password,
+            user.PasswordHash))
         {
             user.RecordFailedLogin(
                 _lockoutOptions.MaxFailedAttempts,
-                TimeSpan.FromMinutes(
-                    _lockoutOptions.DurationMinutes));
+                TimeSpan.FromMinutes(_lockoutOptions.DurationMinutes));
 
             await _userRepository.UpdateAsync(
                 user,
+                cancellationToken);
+
+            await _securityEventLogger.LogAsync(
+                user.Id,
+                SecurityEventType.LoginFailed,
+                "Invalid password",
                 cancellationToken);
 
             return Result.Failure<AuthenticationResponse>(
@@ -122,6 +137,11 @@ internal sealed class LoginCommandHandler
         await _refreshTokenRepository.AddAsync(
             refreshToken,
             cancellationToken);
+
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.LoginSucceeded,
+            cancellationToken: cancellationToken);
 
         var accessToken =
             _jwtProvider.GenerateAccessToken(

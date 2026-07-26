@@ -1,4 +1,6 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
@@ -13,13 +15,16 @@ internal sealed class VerifyEmailCommandHandler
 {
     private readonly IEmailVerificationTokenRepository _verificationRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ISecurityEventLogger _securityEventLogger;
 
     public VerifyEmailCommandHandler(
         IEmailVerificationTokenRepository verificationRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        ISecurityEventLogger securityEventLogger)
     {
         _verificationRepository = verificationRepository;
         _userRepository = userRepository;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<VerifyEmailResponse>> Handle(
@@ -55,6 +60,11 @@ internal sealed class VerifyEmailCommandHandler
         await _userRepository.UpdateAsync(
             user,
             cancellationToken);
+
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.EmailVerified,
+            cancellationToken: cancellationToken);
 
         await _verificationRepository.UpdateAsync(
             verification,

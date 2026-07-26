@@ -1,11 +1,13 @@
-using DevFlow.SharedKernel.Common;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.RefreshToken;
 
@@ -17,18 +19,21 @@ internal sealed class RefreshTokenCommandHandler
     private readonly IJwtProvider _jwtProvider;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly ICurrentRequestInfo _currentRequestInfo;
+    private readonly ISecurityEventLogger _securityEventLogger;
     public RefreshTokenCommandHandler(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtProvider jwtProvider,
         IRefreshTokenGenerator refreshTokenGenerator,
-        ICurrentRequestInfo currentRequestInfo)
+        ICurrentRequestInfo currentRequestInfo,
+        ISecurityEventLogger securityEventLogger)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtProvider = jwtProvider;
         _refreshTokenGenerator = refreshTokenGenerator;
         _currentRequestInfo = currentRequestInfo;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<RefreshTokenResponse>> Handle(
@@ -107,6 +112,11 @@ internal sealed class RefreshTokenCommandHandler
         await _refreshTokenRepository.AddAsync(
             newRefreshToken,
             cancellationToken);
+
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.RefreshTokenRotated,
+            cancellationToken: cancellationToken);
 
         var accessToken =
             _jwtProvider.GenerateAccessToken(

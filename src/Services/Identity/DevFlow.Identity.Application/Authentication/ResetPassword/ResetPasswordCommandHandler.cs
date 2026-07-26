@@ -1,6 +1,8 @@
 
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
@@ -14,17 +16,19 @@ internal sealed class ResetPasswordCommandHandler
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IPasswordHasher _passwordHasher;
-
+    private readonly ISecurityEventLogger _securityEventLogger;
     public ResetPasswordCommandHandler(
         IPasswordResetTokenRepository passwordResetRepository,
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        ISecurityEventLogger securityEventLogger)
     {
         _passwordResetRepository = passwordResetRepository;
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _passwordHasher = passwordHasher;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<ResetPasswordResponse>> Handle(
@@ -74,6 +78,11 @@ internal sealed class ResetPasswordCommandHandler
                 token,
                 cancellationToken);
         }
+
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.PasswordReset,
+            cancellationToken: cancellationToken);
 
         return new ResetPasswordResponse();
     }

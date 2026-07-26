@@ -1,6 +1,7 @@
 using DevFlow.Identity.Domain.Authentication.EmailVerificationTokens;
 using DevFlow.Identity.Domain.Authentication.PasswordResetTokens;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,7 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens  => Set<PasswordResetToken>();
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
+    public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("identity");

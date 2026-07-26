@@ -1,9 +1,11 @@
-using DevFlow.SharedKernel.Common;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.MultiFactor.Setup;
 
@@ -14,13 +16,15 @@ internal sealed class SetupTwoFactorCommandHandler
 {
     private readonly IUserRepository _users;
     private readonly ITotpService _totp;
-
+    private readonly ISecurityEventLogger _securityEventLogger;
     public SetupTwoFactorCommandHandler(
         IUserRepository users,
-        ITotpService totp)
+        ITotpService totp,
+        ISecurityEventLogger securityEventLogger)
     {
         _users = users;
         _totp = totp;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<SetupTwoFactorResponse>> Handle(
@@ -53,6 +57,11 @@ internal sealed class SetupTwoFactorCommandHandler
         await _users.UpdateAsync(
             user,
             cancellationToken);
+
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.TwoFactorEnabled,
+            cancellationToken: cancellationToken);
 
         var qrUri = _totp.GenerateQrCodeUri(
             "DevFlow",
