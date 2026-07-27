@@ -64,4 +64,32 @@ internal sealed class ProjectRepository
 
         return Task.CompletedTask;
     }
+
+    public async Task<(IReadOnlyList<ProjectAggregate> Projects, int TotalCount)> GetPagedAsync(
+        int page,
+        int pageSize,
+        string? search,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<ProjectAggregate> query =
+            _context.Projects
+                .Include(x => x.Members);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(x =>
+            EF.Functions.ILike(x.Name, $"%{search}%") ||
+            EF.Functions.ILike(x.Key, $"%{search}%"));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var projects = await query
+            .OrderBy(x => x.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (projects, totalCount);
+    }
 }

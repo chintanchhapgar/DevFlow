@@ -24,4 +24,10 @@ public interface IProjectRepository
     Task UpdateAsync(
         ProjectAggregate project,
         CancellationToken cancellationToken);
+
+    Task<(IReadOnlyList<ProjectAggregate> Projects, int TotalCount)> GetPagedAsync(
+        int page,
+        int pageSize,
+        string? search,
+        CancellationToken cancellationToken = default);
 }
