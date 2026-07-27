@@ -45,8 +45,20 @@ public static class ProjectErrors
             "Project owner cannot be removed.");
 
     public static readonly AppError Forbidden =
-    new(
-        "Project.Forbidden",
-        "You are not allowed to modify this project.",
-        ErrorType.Forbidden);
+        new(
+            "Project.Forbidden",
+            "You are not allowed to modify this project.",
+            ErrorType.Forbidden);
+
+    public static readonly AppError AlreadyArchived =
+        new(
+            "Project.AlreadyArchived",
+            "Project is already archived.",
+            ErrorType.Validation);
+
+    public static readonly AppError AlreadyActive =
+        new(
+            "Project.AlreadyActive",
+            "Project is already active.",
+            ErrorType.Validation);
 }

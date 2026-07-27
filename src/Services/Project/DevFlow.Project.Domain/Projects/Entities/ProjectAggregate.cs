@@ -105,18 +105,15 @@ public sealed class ProjectAggregate
             new ProjectUpdatedDomainEvent(Id));
     }
 
-    public Result Archive()
+    public void Archive()
     {
         if (Status == ProjectStatus.Archived)
-            return Result.Success();
+            return;
 
         Status = ProjectStatus.Archived;
-        UpdatedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(
             new ProjectArchivedDomainEvent(Id));
-
-        return Result.Success();
     }
 
     public Result AddMember(
@@ -182,5 +179,16 @@ public sealed class ProjectAggregate
         UpdatedOnUtc = DateTime.UtcNow;
 
         return Result.Success();
+    }
+
+    public void Restore()
+    {
+        if (Status == ProjectStatus.Active)
+            return;
+
+        Status = ProjectStatus.Active;
+
+        RaiseDomainEvent(
+            new ProjectRestoredDomainEvent(Id));
     }
 }
