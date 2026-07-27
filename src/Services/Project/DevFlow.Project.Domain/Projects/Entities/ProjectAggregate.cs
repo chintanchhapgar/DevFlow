@@ -86,23 +86,23 @@ public sealed class ProjectAggregate
             visibility);
     }
 
-    public Result Update(
+    public void Update(
         string name,
         string? description,
         ProjectVisibility visibility)
     {
         if (Status == ProjectStatus.Archived)
-            return Result.Failure(ProjectErrors.Archived);
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            throw new InvalidOperationException(
+                "Archived projects cannot be modified.");
 
         Name = name.Trim();
+
         Description = description?.Trim();
+
         Visibility = visibility;
 
-        UpdatedOnUtc = DateTime.UtcNow;
-
-        return Result.Success();
+        RaiseDomainEvent(
+            new ProjectUpdatedDomainEvent(Id));
     }
 
     public Result Archive()

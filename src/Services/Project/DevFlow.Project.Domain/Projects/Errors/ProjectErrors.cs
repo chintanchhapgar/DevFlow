@@ -43,4 +43,10 @@ public static class ProjectErrors
         AppError.Conflict(
             "Project.CannotRemoveOwner",
             "Project owner cannot be removed.");
+
+    public static readonly AppError Forbidden =
+    new(
+        "Project.Forbidden",
+        "You are not allowed to modify this project.",
+        ErrorType.Forbidden);
 }
