@@ -1,4 +1,5 @@
-using System.Net.Http.Json;
+using DevFlow.Identity.Infrastructure.Persistence;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DevFlow.Identity.IntegrationTests.Common;
@@ -8,13 +9,23 @@ public abstract class IntegrationTestBase
 {
     protected HttpClient Client { get; }
 
-    protected IntegrationTestWebAppFactory Factory { get; }
+    protected IServiceScope Scope { get; }
+
+    protected TestUserSeeder Users { get; }
+
+    protected IdentityDbContext Db { get; }
 
     protected IntegrationTestBase(
         IntegrationTestWebAppFactory factory)
     {
-        Factory = factory;
-
         Client = factory.CreateClient();
+
+        Scope = factory.Services.CreateScope();
+
+        Db = Scope.ServiceProvider
+            .GetRequiredService<IdentityDbContext>();
+
+        Users = Scope.ServiceProvider
+            .GetRequiredService<TestUserSeeder>();
     }
 }

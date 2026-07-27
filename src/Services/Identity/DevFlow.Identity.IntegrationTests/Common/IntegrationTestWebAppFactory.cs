@@ -32,6 +32,8 @@ public sealed class IntegrationTestWebAppFactory
         {
             services.RemoveAll<DbContextOptions<IdentityDbContext>>();
 
+            services.AddScoped<TestUserSeeder>();
+
             services.AddDbContext<IdentityDbContext>(options =>
             {
                 options.UseNpgsql(_database.Container.GetConnectionString());
