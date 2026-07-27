@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Security\DevFlow.BuildingBlocks.Security.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Application\DevFlow.Identity.Application.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Infrastructure\DevFlow.Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Contracts\DevFlow.Identity.Contracts.csproj" />
@@ -9,6 +10,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Authentication\" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>

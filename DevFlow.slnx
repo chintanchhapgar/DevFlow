@@ -5,6 +5,7 @@
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Infrastructure/DevFlow.BuildingBlocks.Infrastructure.csproj" />
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Messaging/DevFlow.BuildingBlocks.Messaging.csproj" />
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Observability/DevFlow.BuildingBlocks.Observability.csproj" />
+    <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Security/DevFlow.BuildingBlocks.Security.csproj" />
     <Project Path="src/BuildingBlocks/DevFlow.SharedKernel/DevFlow.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/src/Gateway/">
@@ -12,13 +13,22 @@
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Identity/">
-    <Project Path="src/Services/Identity/DevFlow.Identity.Api/DevFlow.Identity.Api.csproj" DisplayName="DevFlow.Identity.Api" />
+    <Project Path="src/Services/Identity/DevFlow.Identity.Api/DevFlow.Identity.Api.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Application/DevFlow.Identity.Application.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Contracts/DevFlow.Identity.Contracts.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Domain/DevFlow.Identity.Domain.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.Infrastructure/DevFlow.Identity.Infrastructure.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.IntegrationTests/DevFlow.Identity.IntegrationTests.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.UnitTests/DevFlow.Identity.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Project/">
+    <Project Path="src/Services/Project/DevFlow.Project.Api/DevFlow.Project.Api.csproj" />
+    <Project Path="src/Services/Project/DevFlow.Project.Application/DevFlow.Project.Application.csproj" />
+    <Project Path="src/Services/Project/DevFlow.Project.Contracts/DevFlow.Project.Contracts.csproj" />
+    <Project Path="src/Services/Project/DevFlow.Project.Domain/DevFlow.Project.Domain.csproj" />
+    <Project Path="src/Services/Project/DevFlow.Project.Infrastructure/DevFlow.Project.Infrastructure.csproj" />
+    <Project Path="src/Services/Project/DevFlow.Project.IntegrationTests/DevFlow.Project.IntegrationTests.csproj" />
+    <Project Path="src/Services/Project/DevFlow.Project.UnitTests/DevFlow.Project.UnitTests.csproj" />
   </Folder>
 
   <Folder Name="/tests/" />

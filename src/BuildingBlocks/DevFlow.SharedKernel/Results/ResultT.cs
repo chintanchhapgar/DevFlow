@@ -8,8 +8,12 @@ public sealed class Result<TValue> : Result
 {
     private readonly TValue? _value;
 
-    internal Result(TValue? value, bool isSuccess, AppError error)
-        : base(isSuccess, error)
+    internal Result(
+        TValue? value,
+        bool isSuccess,
+        AppError error,
+        string message = "")
+        : base(isSuccess, error, message)
     {
         _value = value;
     }

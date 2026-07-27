@@ -1,30 +1,45 @@
 using System.Text;
 using System.Text.Json;
 using DevFlow.BuildingBlocks.Api.Responses;
-using DevFlow.Identity.Infrastructure.Authentication;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DevFlow.Identity.Api.Authentication;
+namespace DevFlow.BuildingBlocks.Security.Authentication;
 
-public static class JwtAuthenticationExtensions
+public static class AuthenticationExtensions
 {
     public static IServiceCollection AddJwtAuthentication(
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var settings = configuration
-            .GetSection(JwtSettings.SectionName)
-            .Get<JwtSettings>()
+        var jwtOptions = configuration
+            .GetSection(JwtOptions.SectionName)
+            .Get<JwtOptions>()
             ?? throw new InvalidOperationException(
-                "JWT settings are missing.");
+                "JWT configuration is missing.");
+
+        services.Configure<JwtOptions>(
+            configuration.GetSection(
+                JwtOptions.SectionName));
+
+        services.AddHttpContextAccessor();
+
+        services.AddScoped<ICurrentUser, CurrentUser>();
 
         services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddAuthentication(
+                JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                options.RequireHttpsMetadata = false;
+
+                options.SaveToken = true;
+
                 options.TokenValidationParameters =
                     new TokenValidationParameters
                     {
@@ -33,12 +48,13 @@ public static class JwtAuthenticationExtensions
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
 
-                        ValidIssuer = settings.Issuer,
-                        ValidAudience = settings.Audience,
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidAudience = jwtOptions.Audience,
 
                         IssuerSigningKey =
                             new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(settings.SecretKey)),
+                                Encoding.UTF8.GetBytes(
+                                    jwtOptions.SecretKey)),
 
                         ClockSkew = TimeSpan.Zero
                     };
@@ -100,8 +116,6 @@ public static class JwtAuthenticationExtensions
                     }
                 };
             });
-
-        services.AddAuthorization();
 
         return services;
     }

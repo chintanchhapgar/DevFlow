@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\DevFlow.Project.Application\DevFlow.Project.Application.csproj" />
+    <ProjectReference Include="..\DevFlow.Project.Domain\DevFlow.Project.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

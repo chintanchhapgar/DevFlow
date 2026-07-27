@@ -1,10 +1,10 @@
+using System.Reflection;
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
-namespace DevFlow.Identity.Application;
+namespace DevFlow.Project.Application;
 
 public static class DependencyInjection
 {

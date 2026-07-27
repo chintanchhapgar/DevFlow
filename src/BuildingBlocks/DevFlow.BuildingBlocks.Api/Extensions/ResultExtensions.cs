@@ -13,7 +13,9 @@ public static class ResultExtensions
     {
         if (result.IsSuccess)
         {
-            string message = successMessage ?? "";
+            string message =
+                successMessage
+                ?? result.Message;
 
             if (string.IsNullOrWhiteSpace(message) &&
                 result.Value is IApiMessage apiMessage)
@@ -21,7 +23,10 @@ public static class ResultExtensions
                 message = apiMessage.Message;
             }
 
-            message ??= "Success.";
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                message = "Success.";
+            }
 
             object? data = result.Value;
 

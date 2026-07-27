@@ -18,9 +18,11 @@ public static class EndpointExtensions
         params Assembly[] assemblies)
     {
         var endpointTypes = assemblies
-            .SelectMany(a => a.GetExportedTypes())
-            .Where(t => t is { IsAbstract: false, IsInterface: false }
-                        && t.IsAssignableTo(typeof(IEndpoint)));
+            .SelectMany(a => a.GetTypes())
+            .Where(t =>
+                !t.IsAbstract &&
+                !t.IsInterface &&
+                typeof(IEndpoint).IsAssignableFrom(t));
 
         foreach (var endpointType in endpointTypes)
         {

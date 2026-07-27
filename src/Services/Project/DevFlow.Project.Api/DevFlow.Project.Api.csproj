@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Security\DevFlow.BuildingBlocks.Security.csproj" />
+    <ProjectReference Include="..\DevFlow.Project.Application\DevFlow.Project.Application.csproj" />
+    <ProjectReference Include="..\DevFlow.Project.Infrastructure\DevFlow.Project.Infrastructure.csproj" />
+    <ProjectReference Include="..\DevFlow.Project.Contracts\DevFlow.Project.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Observability\DevFlow.BuildingBlocks.Observability.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>
+        runtime;
+        build;
+        native;
+        contentfiles;
+        analyzers;
+        buildtransitive
+      </IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
