@@ -28,7 +28,7 @@ public sealed class CreateProjectEndpoint : IEndpoint
             .WithName("CreateProject")
             .WithSummary("Create Project")
             .Produces<CreateProjectResponse>()
-             .WithOpenApi()
+            .RequireAuthorization()
             .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 }

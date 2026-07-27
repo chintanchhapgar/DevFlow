@@ -18,7 +18,7 @@ internal sealed class ProjectRepository
 
     public async Task<ProjectAggregate?> GetByIdAsync(
         ProjectId id,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await _context.Projects
             .Include(x => x.Members)
