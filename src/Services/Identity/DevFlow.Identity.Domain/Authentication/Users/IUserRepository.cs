@@ -24,4 +24,8 @@ public interface IUserRepository
     Task UpdateAsync(
         User user,
         CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsByIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

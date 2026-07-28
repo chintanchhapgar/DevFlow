@@ -64,4 +64,15 @@ internal sealed class UserRepository : IUserRepository
 
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<bool> ExistsByIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var id = new UserId(userId);
+
+        return await _context.Users.AnyAsync(
+            x => x.Id == id,
+            cancellationToken);
+    }
 }

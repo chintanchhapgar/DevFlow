@@ -1,8 +1,9 @@
 using DevFlow.Project.Domain.Projects.Enums;
-using DevFlow.Project.Domain.Projects.Events;
 using DevFlow.Project.Domain.Projects.Errors;
+using DevFlow.Project.Domain.Projects.Events;
 using DevFlow.Project.Domain.Projects.ValueObjects;
 using DevFlow.SharedKernel.Domain;
+using DevFlow.SharedKernel.Exceptions;
 using DevFlow.SharedKernel.Results;
 
 namespace DevFlow.Project.Domain.Projects.Entities;
@@ -116,45 +117,43 @@ public sealed class ProjectAggregate
             new ProjectArchivedDomainEvent(Id));
     }
 
-    public Result AddMember(
-        Guid userId,
-        ProjectRole role)
+    public void AddMember(
+    Guid userId,
+    ProjectRole role)
     {
-        if (Status == ProjectStatus.Archived)
-            return Result.Failure(ProjectErrors.Archived);
-
         if (_members.Any(x => x.UserId == userId))
-            return Result.Failure(ProjectErrors.MemberAlreadyExists);
+        {
+            throw new InvalidOperationException(
+                "User is already a member.");
+        }
 
         _members.Add(
             ProjectMember.Create(
                 userId,
                 role));
 
-        UpdatedOnUtc = DateTime.UtcNow;
-
         RaiseDomainEvent(
             new MemberAddedDomainEvent(
                 Id,
                 userId));
-
-        return Result.Success();
     }
 
     public Result RemoveMember(Guid userId)
     {
-        if (userId == OwnerId)
-            return Result.Failure(ProjectErrors.CannotRemoveOwner);
-
-        var member = _members.FirstOrDefault(
-            x => x.UserId == userId);
+        var member = _members
+            .FirstOrDefault(x => x.UserId == userId);
 
         if (member is null)
+        {
             return Result.Failure(ProjectErrors.MemberNotFound);
+        }
+
+        if (member.UserId == OwnerId)
+        {
+            return Result.Failure(ProjectErrors.OwnerCannotBeRemoved);
+        }
 
         _members.Remove(member);
-
-        UpdatedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(
             new MemberRemovedDomainEvent(
@@ -165,18 +164,24 @@ public sealed class ProjectAggregate
     }
 
     public Result ChangeMemberRole(
-        Guid userId,
-        ProjectRole role)
+    Guid userId,
+    ProjectRole role)
     {
-        var member = _members.FirstOrDefault(
-            x => x.UserId == userId);
+        var member = _members
+            .FirstOrDefault(x => x.UserId == userId);
 
         if (member is null)
+        {
             return Result.Failure(ProjectErrors.MemberNotFound);
+        }
 
         member.ChangeRole(role);
 
-        UpdatedOnUtc = DateTime.UtcNow;
+        RaiseDomainEvent(
+            new MemberRoleChangedDomainEvent(
+                Id,
+                userId,
+                role));
 
         return Result.Success();
     }
@@ -191,4 +196,6 @@ public sealed class ProjectAggregate
         RaiseDomainEvent(
             new ProjectRestoredDomainEvent(Id));
     }
+
+
 }

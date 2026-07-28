@@ -61,4 +61,19 @@ public static class ProjectErrors
             "Project.AlreadyActive",
             "Project is already active.",
             ErrorType.Validation);
+
+    public static readonly AppError UserNotFound =
+        new(
+            "Project.UserNotFound",
+            "User not found.",
+            ErrorType.Validation);
+
+    public static readonly AppError OwnerCannotBeRemoved =
+    new(
+        "Project.OwnerCannotBeRemoved",
+        "Project owner cannot be removed.",
+        ErrorType.Validation);
+
+
+
 }

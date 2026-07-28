@@ -3,20 +3,17 @@ using System;
 using DevFlow.Project.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DevFlow.Persistence.Migrations
+namespace DevFlow.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    [Migration("20260727085033_InitialCreate")]
-    partial class InitialCreate
+    partial class ProjectDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,20 +69,25 @@ namespace DevFlow.Persistence.Migrations
                 {
                     b.OwnsMany("DevFlow.Project.Domain.Projects.Entities.ProjectMember", "Members", b1 =>
                         {
-                            b1.Property<Guid>("ProjectId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("UserId")
-                                .ValueGeneratedOnAdd()
+                            b1.Property<Guid>("Id")
                                 .HasColumnType("uuid");
 
                             b1.Property<DateTime>("JoinedOnUtc")
                                 .HasColumnType("timestamp with time zone");
 
+                            b1.Property<Guid>("ProjectId")
+                                .HasColumnType("uuid");
+
                             b1.Property<int>("Role")
                                 .HasColumnType("integer");
 
-                            b1.HasKey("ProjectId", "UserId");
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ProjectId", "UserId")
+                                .IsUnique();
 
                             b1.ToTable("ProjectMembers", "project");
 

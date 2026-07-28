@@ -1,5 +1,7 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Project.Application.Common.Abstractions.Identity;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
+using DevFlow.Project.Infrastructure.Identity;
 using DevFlow.Project.Infrastructure.Persistence;
 using DevFlow.Project.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,14 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork>(sp =>
             sp.GetRequiredService<ProjectDbContext>());
+
+        services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
+        {
+            client.BaseAddress = new Uri(
+                configuration["Services:Identity"]
+                ?? throw new InvalidOperationException(
+                    "Identity Service URL is missing."));
+        });
 
         return services;
     }
