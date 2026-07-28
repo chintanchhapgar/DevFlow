@@ -33,6 +33,7 @@ public sealed class UpdateProjectEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Projects")
             .WithName("UpdateProject")
             .WithSummary("Update project")
             .Produces<UpdateProjectResponse>(StatusCodes.Status200OK)

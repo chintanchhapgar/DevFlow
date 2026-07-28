@@ -25,6 +25,7 @@ public sealed class CreateProjectEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Projects")
             .WithName("CreateProject")
             .WithSummary("Create Project")
             .Produces<CreateProjectResponse>()

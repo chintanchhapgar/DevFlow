@@ -28,6 +28,7 @@ internal sealed class RegenerateRecoveryCodesEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("MFA")
         .WithName("RegenerateRecoveryCodes")
         .WithSummary("Regenerate MFA recovery codes")
         .WithDescription(

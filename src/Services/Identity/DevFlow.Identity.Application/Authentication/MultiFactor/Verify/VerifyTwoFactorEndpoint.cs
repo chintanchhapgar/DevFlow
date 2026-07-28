@@ -42,6 +42,7 @@ internal sealed class VerifyTwoFactorEndpoint : IEndpoint
                     httpContext,
                     "Two-factor authentication enabled successfully.");
             })
+            .WithTags("MFA")
             .WithName("VerifyTwoFactor")
             .WithSummary("Verifies MFA setup")
             .WithDescription("Verifies the authenticator code and enables MFA.")

@@ -33,6 +33,7 @@ public sealed class UpdateProjectMemberRoleEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Project Members")
             .WithName("UpdateProjectMemberRole")
             .WithSummary("Update project member role")
             .WithDescription("Updates the role of a project member. Only the project owner can perform this operation.")

@@ -29,6 +29,7 @@ internal sealed class DisableTwoFactorEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("MFA")
         .WithName("DisableTwoFactor")
         .WithSummary("Disable two-factor authentication")
         .WithDescription(

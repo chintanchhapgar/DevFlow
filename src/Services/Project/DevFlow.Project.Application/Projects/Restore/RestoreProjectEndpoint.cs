@@ -29,6 +29,7 @@ public sealed class RestoreProjectEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Projects")
             .WithName("RestoreProject")
             .WithSummary("Restore project")
             .WithDescription("Restores an archived project. Only the project owner can restore a project.")

@@ -45,33 +45,82 @@ internal sealed class ProjectAggregateConfiguration
         // This is handled inside OwnsMany via UsePropertyAccessMode
 
         builder.OwnsMany(
-    x => x.Members,
-    members =>
-    {
-        members.ToTable("ProjectMembers");
+            x => x.Members,
+            members =>
+            {
+                members.ToTable("ProjectMembers");
 
-        members.WithOwner()
-            .HasForeignKey("ProjectId");
+                members.WithOwner()
+                    .HasForeignKey("ProjectId");
 
-        members.UsePropertyAccessMode(PropertyAccessMode.Field);
+                members.UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        members.HasKey(x => x.Id);
+                members.HasKey(x => x.Id);
 
-        members.Property(x => x.Id)
-            .ValueGeneratedNever();
+                members.Property(x => x.Id)
+                    .ValueGeneratedNever();
 
-        members.HasIndex(
-            "ProjectId",
-            nameof(ProjectMember.UserId))
-            .IsUnique();
+                members.HasIndex(
+                    "ProjectId",
+                    nameof(ProjectMember.UserId))
+                    .IsUnique();
 
-        members.Property(x => x.UserId)
-            .IsRequired();
+                members.Property(x => x.UserId)
+                    .IsRequired();
 
-        members.Property(x => x.Role)
-            .HasConversion<int>();
+                members.Property(x => x.Role)
+                    .HasConversion<int>();
 
-        members.Property(x => x.JoinedOnUtc);
-    });
+                members.Property(x => x.JoinedOnUtc);
+            });
+
+        builder.OwnsMany(
+            x => x.Invitations,
+            invitations =>
+            {
+                invitations.ToTable("ProjectInvitations");
+
+                invitations.WithOwner()
+                    .HasForeignKey("ProjectId");
+
+                invitations.UsePropertyAccessMode(PropertyAccessMode.Field);
+
+                invitations.HasKey(x => x.Id);
+
+                invitations.Property(x => x.Id)
+                    .ValueGeneratedNever();
+
+                invitations.Property(x => x.Email)
+                    .HasMaxLength(256)
+                    .IsRequired();
+
+                invitations.Property(x => x.Role)
+                    .HasConversion<int>();
+
+                invitations.Property(x => x.Status)
+                    .HasConversion<int>();
+
+                invitations.Property(x => x.Token)
+                    .IsRequired();
+
+                invitations.HasIndex(x => x.Token)
+                    .IsUnique();
+
+                invitations.Property(x => x.InvitedBy)
+                    .IsRequired();
+
+                invitations.Property(x => x.InvitedOnUtc);
+
+                invitations.Property(x => x.ExpiresOnUtc);
+
+                invitations.Property(x => x.AcceptedOnUtc);
+
+                invitations.HasIndex(new[]
+                {
+                    "ProjectId",
+                    nameof(ProjectInvitation.Email),
+                    nameof(ProjectInvitation.Status)
+                });
+            });
     }
 }

@@ -75,4 +75,33 @@ internal sealed class UserRepository : IUserRepository
             x => x.Id == id,
             cancellationToken);
     }
+    public async Task<(IReadOnlyList<User> Users, int TotalCount)> GetPagedAsync(
+    int page,
+    int pageSize,
+    string? search,
+    CancellationToken cancellationToken)
+    {
+        IQueryable<User> query = _context.Users.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            query = query.Where(x =>
+                EF.Functions.ILike(x.FirstName, $"%{search}%") ||
+                EF.Functions.ILike(x.LastName, $"%{search}%") ||
+                EF.Functions.ILike(x.Email, $"%{search}%"));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var users = await query
+            .OrderBy(x => x.FirstName)
+            .ThenBy(x => x.LastName)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (users, totalCount);
+    }
 }

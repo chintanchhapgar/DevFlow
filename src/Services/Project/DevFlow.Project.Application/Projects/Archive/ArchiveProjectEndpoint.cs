@@ -30,6 +30,7 @@ public sealed class ArchiveProjectEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Projects")
             .WithName("ArchiveProject")
             .WithSummary("Archive project")
             .WithDescription("Archives an existing project. Only the project owner can archive a project.")

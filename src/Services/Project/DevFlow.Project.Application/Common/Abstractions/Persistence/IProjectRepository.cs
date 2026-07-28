@@ -30,4 +30,8 @@ public interface IProjectRepository
         int pageSize,
         string? search,
         CancellationToken cancellationToken = default);
+
+    Task<ProjectAggregate?> GetByInvitationTokenAsync(
+        Guid token,
+        CancellationToken cancellationToken = default);
 }

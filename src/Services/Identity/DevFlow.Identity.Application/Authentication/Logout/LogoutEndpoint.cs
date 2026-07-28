@@ -26,6 +26,7 @@ internal sealed class LogoutEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Auth")
             .RequireAuthorization()
             .WithName("Logout")
             .WithSummary("Logout current user")

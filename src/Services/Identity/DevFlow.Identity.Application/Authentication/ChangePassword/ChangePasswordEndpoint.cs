@@ -29,6 +29,7 @@ internal sealed class ChangePasswordEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Password")
             .RequireAuthorization()
             .WithName("ChangePassword")
             .WithSummary("Change current user's password")

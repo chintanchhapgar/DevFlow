@@ -33,6 +33,7 @@ public sealed class GetProjectsEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Projects")
             .WithName("GetProjects")
             .WithSummary("Get paged projects")
             .Produces<GetProjectsResponse>(StatusCodes.Status200OK)

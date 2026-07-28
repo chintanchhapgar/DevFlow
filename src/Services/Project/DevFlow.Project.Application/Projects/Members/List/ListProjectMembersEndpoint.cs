@@ -26,6 +26,7 @@ public sealed class ListProjectMembersEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Project Members")
             .WithName("GetProjectMembers")
             .WithSummary("Get project members")
             .WithDescription("Returns all members of the specified project.")

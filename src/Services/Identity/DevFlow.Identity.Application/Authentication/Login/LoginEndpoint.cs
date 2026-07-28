@@ -26,6 +26,7 @@ internal sealed class LoginEndpoint : IEndpoint
 
                 return result.ToApiResult(context);
             })
+             .WithTags("Auth")
             .AllowAnonymous()
             .WithName("Login");
     }

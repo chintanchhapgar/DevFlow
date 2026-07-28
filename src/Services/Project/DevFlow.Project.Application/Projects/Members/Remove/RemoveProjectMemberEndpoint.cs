@@ -31,6 +31,7 @@ public sealed class RemoveProjectMemberEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Project Members")
             .WithName("RemoveProjectMember")
             .WithSummary("Remove project member")
             .WithDescription("Removes a member from the project. Only the project owner can perform this operation.")

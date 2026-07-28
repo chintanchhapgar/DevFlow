@@ -92,4 +92,16 @@ internal sealed class ProjectRepository
 
         return (projects, totalCount);
     }
+
+    public async Task<ProjectAggregate?> GetByInvitationTokenAsync(
+        Guid token,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Projects
+            .Include(x => x.Members)
+            .Include(x => x.Invitations)
+            .FirstOrDefaultAsync(
+                x => x.Invitations.Any(i => i.Token == token),
+                cancellationToken);
+    }
 }

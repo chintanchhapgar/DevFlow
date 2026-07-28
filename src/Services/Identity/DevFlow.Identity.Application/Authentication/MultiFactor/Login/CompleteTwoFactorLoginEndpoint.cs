@@ -30,6 +30,7 @@ internal sealed class CompleteTwoFactorLoginEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("MFA")
         .WithName("CompleteTwoFactorLogin")
         .WithSummary("Complete two-factor authentication login")
         .WithDescription(

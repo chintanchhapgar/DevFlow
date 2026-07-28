@@ -26,6 +26,7 @@ internal sealed class ResetPasswordEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Password")
             .AllowAnonymous()
             .WithName("ResetPassword")
             .WithSummary("Reset password")

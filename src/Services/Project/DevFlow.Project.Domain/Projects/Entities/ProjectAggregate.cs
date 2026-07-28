@@ -65,6 +65,10 @@ public sealed class ProjectAggregate
     public IReadOnlyCollection<ProjectMember> Members =>
         _members.AsReadOnly();
 
+    private readonly List<ProjectInvitation> _invitations = [];
+
+    public IReadOnlyCollection<ProjectInvitation> Invitations =>
+    _invitations.AsReadOnly();
     public static ProjectAggregate Create(
         string key,
         string name,
@@ -197,5 +201,135 @@ public sealed class ProjectAggregate
             new ProjectRestoredDomainEvent(Id));
     }
 
+    public Result<ProjectInvitation> InviteMember(
+    string email,
+    ProjectRole role,
+    Guid invitedBy)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+
+        email = email.Trim().ToLowerInvariant();
+
+        if (_members.Any(x => x.UserId == invitedBy) == false)
+        {
+            return Result.Failure<ProjectInvitation>(
+                ProjectErrors.Forbidden);
+        }
+
+        if (_invitations.Any(x =>
+                x.Email == email &&
+                x.Status == InvitationStatus.Pending))
+        {
+            return Result.Failure<ProjectInvitation>(
+                ProjectErrors.InvitationAlreadyExists);
+        }
+
+        var invitation = ProjectInvitation.Create(
+            Id.Value,
+            email,
+            role,
+            invitedBy);
+
+        _invitations.Add(invitation);
+
+        RaiseDomainEvent(
+            new ProjectInvitationCreatedDomainEvent(
+                Id,
+                invitation.Id));
+
+        return Result.Success(invitation);
+    }
+
+    public Result AcceptInvitation(
+    Guid token,
+    Guid userId)
+    {
+        var invitation = _invitations
+            .FirstOrDefault(x => x.Token == token);
+
+        if (invitation is null)
+        {
+            return Result.Failure(ProjectErrors.InvitationNotFound);
+        }
+
+        if (invitation.Status != InvitationStatus.Pending)
+        {
+            return Result.Failure(ProjectErrors.InvitationAlreadyProcessed);
+        }
+
+        if (invitation.ExpiresOnUtc <= DateTime.UtcNow)
+        {
+            return Result.Failure(ProjectErrors.InvitationExpired);
+        }
+
+        if (_members.Any(x => x.UserId == userId))
+        {
+            return Result.Failure(ProjectErrors.MemberAlreadyExists);
+        }
+
+        _members.Add(
+            ProjectMember.Create(
+                userId,
+                invitation.Role));
+
+        invitation.Accept();
+
+        RaiseDomainEvent(
+            new ProjectInvitationAcceptedDomainEvent(
+                Id,
+                invitation.Id,
+                userId));
+
+        return Result.Success();
+    }
+
+    public Result RevokeInvitation(Guid invitationId)
+    {
+        var invitation = _invitations
+            .FirstOrDefault(x => x.Id == invitationId);
+
+        if (invitation is null)
+        {
+            return Result.Failure(
+                ProjectErrors.InvitationNotFound);
+        }
+
+        invitation.Revoke();
+
+        RaiseDomainEvent(
+            new ProjectInvitationRevokedDomainEvent(
+                Id,
+                invitation.Id));
+
+        return Result.Success();
+    }
+
+
+    public Result DeclineInvitation(Guid token)
+    {
+        var invitation = _invitations
+            .FirstOrDefault(x => x.Token == token);
+
+        if (invitation is null)
+        {
+            return Result.Failure(
+                ProjectErrors.InvitationNotFound);
+        }
+
+        if (invitation.Status != InvitationStatus.Pending)
+        {
+            return Result.Failure(
+                ProjectErrors.InvitationAlreadyProcessed);
+        }
+
+        invitation.Decline();
+
+        RaiseDomainEvent(
+            new ProjectInvitationDeclinedDomainEvent(
+                Id,
+                invitation.Id));
+
+        return Result.Success();
+    }
 
 }

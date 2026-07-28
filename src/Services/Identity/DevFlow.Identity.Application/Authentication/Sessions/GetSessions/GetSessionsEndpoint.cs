@@ -24,6 +24,7 @@ internal sealed class GetSessionsEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+             .WithTags("Sessions")
             .RequireAuthorization()
             .WithName("GetSessions")
             .WithSummary("Get active sessions")

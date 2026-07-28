@@ -28,4 +28,10 @@ public interface IUserRepository
     Task<bool> ExistsByIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    Task<(IReadOnlyList<User> Users, int TotalCount)> GetPagedAsync(
+        int page,
+        int pageSize,
+        string? search,
+        CancellationToken cancellationToken);
 }

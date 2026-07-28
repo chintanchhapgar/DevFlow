@@ -29,6 +29,7 @@ internal sealed class ResendVerificationEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("User")
             .AllowAnonymous()
             .WithName("ResendVerification")
             .WithSummary("Resend email verification")

@@ -26,6 +26,7 @@ internal sealed class RegisterEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Auth")
             .WithSummary("Register new user");
 
     }

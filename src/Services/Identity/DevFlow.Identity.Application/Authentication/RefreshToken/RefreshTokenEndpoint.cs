@@ -26,6 +26,7 @@ internal sealed class RefreshTokenEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Auth")
             .AllowAnonymous()
             .WithName("RefreshToken")
             .WithSummary("Refresh expired access token")

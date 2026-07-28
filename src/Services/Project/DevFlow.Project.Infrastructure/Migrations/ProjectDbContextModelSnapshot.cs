@@ -67,6 +67,53 @@ namespace DevFlow.Migrations
 
             modelBuilder.Entity("DevFlow.Project.Domain.Projects.Entities.ProjectAggregate", b =>
                 {
+                    b.OwnsMany("DevFlow.Project.Domain.Projects.Entities.ProjectInvitation", "Invitations", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime?>("AcceptedOnUtc")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)");
+
+                            b1.Property<DateTime>("ExpiresOnUtc")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<Guid>("InvitedBy")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("InvitedOnUtc")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<Guid>("ProjectId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Role")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Status")
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid>("Token")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("Token")
+                                .IsUnique();
+
+                            b1.HasIndex("ProjectId", "Email", "Status");
+
+                            b1.ToTable("ProjectInvitations", "project");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProjectId");
+                        });
+
                     b.OwnsMany("DevFlow.Project.Domain.Projects.Entities.ProjectMember", "Members", b1 =>
                         {
                             b1.Property<Guid>("Id")
@@ -94,6 +141,8 @@ namespace DevFlow.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("ProjectId");
                         });
+
+                    b.Navigation("Invitations");
 
                     b.Navigation("Members");
                 });

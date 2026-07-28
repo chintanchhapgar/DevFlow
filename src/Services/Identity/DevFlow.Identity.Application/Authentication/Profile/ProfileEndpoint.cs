@@ -33,6 +33,7 @@ internal sealed class ProfileEndpoint : IEndpoint
                     response,
                     "Profile retrieved successfully.");
             })
+            .WithTags("User")
             .RequireAuthorization()
                     .WithName("Profile")
                     .WithSummary("Current authenticated user")

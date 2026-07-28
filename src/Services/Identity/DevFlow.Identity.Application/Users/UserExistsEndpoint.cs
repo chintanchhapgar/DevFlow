@@ -27,6 +27,7 @@ public sealed class UserExistsEndpoint : IEndpoint
                     ? Results.Ok()
                     : Results.NotFound();
             })
+            .WithTags("Users")
         .WithName("UserExists")
         .WithSummary("Checks whether a user exists.");
     }

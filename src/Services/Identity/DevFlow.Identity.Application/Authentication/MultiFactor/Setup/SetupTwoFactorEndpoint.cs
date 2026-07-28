@@ -38,6 +38,7 @@ internal sealed class SetupTwoFactorEndpoint : IEndpoint
                     httpContext,
                     "Two-factor authentication setup initialized.");
             })
+            .WithTags("MFA")
             .WithName("SetupTwoFactor")
             .WithSummary("Starts MFA setup")
             .WithDescription("Generates a TOTP secret and QR code URI for authenticator apps.")

@@ -1,4 +1,5 @@
 using DevFlow.SharedKernel.Results;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DevFlow.Project.Domain.Projects.Errors;
 
@@ -69,10 +70,30 @@ public static class ProjectErrors
             ErrorType.Validation);
 
     public static readonly AppError OwnerCannotBeRemoved =
-    new(
-        "Project.OwnerCannotBeRemoved",
-        "Project owner cannot be removed.",
-        ErrorType.Validation);
+        new(
+            "Project.OwnerCannotBeRemoved",
+            "Project owner cannot be removed.",
+            ErrorType.Validation);
+
+    public static readonly AppError InvitationNotFound =
+        AppError.NotFound(
+            "Project.Invitation.NotFound",
+            "Invitation was not found.");
+
+    public static readonly AppError InvitationAlreadyExists =
+        AppError.Conflict(
+            "Project.Invitation.Exists",
+            "A pending invitation already exists for this email.");
+
+    public static readonly AppError InvitationExpired =
+        AppError.Validation(
+            "Project.InvitationExpired",
+            "Invitation has expired.");
+
+    public static readonly AppError InvitationAlreadyProcessed =
+        AppError.Conflict(
+            "Project.InvitationAlreadyProcessed",
+            "Invitation has already been processed.");
 
 
 

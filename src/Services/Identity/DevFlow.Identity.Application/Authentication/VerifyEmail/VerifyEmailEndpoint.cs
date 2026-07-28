@@ -29,6 +29,7 @@ internal sealed class VerifyEmailEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("User")
             .AllowAnonymous()
             .WithName("VerifyEmail")
             .WithSummary("Verify user email")

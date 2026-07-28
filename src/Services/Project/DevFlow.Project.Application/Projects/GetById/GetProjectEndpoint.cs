@@ -29,6 +29,7 @@ public sealed class GetProjectByIdEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Projects")
             .WithName("GetProjectById")
             .WithSummary("Get project by id")
             .Produces<GetProjectResponse>(StatusCodes.Status200OK)

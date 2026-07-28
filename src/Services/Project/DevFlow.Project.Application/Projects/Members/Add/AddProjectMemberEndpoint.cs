@@ -32,6 +32,7 @@ public sealed class AddProjectMemberEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
+            .WithTags("Project Members")
             .WithName("AddProjectMember")
             .WithSummary("Add project member")
             .WithDescription("Adds a new member to the project. Only the project owner can add members.")
