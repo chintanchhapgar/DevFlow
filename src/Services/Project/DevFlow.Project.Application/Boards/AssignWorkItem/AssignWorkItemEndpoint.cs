@@ -33,7 +33,7 @@ public sealed class AssignWorkItemEndpoint
                 return result.ToApiResult(httpContext);
             })
             .WithTags("Boards")
-            .WithName("AssignWorkItem")
+            .WithName("AssignWorkItemForBoards")
             .WithSummary("Assign work item")
             .WithDescription("Assigns a work item to a user.")
             .Produces<AssignWorkItemResponse>(StatusCodes.Status200OK)

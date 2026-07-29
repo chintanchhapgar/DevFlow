@@ -12,6 +12,10 @@ public static class SwaggerExtensions
 
         services.AddSwaggerGen(options =>
         {
+            // ADD THIS
+            options.CustomSchemaIds(type =>
+                type.FullName!.Replace("+", "."));
+
             options.SwaggerDoc(
                 "v1",
                 new OpenApiInfo
@@ -33,8 +37,7 @@ public static class SwaggerExtensions
                     Reference =
                         new OpenApiReference
                         {
-                            Type =
-                                ReferenceType.SecurityScheme,
+                            Type = ReferenceType.SecurityScheme,
                             Id = "Bearer"
                         }
                 };

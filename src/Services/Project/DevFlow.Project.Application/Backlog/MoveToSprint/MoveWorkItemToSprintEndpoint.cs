@@ -33,7 +33,7 @@ public sealed class MoveWorkItemToSprintEndpoint
                 return result.ToApiResult(httpContext);
             })
             .WithTags("Backlog")
-            .WithName("MoveWorkItemToSprint")
+            .WithName("MoveWorkItemToSprintForBacklog")
             .WithSummary("Move work item to sprint")
             .WithDescription("Assigns a backlog work item to a sprint.")
             .Produces<MoveWorkItemToSprintResponse>(StatusCodes.Status200OK)

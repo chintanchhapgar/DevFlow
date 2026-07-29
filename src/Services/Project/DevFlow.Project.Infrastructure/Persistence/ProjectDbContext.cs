@@ -1,4 +1,5 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Project.Domain.Comments.Entities;
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Sprints.Entities;
 using DevFlow.Project.Domain.WorkItems.Entities;
@@ -17,10 +18,9 @@ public sealed class ProjectDbContext
     }
 
     public DbSet<ProjectAggregate> Projects => Set<ProjectAggregate>();
-
     public DbSet<WorkItemAggregate> WorkItems => Set<WorkItemAggregate>();
-
     public DbSet<SprintAggregate> Sprints => Set<SprintAggregate>();
+    public DbSet<Comment> Comments => Set<Comment>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("project");

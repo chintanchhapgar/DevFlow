@@ -1,6 +1,7 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Application.Common.Abstractions.Identity;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
+using DevFlow.Project.Domain.Comments.Repositories;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.WorkItems.Repositories;
 using DevFlow.Project.Infrastructure.Identity;
@@ -31,6 +32,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ProjectDbContext>());
 
         services.AddScoped<ISprintRepository, SprintRepository>();
+
+        services.AddScoped<ICommentRepository, CommentRepository>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {
