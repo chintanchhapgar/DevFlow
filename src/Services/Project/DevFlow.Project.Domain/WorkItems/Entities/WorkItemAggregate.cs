@@ -70,7 +70,8 @@ public sealed class WorkItemAggregate
     public Guid? EpicId { get; private set; }
 
     public Guid? ParentId { get; private set; }
-
+    public bool IsSubtask => ParentId.HasValue;
+    public int ChildCount { get; private set; }
     public Guid? SprintId { get; private set; }
 
     public decimal? EstimateHours { get; private set; }
@@ -132,6 +133,9 @@ public sealed class WorkItemAggregate
 
     public void Assign(Guid userId)
     {
+        if (AssigneeId == userId)
+            return;
+
         AssigneeId = userId;
 
         UpdatedOnUtc = DateTime.UtcNow;
@@ -183,6 +187,9 @@ public sealed class WorkItemAggregate
 
     public void MoveToSprint(Guid sprintId)
     {
+        if (SprintId == sprintId)
+            return;
+
         SprintId = sprintId;
 
         UpdatedOnUtc = DateTime.UtcNow;
@@ -220,5 +227,46 @@ public sealed class WorkItemAggregate
         IsDeleted = false;
 
         UpdatedOnUtc = DateTime.UtcNow;
+    }
+
+    public void MoveToStatus(
+    WorkItemStatus status)
+    {
+        if (Status == status)
+            return;
+
+        Status = status;
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(
+            new WorkItemStatusChangedDomainEvent(
+                Id,
+                status));
+    }
+
+    public void RemoveFromSprint()
+    {
+        if (SprintId is null)
+            return;
+
+        SprintId = null;
+
+        UpdatedOnUtc = DateTime.UtcNow;
+    }
+
+    public int GetNextChildSequence()
+    {
+        if (IsSubtask)
+        {
+            throw new InvalidOperationException(
+                "Subtasks cannot have child work items.");
+        }
+
+        ChildCount++;
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        return ChildCount;
     }
 }

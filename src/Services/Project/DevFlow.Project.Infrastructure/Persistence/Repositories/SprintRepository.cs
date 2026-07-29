@@ -1,4 +1,5 @@
 using DevFlow.Project.Domain.Sprints.Entities;
+using DevFlow.Project.Domain.Sprints.Enums;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.Sprints.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -93,5 +94,18 @@ internal sealed class SprintRepository
             .ToListAsync(cancellationToken);
 
         return (items, total);
+    }
+
+    public async Task<SprintAggregate?> GetActiveSprintAsync(
+    Guid projectId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Sprints
+            .FirstOrDefaultAsync(
+                x =>
+                    x.ProjectId == projectId &&
+                    x.Status == SprintStatus.Active &&
+                    !x.IsDeleted,
+                cancellationToken);
     }
 }

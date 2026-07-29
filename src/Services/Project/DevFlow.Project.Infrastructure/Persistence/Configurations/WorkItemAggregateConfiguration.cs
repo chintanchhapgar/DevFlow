@@ -68,6 +68,9 @@ internal sealed class WorkItemAggregateConfiguration
 
         builder.HasIndex(x => x.ProjectId);
 
+        builder.Property(x => x.ChildCount)
+    .HasDefaultValue(0);
+
         builder.HasIndex(x => new
         {
             x.ProjectId,

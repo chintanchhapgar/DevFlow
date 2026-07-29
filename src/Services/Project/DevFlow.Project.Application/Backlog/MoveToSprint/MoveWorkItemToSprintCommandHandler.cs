@@ -5,13 +5,11 @@ using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.Sprints.ValueObjects;
 using DevFlow.Project.Domain.WorkItems.Errors;
 using DevFlow.Project.Domain.WorkItems.Repositories;
-//using DevFlow.Project.Domain.Sprints.Repositories;
-//using DevFlow.Project.Domain.Sprints.ValueObjects;
-using DevFlow.SharedKernel.Common;
+using DevFlow.Project.Domain.WorkItems.ValueObjects;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
-namespace DevFlow.Project.Application.WorkItems.MoveToSprint;
+namespace DevFlow.Project.Application.Backlog.MoveToSprint;
 
 internal sealed class MoveWorkItemToSprintCommandHandler
     : IRequestHandler<
@@ -21,18 +19,15 @@ internal sealed class MoveWorkItemToSprintCommandHandler
     private readonly IWorkItemRepository _workItemRepository;
     private readonly ISprintRepository _sprintRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ICurrentUser _currentUser;
 
     public MoveWorkItemToSprintCommandHandler(
         IWorkItemRepository workItemRepository,
         ISprintRepository sprintRepository,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser)
+        IUnitOfWork unitOfWork)
     {
         _workItemRepository = workItemRepository;
         _sprintRepository = sprintRepository;
         _unitOfWork = unitOfWork;
-        _currentUser = currentUser;
     }
 
     public async Task<Result<MoveWorkItemToSprintResponse>> Handle(
@@ -40,20 +35,13 @@ internal sealed class MoveWorkItemToSprintCommandHandler
         CancellationToken cancellationToken)
     {
         var workItem = await _workItemRepository.GetByIdAsync(
-            new(request.WorkItemId),
+            new WorkItemId(request.WorkItemId),
             cancellationToken);
 
         if (workItem is null)
         {
             return Result.Failure<MoveWorkItemToSprintResponse>(
                 WorkItemErrors.NotFound);
-        }
-
-        if (workItem.ReporterId != _currentUser.UserId &&
-            workItem.AssigneeId != _currentUser.UserId)
-        {
-            return Result.Failure<MoveWorkItemToSprintResponse>(
-                WorkItemErrors.Forbidden);
         }
 
         var sprint = await _sprintRepository.GetByIdAsync(
@@ -73,7 +61,7 @@ internal sealed class MoveWorkItemToSprintCommandHandler
         return Result.Success(
             new MoveWorkItemToSprintResponse(
                 workItem.Id.Value,
-                request.SprintId),
+                sprint.Id.Value),
             "Work item moved to sprint successfully.");
     }
 }

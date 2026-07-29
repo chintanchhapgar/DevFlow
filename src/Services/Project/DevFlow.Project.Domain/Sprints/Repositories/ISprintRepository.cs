@@ -32,4 +32,8 @@ public interface ISprintRepository
         int pageSize,
         string? search,
         CancellationToken cancellationToken = default);
+
+    Task<SprintAggregate?> GetActiveSprintAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default);
 }

@@ -128,4 +128,39 @@ internal sealed class WorkItemRepository
 
         return (items, totalCount);
     }
+
+    public async Task<IReadOnlyList<WorkItemAggregate>> GetBySprintAsync(
+        Guid sprintId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.WorkItems
+            .Where(x =>
+                x.SprintId == sprintId &&
+                !x.IsDeleted)
+            .OrderBy(x => x.Status)
+            .ThenBy(x => x.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<WorkItemAggregate>> GetBacklogAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.WorkItems
+            .Where(x =>
+                x.ProjectId == projectId &&
+                x.SprintId == null &&
+                !x.IsDeleted)
+            .OrderBy(x => x.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetNextSubtaskSequenceAsync(
+    Guid parentId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.WorkItems
+            .Where(x => x.ParentId == parentId)
+            .CountAsync(cancellationToken) + 1;
+    }
 }

@@ -40,4 +40,16 @@ public interface IWorkItemRepository
         WorkItemPriority? priority,
         Guid? assigneeId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<WorkItemAggregate>> GetBySprintAsync(
+        Guid sprintId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<WorkItemAggregate>> GetBacklogAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default);
+
+    Task<int> GetNextSubtaskSequenceAsync(
+        Guid parentId,
+        CancellationToken cancellationToken = default);
 }
