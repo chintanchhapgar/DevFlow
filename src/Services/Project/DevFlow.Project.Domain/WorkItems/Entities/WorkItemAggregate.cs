@@ -84,6 +84,10 @@ public sealed class WorkItemAggregate
 
     public DateTime? UpdatedOnUtc { get; private set; }
 
+    private readonly List<WorkItemLabel> _labels = [];
+    public IReadOnlyCollection<WorkItemLabel> Labels
+    => _labels.AsReadOnly();
+
     public static WorkItemAggregate Create(
         Guid projectId,
         string key,
@@ -268,5 +272,31 @@ public sealed class WorkItemAggregate
         UpdatedOnUtc = DateTime.UtcNow;
 
         return ChildCount;
+    }
+
+    public void AddLabel(Guid labelId)
+    {
+        if (_labels.Any(x => x.LabelId == labelId))
+            return;
+
+        _labels.Add(
+            WorkItemLabel.Create(
+                Id.Value,
+                labelId));
+
+        UpdatedOnUtc = DateTime.UtcNow;
+    }
+
+    public void RemoveLabel(Guid labelId)
+    {
+        var label = _labels.FirstOrDefault(
+            x => x.LabelId == labelId);
+
+        if (label is null)
+            return;
+
+        _labels.Remove(label);
+
+        UpdatedOnUtc = DateTime.UtcNow;
     }
 }

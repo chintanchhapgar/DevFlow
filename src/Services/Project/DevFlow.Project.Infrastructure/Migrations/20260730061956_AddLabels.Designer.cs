@@ -3,6 +3,7 @@ using System;
 using DevFlow.Project.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevFlow.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    partial class ProjectDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260730061956_AddLabels")]
+    partial class AddLabels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -336,24 +339,6 @@ namespace DevFlow.Migrations
                     b.ToTable("WorkItems", "project");
                 });
 
-            modelBuilder.Entity("DevFlow.Project.Domain.WorkItems.Entities.WorkItemLabel", b =>
-                {
-                    b.Property<Guid>("WorkItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("LabelId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("WorkItemAggregateId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("WorkItemId", "LabelId");
-
-                    b.HasIndex("WorkItemAggregateId");
-
-                    b.ToTable("WorkItemLabels", "project");
-                });
-
             modelBuilder.Entity("DevFlow.Project.Domain.Projects.Entities.ProjectAggregate", b =>
                 {
                     b.OwnsMany("DevFlow.Project.Domain.Projects.Entities.ProjectInvitation", "Invitations", b1 =>
@@ -434,18 +419,6 @@ namespace DevFlow.Migrations
                     b.Navigation("Invitations");
 
                     b.Navigation("Members");
-                });
-
-            modelBuilder.Entity("DevFlow.Project.Domain.WorkItems.Entities.WorkItemLabel", b =>
-                {
-                    b.HasOne("DevFlow.Project.Domain.WorkItems.Entities.WorkItemAggregate", null)
-                        .WithMany("Labels")
-                        .HasForeignKey("WorkItemAggregateId");
-                });
-
-            modelBuilder.Entity("DevFlow.Project.Domain.WorkItems.Entities.WorkItemAggregate", b =>
-                {
-                    b.Navigation("Labels");
                 });
 #pragma warning restore 612, 618
         }

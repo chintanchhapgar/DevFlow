@@ -4,6 +4,7 @@ using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Application.Common.Abstractions.Storage;
 using DevFlow.Project.Domain.Attachments.Repositories;
 using DevFlow.Project.Domain.Comments.Repositories;
+using DevFlow.Project.Domain.Labels.Repositories;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.WorkItems.Repositories;
 using DevFlow.Project.Infrastructure.Identity;
@@ -41,6 +42,8 @@ public static class DependencyInjection
         services.AddScoped<ICommentRepository, CommentRepository>();
 
         services.AddScoped<IFileStorage, LocalFileStorage>();
+
+        services.AddScoped<ILabelRepository, LabelRepository>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {

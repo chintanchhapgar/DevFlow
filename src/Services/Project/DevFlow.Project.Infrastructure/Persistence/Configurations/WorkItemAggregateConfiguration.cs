@@ -71,6 +71,11 @@ internal sealed class WorkItemAggregateConfiguration
         builder.Property(x => x.ChildCount)
     .HasDefaultValue(0);
 
+        builder.Metadata
+    .FindNavigation(nameof(WorkItemAggregate.Labels))!
+    .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+
         builder.HasIndex(x => new
         {
             x.ProjectId,
