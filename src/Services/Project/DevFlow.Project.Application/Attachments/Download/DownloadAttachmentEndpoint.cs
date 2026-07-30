@@ -1,4 +1,5 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +42,6 @@ public sealed class DownloadAttachmentEndpoint
             .WithDescription("Downloads an attachment by its identifier.")
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +36,6 @@ public sealed class RemoveWorkItemEndpoint
             .WithSummary("Remove work item from epic")
             .Produces<RemoveWorkItemResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using DevFlow.Project.Domain.WorkItems.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -45,6 +46,6 @@ public sealed class GetAllWorkItemsEndpoint : IEndpoint
             .WithName("GetAllWorkItems")
             .WithSummary("Get all work items")
             .Produces<GetAllWorkItemsResponse>()
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

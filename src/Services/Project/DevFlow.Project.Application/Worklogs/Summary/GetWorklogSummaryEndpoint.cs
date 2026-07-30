@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -33,6 +34,6 @@ public sealed class GetWorklogSummaryEndpoint
             .WithSummary("Get worklog summary")
             .WithDescription("Returns total logged time for a work item.")
             .Produces<GetWorklogSummaryResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectViewer);
     }
 }

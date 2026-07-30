@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -42,6 +43,6 @@ public sealed class CreateEpicEndpoint
             .WithDescription("Creates a new epic.")
             .Produces<CreateEpicResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status409Conflict)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -38,6 +39,6 @@ public sealed class CreateLabelEndpoint
             .WithDescription("Creates a new project label.")
             .Produces<CreateLabelResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status409Conflict)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

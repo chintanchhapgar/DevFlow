@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +42,6 @@ public sealed class GetAllSprintsEndpoint
             .WithSummary("Get all sprints")
             .WithDescription("Returns paginated sprints for a project.")
             .Produces<GetAllSprintsResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

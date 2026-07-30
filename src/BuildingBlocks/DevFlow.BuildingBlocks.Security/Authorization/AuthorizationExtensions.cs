@@ -22,13 +22,9 @@ public static class AuthorizationExtensions
                 policy =>
                 {
                     policy.RequireAuthenticatedUser();
-                    policy.RequireRole(
-                        "Admin",
-                        "Member");
+                    policy.RequireRole("Admin", "Member");
                 });
 
-            // Placeholder.
-            // Will be implemented after Project Permissions service.
             options.AddPolicy(
                 PolicyNames.ProjectOwner,
                 policy =>
@@ -36,10 +32,22 @@ public static class AuthorizationExtensions
                     policy.RequireAuthenticatedUser();
                 });
 
-            // Placeholder.
-            // Will be implemented after Project Permissions service.
+            options.AddPolicy(
+                PolicyNames.ProjectEditor,
+                policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                });
+
             options.AddPolicy(
                 PolicyNames.ProjectMember,
+                policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                });
+
+            options.AddPolicy(
+                PolicyNames.ProjectViewer,
                 policy =>
                 {
                     policy.RequireAuthenticatedUser();

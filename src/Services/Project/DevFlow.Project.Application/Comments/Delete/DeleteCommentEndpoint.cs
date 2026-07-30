@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Security.Authorization;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,8 @@ internal sealed class DeleteCommentEndpoint
             .WithName("DeleteComment")
             .WithTags("Comments")
             .Produces<Result<DeleteCommentResponse>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PolicyNames.ProjectEditor);
 
         return app;
     }

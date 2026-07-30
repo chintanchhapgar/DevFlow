@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -33,6 +34,6 @@ public sealed class GetAllEpicsEndpoint
             .WithSummary("Get project epics")
             .WithDescription("Returns all epics for a project.")
             .Produces<IReadOnlyList<GetAllEpicsResponse>>(StatusCodes.Status200OK)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectViewer);
     }
 }

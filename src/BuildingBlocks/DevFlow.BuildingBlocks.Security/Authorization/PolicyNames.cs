@@ -2,11 +2,15 @@ namespace DevFlow.BuildingBlocks.Security.Authorization;
 
 public static class PolicyNames
 {
-    public const string Admin = "Admin";
+    public const string Admin = nameof(Admin);
 
-    public const string Member = "Member";
+    public const string Member = nameof(Member);
 
-    public const string ProjectOwner = "ProjectOwner";
+    public const string ProjectOwner = nameof(ProjectOwner);
 
-    public const string ProjectMember = "ProjectMember";
+    public const string ProjectEditor = nameof(ProjectEditor);
+
+    public const string ProjectMember = nameof(ProjectMember);
+
+    public const string ProjectViewer = nameof(ProjectViewer);
 }

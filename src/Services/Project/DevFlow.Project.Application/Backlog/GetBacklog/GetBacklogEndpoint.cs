@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -32,6 +33,6 @@ public sealed class GetBacklogEndpoint
             .WithSummary("Get backlog")
             .WithDescription("Returns all unscheduled work items for a project.")
             .Produces<GetBacklogResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization();
+           .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

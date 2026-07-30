@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Security.Authorization;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -35,7 +36,8 @@ internal sealed class UpdateCommentEndpoint
             .WithName("UpdateComment")
             .WithTags("Comments")
             .Produces<Result<UpdateCommentResponse>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PolicyNames.ProjectEditor);
 
         return app;
     }

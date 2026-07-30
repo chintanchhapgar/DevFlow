@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -33,6 +34,6 @@ public sealed class GetAllWorklogsEndpoint
             .WithSummary("Get worklogs")
             .WithDescription("Returns all worklogs for a work item.")
             .Produces<IReadOnlyList<GetAllWorklogsResponse>>(StatusCodes.Status200OK)
-            .RequireAuthorization();
+            .RequireAuthorization(PolicyNames.ProjectViewer);
     }
 }

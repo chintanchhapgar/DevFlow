@@ -10,6 +10,7 @@
     <PackageReference Include="FluentValidation" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Security\DevFlow.BuildingBlocks.Security.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
     <ProjectReference Include="..\..\Identity\DevFlow.Identity.Application\DevFlow.Identity.Application.csproj" />
     <ProjectReference Include="..\DevFlow.Project.Domain\DevFlow.Project.Domain.csproj" />

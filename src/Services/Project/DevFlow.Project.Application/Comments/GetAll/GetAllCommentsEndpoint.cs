@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Security.Authorization;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,8 @@ internal sealed class GetAllCommentsEndpoint
             .WithName("GetAllComments")
             .WithTags("Comments")
             .Produces<Result<IReadOnlyList<GetAllCommentsResponse>>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PolicyNames.ProjectViewer);
 
         return app;
     }

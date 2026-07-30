@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,6 @@ public sealed class GetBoardEndpoint : IEndpoint
             .WithSummary("Get sprint board")
             .WithDescription("Returns the active sprint board grouped by status.")
             .Produces<GetBoardResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization();
+             .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
+using DevFlow.BuildingBlocks.Security.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,7 @@ public sealed class CreateProjectEndpoint : IEndpoint
             .WithName("CreateProject")
             .WithSummary("Create Project")
             .Produces<CreateProjectResponse>()
-            .RequireAuthorization()
+            .RequireAuthorization(PolicyNames.ProjectEditor)
             .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 }
