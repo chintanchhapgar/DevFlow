@@ -6,6 +6,7 @@ using DevFlow.Project.Domain.Labels.Entities;
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Sprints.Entities;
 using DevFlow.Project.Domain.WorkItems.Entities;
+using DevFlow.Project.Domain.Worklogs.Entities;
 using DevFlow.Project.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,8 +28,9 @@ public sealed class ProjectDbContext
     public DbSet<Label> Labels => Set<Label>();
     public DbSet<WorkItemLabel> WorkItemLabels => Set<WorkItemLabel>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
-
     public DbSet<EpicAggregate> Epics  => Set<EpicAggregate>();
+    public DbSet<WorklogAggregate> Worklogs => Set<WorklogAggregate>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("project");

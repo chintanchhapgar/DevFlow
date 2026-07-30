@@ -8,6 +8,7 @@ using DevFlow.Project.Domain.Epics.Repositories;
 using DevFlow.Project.Domain.Labels.Repositories;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.WorkItems.Repositories;
+using DevFlow.Project.Domain.Worklogs.Repositories;
 using DevFlow.Project.Infrastructure.Identity;
 using DevFlow.Project.Infrastructure.Persistence;
 using DevFlow.Project.Infrastructure.Persistence.Repositories;
@@ -47,6 +48,8 @@ public static class DependencyInjection
         services.AddScoped<ILabelRepository, LabelRepository>();
 
         services.AddScoped<IEpicRepository, EpicRepository>();
+
+        services.AddScoped<IWorklogRepository, WorklogRepository>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {
