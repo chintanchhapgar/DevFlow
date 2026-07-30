@@ -1,8 +1,8 @@
-using System.Reflection;
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace DevFlow.Project.Application;
 
@@ -18,7 +18,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(assembly);
 
-        services.AddEndpoints(assembly);
+        services.AddEndpoints(assembly);       
 
         return services;
     }

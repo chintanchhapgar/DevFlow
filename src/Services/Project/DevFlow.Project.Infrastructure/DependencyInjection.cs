@@ -1,12 +1,15 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Application.Common.Abstractions.Identity;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
+using DevFlow.Project.Application.Common.Abstractions.Storage;
+using DevFlow.Project.Domain.Attachments.Repositories;
 using DevFlow.Project.Domain.Comments.Repositories;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.WorkItems.Repositories;
 using DevFlow.Project.Infrastructure.Identity;
 using DevFlow.Project.Infrastructure.Persistence;
 using DevFlow.Project.Infrastructure.Persistence.Repositories;
+using DevFlow.Project.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,11 +32,15 @@ public static class DependencyInjection
 
         services.AddScoped<IWorkItemRepository, WorkItemRepository>();
 
+        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ProjectDbContext>());
 
         services.AddScoped<ISprintRepository, SprintRepository>();
 
         services.AddScoped<ICommentRepository, CommentRepository>();
+
+        services.AddScoped<IFileStorage, LocalFileStorage>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {
