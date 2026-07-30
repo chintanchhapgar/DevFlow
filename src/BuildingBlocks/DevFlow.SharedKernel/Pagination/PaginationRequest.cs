@@ -1,24 +1,32 @@
 namespace DevFlow.SharedKernel.Pagination;
 
-/// <summary>
-/// Standard pagination request.
-/// </summary>
 public sealed record PaginationRequest
 {
-    private const int DefaultPage = 1;
     private const int DefaultPageSize = 20;
     private const int MaxPageSize = 100;
 
-    public int Page { get; init; } = DefaultPage;
+    public int Page { get; init; } = 1;
 
     public int PageSize { get; init; } = DefaultPageSize;
 
-    public int GetValidPage() =>
-        Math.Max(DefaultPage, Page);
+    public string? SortBy { get; init; }
 
-    public int GetValidPageSize() =>
-        Math.Clamp(PageSize, 1, MaxPageSize);
+    public string? SortDirection { get; init; } = "asc";
 
     public int Skip =>
-        (GetValidPage() - 1) * GetValidPageSize();
+    (GetValidPage() - 1) * GetValidPageSize();
+
+    public int GetValidPage() =>
+        Math.Max(1, Page);
+
+    public int GetValidPageSize() =>
+        Math.Min(
+            Math.Max(1, PageSize),
+            MaxPageSize);
+
+    public bool IsDescending =>
+        string.Equals(
+            SortDirection,
+            "desc",
+            StringComparison.OrdinalIgnoreCase);
 }

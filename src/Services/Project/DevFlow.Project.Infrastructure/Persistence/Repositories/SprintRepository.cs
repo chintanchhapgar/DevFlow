@@ -3,6 +3,7 @@ using DevFlow.Project.Domain.Sprints.Entities;
 using DevFlow.Project.Domain.Sprints.Enums;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.Sprints.ValueObjects;
+using DevFlow.Project.Infrastructure.Persistence.Sorting;
 using DevFlow.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,13 @@ internal sealed class SprintRepository
     : ISprintRepository
 {
     private readonly ProjectDbContext _context;
-
+    private readonly SprintSorting _sorting;
     public SprintRepository(
-        ProjectDbContext context)
+    ProjectDbContext context,
+    SprintSorting sorting)
     {
         _context = context;
+        _sorting = sorting;
     }
 
     public async Task AddAsync(
@@ -85,11 +88,14 @@ internal sealed class SprintRepository
                     $"%{search}%"));
         }
 
-        return await query
-            .OrderByDescending(x => x.CreatedOnUtc)
-            .ToPagedListAsync(
-                pagination,
-                cancellationToken);
+        query = _sorting.Apply(
+            query,
+            pagination.SortBy,
+            pagination.IsDescending);
+
+        return await query.ToPagedListAsync(
+            pagination,
+            cancellationToken);
     }
 
     public async Task<SprintAggregate?> GetActiveSprintAsync(

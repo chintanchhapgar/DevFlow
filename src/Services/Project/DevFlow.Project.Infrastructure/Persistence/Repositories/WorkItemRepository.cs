@@ -4,6 +4,7 @@ using DevFlow.Project.Domain.WorkItems.Entities;
 using DevFlow.Project.Domain.WorkItems.Enums;
 using DevFlow.Project.Domain.WorkItems.Repositories;
 using DevFlow.Project.Domain.WorkItems.ValueObjects;
+using DevFlow.Project.Infrastructure.Persistence.Sorting;
 using DevFlow.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,13 @@ internal sealed class WorkItemRepository
     : IWorkItemRepository
 {
     private readonly ProjectDbContext _context;
-
+    private readonly WorkItemSorting _sorting;
     public WorkItemRepository(
-        ProjectDbContext context)
+     ProjectDbContext context,
+     WorkItemSorting sorting)
     {
         _context = context;
+        _sorting = sorting;
     }
 
     public async Task<WorkItemAggregate?> GetByIdAsync(
@@ -128,11 +131,14 @@ internal sealed class WorkItemRepository
                 x => x.AssigneeId == assigneeId.Value);
         }
 
-        return await query
-            .OrderByDescending(x => x.CreatedOnUtc)
-            .ToPagedListAsync(
-                pagination,
-                cancellationToken);
+        query = _sorting.Apply(
+            query,
+            pagination.SortBy,
+            pagination.IsDescending);
+
+        return await query.ToPagedListAsync(
+            pagination,
+            cancellationToken);
     }
 
     public async Task<IReadOnlyList<WorkItemAggregate>> GetBySprintAsync(

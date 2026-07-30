@@ -12,6 +12,7 @@ using DevFlow.Project.Domain.Worklogs.Repositories;
 using DevFlow.Project.Infrastructure.Identity;
 using DevFlow.Project.Infrastructure.Persistence;
 using DevFlow.Project.Infrastructure.Persistence.Repositories;
+using DevFlow.Project.Infrastructure.Persistence.Sorting;
 using DevFlow.Project.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +51,10 @@ public static class DependencyInjection
         services.AddScoped<IEpicRepository, EpicRepository>();
 
         services.AddScoped<IWorklogRepository, WorklogRepository>();
+
+        services.AddScoped<ProjectSorting>();
+        services.AddScoped<SprintSorting>();
+        services.AddScoped<WorkItemSorting>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {

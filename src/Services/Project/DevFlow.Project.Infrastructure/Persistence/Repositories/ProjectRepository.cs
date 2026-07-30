@@ -1,7 +1,9 @@
 using DevFlow.BuildingBlocks.Infrastructure.Persistence.Pagination;
+using DevFlow.BuildingBlocks.Infrastructure.Persistence.Sorting;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Projects.ValueObjects;
+using DevFlow.Project.Infrastructure.Persistence.Sorting;
 using DevFlow.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +13,13 @@ internal sealed class ProjectRepository
     : IProjectRepository
 {
     private readonly ProjectDbContext _context;
-
+    private readonly ProjectSorting _sorting;
     public ProjectRepository(
-        ProjectDbContext context)
+    ProjectDbContext context,
+    ProjectSorting sorting)
     {
         _context = context;
+        _sorting = sorting;
     }
 
     public async Task<ProjectAggregate?> GetByIdAsync(
@@ -84,11 +88,14 @@ internal sealed class ProjectRepository
                 EF.Functions.ILike(x.Key, $"%{search}%"));
         }
 
-        return await query
-            .OrderBy(x => x.Name)
-            .ToPagedListAsync(
-                pagination,
-                cancellationToken);
+        query = _sorting.Apply(
+            query,
+            pagination.SortBy,
+            pagination.IsDescending);
+
+        return await query.ToPagedListAsync(
+            pagination,
+            cancellationToken);
     }
 
     public async Task<ProjectAggregate?> GetByInvitationTokenAsync(
