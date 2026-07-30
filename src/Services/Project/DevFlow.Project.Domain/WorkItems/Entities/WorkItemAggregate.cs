@@ -198,7 +198,14 @@ public sealed class WorkItemAggregate
 
         UpdatedOnUtc = DateTime.UtcNow;
     }
+    public void RemoveEpic()
+    {
+        if (EpicId is null)
+            return;
 
+        EpicId = null;
+        UpdatedOnUtc = DateTime.UtcNow;
+    }
     public void LinkEpic(Guid epicId)
     {
         EpicId = epicId;

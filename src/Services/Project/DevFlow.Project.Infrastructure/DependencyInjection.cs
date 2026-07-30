@@ -4,6 +4,7 @@ using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Application.Common.Abstractions.Storage;
 using DevFlow.Project.Domain.Attachments.Repositories;
 using DevFlow.Project.Domain.Comments.Repositories;
+using DevFlow.Project.Domain.Epics.Repositories;
 using DevFlow.Project.Domain.Labels.Repositories;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.WorkItems.Repositories;
@@ -44,6 +45,8 @@ public static class DependencyInjection
         services.AddScoped<IFileStorage, LocalFileStorage>();
 
         services.AddScoped<ILabelRepository, LabelRepository>();
+
+        services.AddScoped<IEpicRepository, EpicRepository>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {

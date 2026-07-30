@@ -1,6 +1,7 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.Attachments.Entities;
 using DevFlow.Project.Domain.Comments.Entities;
+using DevFlow.Project.Domain.Epics.Entities;
 using DevFlow.Project.Domain.Labels.Entities;
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Sprints.Entities;
@@ -26,6 +27,8 @@ public sealed class ProjectDbContext
     public DbSet<Label> Labels => Set<Label>();
     public DbSet<WorkItemLabel> WorkItemLabels => Set<WorkItemLabel>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
+
+    public DbSet<EpicAggregate> Epics  => Set<EpicAggregate>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("project");
