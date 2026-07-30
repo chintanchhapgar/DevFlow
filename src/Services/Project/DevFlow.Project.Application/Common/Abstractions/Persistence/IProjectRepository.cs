@@ -1,5 +1,6 @@
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Projects.ValueObjects;
+using DevFlow.SharedKernel.Pagination;
 
 namespace DevFlow.Project.Application.Common.Abstractions.Persistence;
 
@@ -25,9 +26,8 @@ public interface IProjectRepository
         ProjectAggregate project,
         CancellationToken cancellationToken);
 
-    Task<(IReadOnlyList<ProjectAggregate> Projects, int TotalCount)> GetPagedAsync(
-        int page,
-        int pageSize,
+    Task<PagedList<ProjectAggregate>> GetPagedAsync(
+        PaginationRequest pagination,
         string? search,
         CancellationToken cancellationToken = default);
 

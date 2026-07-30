@@ -1,8 +1,10 @@
+using DevFlow.BuildingBlocks.Infrastructure.Persistence.Pagination;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.WorkItems.Entities;
 using DevFlow.Project.Domain.WorkItems.Enums;
 using DevFlow.Project.Domain.WorkItems.Repositories;
 using DevFlow.Project.Domain.WorkItems.ValueObjects;
+using DevFlow.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Project.Infrastructure.Persistence.Repositories;
@@ -74,16 +76,15 @@ internal sealed class WorkItemRepository
         return Task.CompletedTask;
     }
 
-    public async Task<(IReadOnlyList<WorkItemAggregate> Items, int TotalCount)> GetPagedAsync(
-        Guid projectId,
-        int page,
-        int pageSize,
-        string? search,
-        WorkItemStatus? status,
-        WorkItemType? type,
-        WorkItemPriority? priority,
-        Guid? assigneeId,
-        CancellationToken cancellationToken = default)
+    public async Task<PagedList<WorkItemAggregate>> GetPagedAsync(
+    Guid projectId,
+    PaginationRequest pagination,
+    string? search,
+    WorkItemStatus? status,
+    WorkItemType? type,
+    WorkItemPriority? priority,
+    Guid? assigneeId,
+    CancellationToken cancellationToken = default)
     {
         IQueryable<WorkItemAggregate> query =
             _context.WorkItems
@@ -94,39 +95,44 @@ internal sealed class WorkItemRepository
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(x =>
-                EF.Functions.ILike(x.Title, $"%{search}%") ||
-                EF.Functions.ILike(x.Key, $"%{search}%"));
+                EF.Functions.ILike(
+                    x.Title,
+                    $"%{search}%") ||
+
+                EF.Functions.ILike(
+                    x.Key,
+                    $"%{search}%"));
         }
 
         if (status.HasValue)
         {
-            query = query.Where(x => x.Status == status);
+            query = query.Where(
+                x => x.Status == status.Value);
         }
 
         if (type.HasValue)
         {
-            query = query.Where(x => x.Type == type);
+            query = query.Where(
+                x => x.Type == type.Value);
         }
 
         if (priority.HasValue)
         {
-            query = query.Where(x => x.Priority == priority);
+            query = query.Where(
+                x => x.Priority == priority.Value);
         }
 
         if (assigneeId.HasValue)
         {
-            query = query.Where(x => x.AssigneeId == assigneeId);
+            query = query.Where(
+                x => x.AssigneeId == assigneeId.Value);
         }
 
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
+        return await query
             .OrderByDescending(x => x.CreatedOnUtc)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (items, totalCount);
+            .ToPagedListAsync(
+                pagination,
+                cancellationToken);
     }
 
     public async Task<IReadOnlyList<WorkItemAggregate>> GetBySprintAsync(

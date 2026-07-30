@@ -2,13 +2,7 @@ using DevFlow.Project.Domain.WorkItems.Enums;
 
 namespace DevFlow.Project.Application.WorkItems.GetAll;
 
-public sealed record GetAllWorkItemsResponse(
-    IReadOnlyList<GetAllWorkItemItem> Items,
-    int TotalCount,
-    int Page,
-    int PageSize);
-
-public sealed record GetAllWorkItemItem(
+public sealed record WorkItemListItemResponse(
     Guid Id,
     string Key,
     string Title,

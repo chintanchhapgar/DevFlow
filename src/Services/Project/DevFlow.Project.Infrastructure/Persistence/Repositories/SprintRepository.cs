@@ -1,7 +1,9 @@
+using DevFlow.BuildingBlocks.Infrastructure.Persistence.Pagination;
 using DevFlow.Project.Domain.Sprints.Entities;
 using DevFlow.Project.Domain.Sprints.Enums;
 using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.Sprints.ValueObjects;
+using DevFlow.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Project.Infrastructure.Persistence.Repositories;
@@ -63,12 +65,11 @@ internal sealed class SprintRepository
         return Task.CompletedTask;
     }
 
-    public async Task<(IReadOnlyList<SprintAggregate> Items, int TotalCount)> GetPagedAsync(
-        Guid projectId,
-        int page,
-        int pageSize,
-        string? search,
-        CancellationToken cancellationToken = default)
+    public async Task<PagedList<SprintAggregate>> GetPagedAsync(
+     Guid projectId,
+     PaginationRequest pagination,
+     string? search,
+     CancellationToken cancellationToken = default)
     {
         IQueryable<SprintAggregate> query =
             _context.Sprints
@@ -84,16 +85,11 @@ internal sealed class SprintRepository
                     $"%{search}%"));
         }
 
-        var total = await query.CountAsync(
-            cancellationToken);
-
-        var items = await query
+        return await query
             .OrderByDescending(x => x.CreatedOnUtc)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (items, total);
+            .ToPagedListAsync(
+                pagination,
+                cancellationToken);
     }
 
     public async Task<SprintAggregate?> GetActiveSprintAsync(

@@ -2,6 +2,7 @@ using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.BuildingBlocks.Security.Authorization;
 using DevFlow.Project.Domain.WorkItems.Enums;
+using DevFlow.SharedKernel.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -17,8 +18,7 @@ public sealed class GetAllWorkItemsEndpoint : IEndpoint
             "/api/projects/{projectId:guid}/work-items",
             async (
                 Guid projectId,
-                int page,
-                int pageSize,
+                [AsParameters] PaginationRequest pagination,
                 string? search,
                 WorkItemStatus? status,
                 WorkItemType? type,
@@ -31,8 +31,7 @@ public sealed class GetAllWorkItemsEndpoint : IEndpoint
                 var result = await sender.Send(
                     new GetAllWorkItemsQuery(
                         projectId,
-                        page <= 0 ? 1 : page,
-                        pageSize <= 0 ? 20 : pageSize,
+                        pagination,
                         search,
                         status,
                         type,
@@ -45,7 +44,7 @@ public sealed class GetAllWorkItemsEndpoint : IEndpoint
             .WithTags("Work Items")
             .WithName("GetAllWorkItems")
             .WithSummary("Get all work items")
-            .Produces<GetAllWorkItemsResponse>()
+            .Produces<PagedList<WorkItemListItemResponse>>(StatusCodes.Status200OK)
             .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

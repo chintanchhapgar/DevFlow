@@ -1,6 +1,7 @@
 
 using DevFlow.Project.Domain.Sprints.Entities;
 using DevFlow.Project.Domain.Sprints.ValueObjects;
+using DevFlow.SharedKernel.Pagination;
 
 namespace DevFlow.Project.Domain.Sprints.Repositories;
 
@@ -26,10 +27,9 @@ public interface ISprintRepository
         SprintAggregate sprint,
         CancellationToken cancellationToken);
 
-    Task<(IReadOnlyList<SprintAggregate> Items, int TotalCount)> GetPagedAsync(
+    Task<PagedList<SprintAggregate>> GetPagedAsync(
         Guid projectId,
-        int page,
-        int pageSize,
+        PaginationRequest pagination,
         string? search,
         CancellationToken cancellationToken = default);
 

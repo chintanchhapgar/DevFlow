@@ -1,13 +1,9 @@
 namespace DevFlow.SharedKernel.Pagination;
 
-/// <summary>
-/// Represents a paginated list of items.
-/// </summary>
-/// <typeparam name="T">The item type.</typeparam>
 public sealed class PagedList<T>
 {
-    private PagedList(
-        List<T> items,
+    public PagedList(
+        IReadOnlyList<T> items,
         int page,
         int pageSize,
         int totalCount)
@@ -18,25 +14,30 @@ public sealed class PagedList<T>
         TotalCount = totalCount;
     }
 
-    public List<T> Items { get; }
+    public IReadOnlyList<T> Items { get; }
+
     public int Page { get; }
+
     public int PageSize { get; }
+
     public int TotalCount { get; }
-    public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
-    public bool HasNextPage => Page < TotalPages;
-    public bool HasPreviousPage => Page > 1;
 
-    public  PagedList<T> Create(List<T> items, int page, int pageSize, int totalCount)
-    {
-        return new PagedList<T>(items, page, pageSize, totalCount);
-    }
+    public int TotalPages =>
+        (int)Math.Ceiling(TotalCount / (double)PageSize);
 
-    /// <summary>
-    /// Projects each item using a mapping function.
-    /// </summary>
-    public PagedList<TResult> Map<TResult>(Func<T, TResult> mapper)
+    public bool HasNextPage =>
+        Page < TotalPages;
+
+    public bool HasPreviousPage =>
+        Page > 1;
+
+    public PagedList<TResult> Map<TResult>(
+        Func<T, TResult> mapper)
     {
-        var mappedItems = Items.Select(mapper).ToList();
-        return new PagedList<TResult>(mappedItems, Page, PageSize, TotalCount);
+        return new PagedList<TResult>(
+            Items.Select(mapper).ToList(),
+            Page,
+            PageSize,
+            TotalCount);
     }
 }

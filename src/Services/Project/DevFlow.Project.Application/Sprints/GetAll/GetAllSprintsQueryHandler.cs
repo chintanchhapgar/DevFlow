@@ -1,4 +1,5 @@
 using DevFlow.Project.Domain.Sprints.Repositories;
+using DevFlow.SharedKernel.Pagination;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -7,7 +8,7 @@ namespace DevFlow.Project.Application.Sprints.GetAll;
 internal sealed class GetAllSprintsQueryHandler
     : IRequestHandler<
         GetAllSprintsQuery,
-        Result<GetAllSprintsResponse>>
+        Result<PagedList<SprintListItemResponse>>>
 {
     private readonly ISprintRepository _repository;
 
@@ -17,32 +18,29 @@ internal sealed class GetAllSprintsQueryHandler
         _repository = repository;
     }
 
-    public async Task<Result<GetAllSprintsResponse>> Handle(
+    public async Task<Result<PagedList<SprintListItemResponse>>> Handle(
         GetAllSprintsQuery request,
         CancellationToken cancellationToken)
     {
-        var (items, totalCount) =
+        var pagedSprints =
             await _repository.GetPagedAsync(
                 request.ProjectId,
-                request.Page,
-                request.PageSize,
+                request.Pagination,
                 request.Search,
                 cancellationToken);
 
-        var response = new GetAllSprintsResponse(
-            items.Select(x =>
-                new SprintItemResponse(
+        var response =
+            pagedSprints.Map(x =>
+                new SprintListItemResponse(
                     x.Id.Value,
                     x.Name,
                     x.Goal,
                     x.Status,
                     x.StartDate,
-                    x.EndDate))
-            .ToList(),
-            totalCount,
-            request.Page,
-            request.PageSize);
+                    x.EndDate));
 
-        return Result.Success(response);
+        return Result.Success(
+            response,
+            "Sprints retrieved successfully.");
     }
 }

@@ -1,3 +1,4 @@
+using DevFlow.SharedKernel.Pagination;
 using FluentValidation;
 
 namespace DevFlow.Project.Application.Projects.GetAll;
@@ -7,10 +8,7 @@ internal sealed class GetProjectsQueryValidator
 {
     public GetProjectsQueryValidator()
     {
-        RuleFor(x => x.Page)
-            .GreaterThan(0);
-
-        RuleFor(x => x.PageSize)
-            .InclusiveBetween(1, 100);
+        RuleFor(x => x.Pagination)
+            .SetValidator(new PaginationRequestValidator());
     }
 }

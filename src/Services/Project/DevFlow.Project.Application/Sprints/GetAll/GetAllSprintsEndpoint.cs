@@ -1,6 +1,7 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
 using DevFlow.BuildingBlocks.Security.Authorization;
+using DevFlow.SharedKernel.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -18,8 +19,7 @@ public sealed class GetAllSprintsEndpoint
             "/api/projects/{projectId:guid}/sprints",
             async (
                 Guid projectId,
-                int page,
-                int pageSize,
+                [AsParameters] PaginationRequest pagination,
                 string? search,
                 ISender sender,
                 HttpContext httpContext,
@@ -27,8 +27,7 @@ public sealed class GetAllSprintsEndpoint
             {
                 var query = new GetAllSprintsQuery(
                     projectId,
-                    page <= 0 ? 1 : page,
-                    pageSize <= 0 ? 20 : pageSize,
+                    pagination,
                     search);
 
                 var result = await sender.Send(
@@ -41,7 +40,7 @@ public sealed class GetAllSprintsEndpoint
             .WithName("GetAllSprints")
             .WithSummary("Get all sprints")
             .WithDescription("Returns paginated sprints for a project.")
-            .Produces<GetAllSprintsResponse>(StatusCodes.Status200OK)
+            .Produces<SprintListItemResponse>(StatusCodes.Status200OK)
             .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }

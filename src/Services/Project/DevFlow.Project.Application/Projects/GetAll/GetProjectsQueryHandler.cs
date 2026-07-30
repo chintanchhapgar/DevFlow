@@ -1,11 +1,14 @@
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
+using DevFlow.SharedKernel.Pagination;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
 namespace DevFlow.Project.Application.Projects.GetAll;
 
 internal sealed class GetProjectsQueryHandler
-    : IRequestHandler<GetProjectsQuery, Result<GetProjectsResponse>>
+    : IRequestHandler<
+        GetProjectsQuery,
+        Result<PagedList<ProjectListItemResponse>>>
 {
     private readonly IProjectRepository _projectRepository;
 
@@ -15,19 +18,18 @@ internal sealed class GetProjectsQueryHandler
         _projectRepository = projectRepository;
     }
 
-    public async Task<Result<GetProjectsResponse>> Handle(
+    public async Task<Result<PagedList<ProjectListItemResponse>>> Handle(
         GetProjectsQuery request,
         CancellationToken cancellationToken)
     {
-        var (projects, totalCount) =
+        var pagedProjects =
             await _projectRepository.GetPagedAsync(
-                request.Page,
-                request.PageSize,
+                request.Pagination,
                 request.Search,
                 cancellationToken);
 
-        var items = projects
-            .Select(project =>
+        var response =
+            pagedProjects.Map(project =>
                 new ProjectListItemResponse(
                     project.Id.Value,
                     project.Key,
@@ -35,14 +37,7 @@ internal sealed class GetProjectsQueryHandler
                     project.Status.ToString(),
                     project.Visibility.ToString(),
                     project.OwnerId,
-                    project.Members.Count))
-            .ToList();
-
-        var response = new GetProjectsResponse(
-            items,
-            request.Page,
-            request.PageSize,
-            totalCount);
+                    project.Members.Count));
 
         return Result.Success(
             response,

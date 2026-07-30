@@ -1,6 +1,8 @@
+using DevFlow.BuildingBlocks.Infrastructure.Persistence.Pagination;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Projects.ValueObjects;
+using DevFlow.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Project.Infrastructure.Persistence.Repositories;
@@ -65,32 +67,28 @@ internal sealed class ProjectRepository
         return Task.CompletedTask;
     }
 
-    public async Task<(IReadOnlyList<ProjectAggregate> Projects, int TotalCount)> GetPagedAsync(
-        int page,
-        int pageSize,
-        string? search,
-        CancellationToken cancellationToken = default)
+    public async Task<PagedList<ProjectAggregate>> GetPagedAsync(
+    PaginationRequest pagination,
+    string? search,
+    CancellationToken cancellationToken = default)
     {
         IQueryable<ProjectAggregate> query =
             _context.Projects
-                .Include(x => x.Members);
+                .Include(x => x.Members)
+                .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(x =>
-            EF.Functions.ILike(x.Name, $"%{search}%") ||
-            EF.Functions.ILike(x.Key, $"%{search}%"));
+                EF.Functions.ILike(x.Name, $"%{search}%") ||
+                EF.Functions.ILike(x.Key, $"%{search}%"));
         }
 
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var projects = await query
+        return await query
             .OrderBy(x => x.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (projects, totalCount);
+            .ToPagedListAsync(
+                pagination,
+                cancellationToken);
     }
 
     public async Task<ProjectAggregate?> GetByInvitationTokenAsync(

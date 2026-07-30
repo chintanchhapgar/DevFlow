@@ -1,6 +1,7 @@
 using DevFlow.Project.Domain.WorkItems.Entities;
 using DevFlow.Project.Domain.WorkItems.Enums;
 using DevFlow.Project.Domain.WorkItems.ValueObjects;
+using DevFlow.SharedKernel.Pagination;
 
 namespace DevFlow.Project.Domain.WorkItems.Repositories;
 
@@ -30,10 +31,9 @@ public interface IWorkItemRepository
         WorkItemAggregate workItem,
         CancellationToken cancellationToken);
 
-    Task<(IReadOnlyList<WorkItemAggregate> Items, int TotalCount)> GetPagedAsync(
+    Task<PagedList<WorkItemAggregate>> GetPagedAsync(
         Guid projectId,
-        int page,
-        int pageSize,
+        PaginationRequest pagination,
         string? search,
         WorkItemStatus? status,
         WorkItemType? type,

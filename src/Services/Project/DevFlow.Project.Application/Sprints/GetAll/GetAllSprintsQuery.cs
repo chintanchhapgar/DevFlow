@@ -1,3 +1,4 @@
+using DevFlow.SharedKernel.Pagination;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -5,7 +6,6 @@ namespace DevFlow.Project.Application.Sprints.GetAll;
 
 public sealed record GetAllSprintsQuery(
     Guid ProjectId,
-    int Page = 1,
-    int PageSize = 20,
+    PaginationRequest Pagination,
     string? Search = null)
-    : IRequest<Result<GetAllSprintsResponse>>;
+    : IRequest<Result<PagedList<SprintListItemResponse>>>;
