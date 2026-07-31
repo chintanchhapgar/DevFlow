@@ -12,6 +12,7 @@ using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
 using DevFlow.Identity.Infrastructure.Requests;
 using DevFlow.Identity.Infrastructure.Security;
+using DevFlow.Identity.Infrastructure.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +63,8 @@ public static class DependencyInjection
         services.AddScoped<ISecurityEventRepository, SecurityEventRepository>();
 
         services.AddScoped<ISecurityEventLogger,  SecurityEventLogger>();
+
+        services.AddScoped<IdentitySeeder>();
 
         return services;
     }

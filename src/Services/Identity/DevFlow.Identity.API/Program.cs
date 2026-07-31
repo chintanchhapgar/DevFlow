@@ -5,6 +5,7 @@ using DevFlow.Identity.Application;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Infrastructure;
 using DevFlow.Identity.Infrastructure.Requests;
+using DevFlow.Identity.Infrastructure.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,5 +34,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapEndpoints();
+
+await app.SeedDemoDataAsync();
 
 app.Run();
