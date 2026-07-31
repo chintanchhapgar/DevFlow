@@ -6,10 +6,6 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Seed\" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

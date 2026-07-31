@@ -6,15 +6,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Project.Application.Boards.GetBoard;
+namespace DevFlow.Project.Application.Dashboard.GetDashboard;
 
-public sealed class GetBoardEndpoint : IEndpoint
+public sealed class GetDashboardEndpoint : IEndpoint
 {
     public void MapEndpoint(
         IEndpointRouteBuilder app)
     {
         app.MapGet(
-            "/api/projects/{projectId:guid}/board",
+            "/api/projects/{projectId:guid}/dashboard",
             async (
                 Guid projectId,
                 ISender sender,
@@ -22,16 +22,16 @@ public sealed class GetBoardEndpoint : IEndpoint
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
-                    new GetBoardQuery(projectId),
+                    new GetDashboardQuery(projectId),
                     cancellationToken);
 
                 return result.ToApiResult(context);
             })
-            .WithTags("Boards")
-            .WithName("GetActiveBoard")
-            .WithSummary("Get active board")
-            .WithDescription("Returns the active sprint board grouped by status.")
-            .Produces<GetBoardResponse>(StatusCodes.Status200OK)
-             .RequireAuthorization(PolicyNames.ProjectEditor);
+            .WithTags("Dashboard")
+            .WithName("GetDashboard")
+            .WithSummary("Get project dashboard")
+            .WithDescription("Returns project dashboard information.")
+            .Produces<GetDashboardResponse>(StatusCodes.Status200OK)
+            .RequireAuthorization(PolicyNames.ProjectViewer);
     }
 }

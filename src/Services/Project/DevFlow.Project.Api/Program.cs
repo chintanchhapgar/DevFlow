@@ -2,6 +2,7 @@ using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Security.Extensions;
 using DevFlow.Project.Application;
 using DevFlow.Project.Infrastructure;
+using DevFlow.Project.Infrastructure.Seed;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -6,32 +6,32 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DevFlow.Project.Application.Boards.GetBoard;
+namespace DevFlow.Project.Application.Boards.GetSprintBoard;
 
-public sealed class GetBoardEndpoint : IEndpoint
+public sealed class GetSprintBoardEndpoint : IEndpoint
 {
     public void MapEndpoint(
         IEndpointRouteBuilder app)
     {
         app.MapGet(
-            "/api/projects/{projectId:guid}/board",
+            "/api/sprints/{sprintId:guid}/board",
             async (
-                Guid projectId,
+                Guid sprintId,
                 ISender sender,
                 HttpContext context,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
-                    new GetBoardQuery(projectId),
+                    new GetSprintBoardQuery(sprintId),
                     cancellationToken);
 
                 return result.ToApiResult(context);
             })
             .WithTags("Boards")
-            .WithName("GetActiveBoard")
-            .WithSummary("Get active board")
-            .WithDescription("Returns the active sprint board grouped by status.")
-            .Produces<GetBoardResponse>(StatusCodes.Status200OK)
-             .RequireAuthorization(PolicyNames.ProjectEditor);
+            .WithName("GetSprintBoard")
+            .WithSummary("Get sprint board")
+            .WithDescription("Returns the specified sprint board grouped by status.")
+            .Produces<GetSprintBoardResponse>(StatusCodes.Status200OK)
+            .RequireAuthorization(PolicyNames.ProjectEditor);
     }
 }
