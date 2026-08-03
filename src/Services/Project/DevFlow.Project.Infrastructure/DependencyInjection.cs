@@ -58,6 +58,14 @@ public static class DependencyInjection
         services.AddScoped<WorkItemSorting>();
         services.AddScoped<ProjectSeeder>();
 
+        services.AddScoped<IProjectReportRepository, ProjectReportRepository>();
+
+        services.AddScoped<IBurndownRepository, BurndownRepository>();
+
+        services.AddScoped<IVelocityRepository, VelocityRepository>();
+
+        services.AddScoped<IWorkloadRepository, WorkloadRepository>();
+
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {
             client.BaseAddress = new Uri(
