@@ -1,13 +1,15 @@
 namespace DevFlow.BuildingBlocks.Infrastructure.Outbox;
 
 /// <summary>
-/// Contract for outbox message persistence operations.
+/// Repository for transactional outbox messages.
 /// </summary>
 public interface IOutboxRepository
 {
-    Task AddAsync(OutboxMessage message, CancellationToken cancellationToken = default);
+    Task AddAsync(
+        OutboxMessage message,
+        CancellationToken cancellationToken = default);
 
-    Task<List<OutboxMessage>> GetPendingMessagesAsync(
-        int batchSize = 20,
+    Task<IReadOnlyList<OutboxMessage>> GetPendingMessagesAsync(
+        int batchSize,
         CancellationToken cancellationToken = default);
 }

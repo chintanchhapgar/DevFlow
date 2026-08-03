@@ -1,4 +1,4 @@
-using DevFlow.SharedKernel.Domain;
+using DevFlow.SharedKernel.Domain.DomainEvents;
 
 namespace DevFlow.SharedKernel.Abstractions;
 

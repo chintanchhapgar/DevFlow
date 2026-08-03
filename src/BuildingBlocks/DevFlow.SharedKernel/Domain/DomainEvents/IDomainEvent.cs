@@ -1,4 +1,4 @@
-namespace DevFlow.SharedKernel.Domain;
+namespace DevFlow.SharedKernel.Domain.DomainEvents;
 
 /// <summary>
 /// Marker interface for domain events.

@@ -109,7 +109,11 @@ public sealed partial class User : AggregateRoot<UserId>
             lastName.Trim());
 
         user.RaiseDomainEvent(
-            new UserRegisteredDomainEvent(user.Id));
+            new UserRegisteredDomainEvent(
+                user.Id,
+                user.Email,
+                user.FirstName,
+                user.LastName));
 
         return user;
     }

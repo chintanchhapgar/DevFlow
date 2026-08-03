@@ -1,5 +1,7 @@
-using DevFlow.SharedKernel.Domain;
+using DevFlow.BuildingBlocks.Infrastructure.DomainEvents;
 using DevFlow.SharedKernel.Abstractions;
+using DevFlow.SharedKernel.Domain;
+using DevFlow.SharedKernel.Domain.DomainEvents;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -12,13 +14,15 @@ namespace DevFlow.BuildingBlocks.Infrastructure.Persistence.Interceptors;
 /// </summary>
 public sealed class DomainEventDispatchInterceptor : SaveChangesInterceptor
 {
-    private readonly IPublisher _publisher;
+    private readonly IDomainEventDispatcher _dispatcher;
 
-    public DomainEventDispatchInterceptor(IPublisher publisher)
+    public DomainEventDispatchInterceptor(
+     IDomainEventDispatcher dispatcher)
     {
-        _publisher = publisher;
+        _dispatcher = dispatcher;
     }
 
+    
     public override async ValueTask<int> SavedChangesAsync(
         SaveChangesCompletedEventData eventData,
         int result,
@@ -36,31 +40,21 @@ public sealed class DomainEventDispatchInterceptor : SaveChangesInterceptor
         DbContext context,
         CancellationToken cancellationToken)
     {
-        var aggregateRoots = context.ChangeTracker
-            .Entries<IAggregateRootMarker>()
-            .Select(e => e.Entity)
-            .Where(ar => ar.DomainEvents.Count != 0)
-            .ToList();
+        var entities = context.ChangeTracker
+        .Entries<IHasDomainEvents>()
+        .Select(entry => entry.Entity)
+        .Where(entity => entity.DomainEvents.Count > 0)
+        .ToList();
 
-        var domainEvents = aggregateRoots
-            .SelectMany(ar => ar.DomainEvents)
-            .ToList();
+            var domainEvents = entities
+                .SelectMany(entity => entity.DomainEvents)
+                .OrderBy(e => (e as DomainEvent)?.OccurredOnUtc ?? DateTime.MinValue)
+                .ToList();
 
-        // Clear events before dispatching to prevent re-dispatch
-        aggregateRoots.ForEach(ar => ar.ClearDomainEvents());
+            entities.ForEach(entity => entity.ClearDomainEvents());
 
-        foreach (var domainEvent in domainEvents)
-        {
-            await _publisher.Publish(domainEvent, cancellationToken);
-        }
+        await _dispatcher.DispatchAsync(
+            domainEvents,
+            cancellationToken);
     }
-}
-
-/// <summary>
-/// Internal marker interface for EF Core change tracker access.
-/// </summary>
-internal interface IAggregateRootMarker
-{
-    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
-    void ClearDomainEvents();
 }

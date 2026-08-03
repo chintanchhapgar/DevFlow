@@ -12,7 +12,6 @@ internal static partial class OutboxLogMessages
         this ILogger logger,
         double intervalSeconds);
 
-
     [LoggerMessage(
         EventId = 6001,
         Level = LogLevel.Information,
@@ -20,7 +19,6 @@ internal static partial class OutboxLogMessages
     public static partial void LogProcessingMessages(
         this ILogger logger,
         int count);
-
 
     [LoggerMessage(
         EventId = 6002,
@@ -31,7 +29,6 @@ internal static partial class OutboxLogMessages
         string type,
         Guid id);
 
-
     [LoggerMessage(
         EventId = 6003,
         Level = LogLevel.Debug,
@@ -41,7 +38,6 @@ internal static partial class OutboxLogMessages
         Guid id,
         string type);
 
-
     [LoggerMessage(
         EventId = 6004,
         Level = LogLevel.Error,
@@ -50,4 +46,12 @@ internal static partial class OutboxLogMessages
         this ILogger logger,
         Exception exception,
         Guid id);
+
+    [LoggerMessage(
+        EventId = 6005,
+        Level = LogLevel.Error,
+        Message = "An unhandled exception occurred while processing the outbox.")]
+    public static partial void LogUnhandledProcessingError(
+        this ILogger logger,
+        Exception exception);
 }

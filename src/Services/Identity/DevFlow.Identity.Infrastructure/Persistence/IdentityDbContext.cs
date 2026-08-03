@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Infrastructure.Outbox;
 using DevFlow.Identity.Domain.Authentication.EmailVerificationTokens;
 using DevFlow.Identity.Domain.Authentication.PasswordResetTokens;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
@@ -23,9 +24,14 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens  => Set<PasswordResetToken>();
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
     public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("identity");
+
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(IdentityDbContext).Assembly);
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(IdentityDbContext).Assembly);

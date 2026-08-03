@@ -1,5 +1,5 @@
+using DevFlow.SharedKernel.Domain.DomainEvents;
 using DevFlow.Project.Domain.Labels.ValueObjects;
-using DevFlow.SharedKernel.Domain;
 
 namespace DevFlow.Project.Domain.Labels.Events;
 

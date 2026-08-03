@@ -1,4 +1,5 @@
 using DevFlow.SharedKernel.Abstractions;
+using DevFlow.SharedKernel.Domain.DomainEvents;
 
 namespace DevFlow.SharedKernel.Domain;
 
@@ -8,7 +9,8 @@ namespace DevFlow.SharedKernel.Domain;
 /// Equality is based on identity.
 /// </summary>
 /// <typeparam name="TId">Strongly typed identifier.</typeparam>
-public abstract class Entity<TId> : IEquatable<Entity<TId>>
+public abstract class Entity<TId>
+    : IEquatable<Entity<TId>>, IHasDomainEvents
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];

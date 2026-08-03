@@ -1,4 +1,5 @@
 
+using DevFlow.SharedKernel.Domain.DomainEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 
 

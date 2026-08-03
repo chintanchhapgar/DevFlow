@@ -1,7 +1,9 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
+using DevFlow.BuildingBlocks.Messaging;
 using DevFlow.BuildingBlocks.Security.Extensions;
 using DevFlow.Project.Application;
 using DevFlow.Project.Infrastructure;
+using DevFlow.Project.Infrastructure.Persistence;
 using DevFlow.Project.Infrastructure.Seed;
 using Serilog;
 
@@ -23,6 +25,13 @@ builder.Host.UseSerilog((context, services, configuration) =>
 builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddMessaging<ProjectDbContext>(
+    builder.Configuration,
+    consumerAssemblies:
+    [
+        typeof(Program).Assembly
+    ]);
 
 // Shared Security
 builder.Services.AddSecurity(builder.Configuration);

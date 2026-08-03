@@ -1,35 +1,46 @@
 using DevFlow.BuildingBlocks.Infrastructure.Outbox;
 using DevFlow.BuildingBlocks.Messaging.Logging;
+using DevFlow.BuildingBlocks.Messaging.Serialization;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace DevFlow.BuildingBlocks.Messaging.Outbox;
 
 /// <summary>
-/// Background service that processes pending outbox messages.
-/// Publishes integration events stored in the outbox.
+/// Background service that continuously processes pending
+/// integration events stored in the transactional outbox.
 /// </summary>
 public abstract class OutboxProcessor<TContext> : BackgroundService
     where TContext : class
 {
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger _logger;
-    private readonly TimeSpan _interval;
+    private const int BatchSize = 20;
 
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<OutboxProcessor<TContext>> _logger;
+    private readonly Serialization.IMessageSerializer _serializer;
+    private readonly IEventTypeResolver _eventTypeResolver;
+    private readonly TimeSpan _interval;
 
     protected OutboxProcessor(
         IServiceScopeFactory scopeFactory,
-        ILogger logger,
+        ILogger<OutboxProcessor<TContext>> logger,
+        Serialization.IMessageSerializer serializer,
+        IEventTypeResolver eventTypeResolver,
         TimeSpan? interval = null)
     {
+        ArgumentNullException.ThrowIfNull(scopeFactory);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(serializer);
+        ArgumentNullException.ThrowIfNull(eventTypeResolver);
+
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _serializer = serializer;
+        _eventTypeResolver = eventTypeResolver;
         _interval = interval ?? TimeSpan.FromSeconds(10);
     }
-
 
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
@@ -39,75 +50,84 @@ public abstract class OutboxProcessor<TContext> : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await ProcessPendingMessagesAsync(stoppingToken);
+            try
+            {
+                await ProcessPendingMessagesAsync(
+                    stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogUnhandledProcessingError(
+                    exception);
+            }
 
-            await Task.Delay(
-                _interval,
-                stoppingToken);
+            try
+            {
+                await Task.Delay(
+                    _interval,
+                    stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
     }
-
 
     private async Task ProcessPendingMessagesAsync(
         CancellationToken cancellationToken)
     {
-        using var scope = _scopeFactory.CreateScope();
+        using IServiceScope scope =
+            _scopeFactory.CreateScope();
 
-        var outboxRepository = scope.ServiceProvider
-            .GetRequiredService<IOutboxRepository>();
+        var outboxRepository =
+            scope.ServiceProvider
+                .GetRequiredService<IOutboxRepository>();
 
-        var publishEndpoint = scope.ServiceProvider
-            .GetRequiredService<IPublishEndpoint>();
+        var publishEndpoint =
+            scope.ServiceProvider
+                .GetRequiredService<IPublishEndpoint>();
 
-
-        var messages = await outboxRepository
-            .GetPendingMessagesAsync(
-                20,
+        var messages =
+            await outboxRepository.GetPendingMessagesAsync(
+                BatchSize,
                 cancellationToken);
 
-
         if (messages.Count == 0)
+        {
             return;
-
+        }
 
         _logger.LogProcessingMessages(
             messages.Count);
-
 
         foreach (var message in messages)
         {
             try
             {
-                var messageType = Type.GetType(message.Type);
+                var messageType =
+                    _eventTypeResolver.Resolve(
+                        message.Type);
 
-                if (messageType is null)
-                {
-                    _logger.LogMessageTypeNotResolved(
-                        message.Type,
-                        message.Id);
-
-                    continue;
-                }
-
-
-                var payload = JsonSerializer.Deserialize(
-                    message.Content,
-                    messageType);
-
-
-                if (payload is null)
-                    continue;
-
+                var payload =
+                    _serializer.Deserialize(
+                        message.Content,
+                        messageType);
 
                 await publishEndpoint.Publish(
                     payload,
                     messageType,
                     cancellationToken);
 
+                var processedOnUtc =
+                    DateTime.UtcNow;
 
                 message.MarkAsProcessed(
-                    DateTime.UtcNow);
-
+                    processedOnUtc);
 
                 _logger.LogMessagePublished(
                     message.Id,
@@ -115,24 +135,22 @@ public abstract class OutboxProcessor<TContext> : BackgroundService
             }
             catch (Exception exception)
             {
+                message.MarkAsFailed(
+                    exception.Message);
+
                 _logger.LogMessageProcessingFailed(
                     exception,
                     message.Id);
-
-                message.MarkAsFailed(
-                    exception.Message);
             }
         }
-
 
         await SaveChangesAsync(
             scope.ServiceProvider,
             cancellationToken);
     }
 
-
     /// <summary>
-    /// Saves outbox changes using the service-specific DbContext.
+    /// Persists outbox state changes using the service-specific DbContext.
     /// </summary>
     protected abstract Task SaveChangesAsync(
         IServiceProvider serviceProvider,

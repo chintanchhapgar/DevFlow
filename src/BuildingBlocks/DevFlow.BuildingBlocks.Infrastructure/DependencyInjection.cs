@@ -1,3 +1,5 @@
+using DevFlow.BuildingBlocks.Infrastructure.DomainEvents;
+using DevFlow.BuildingBlocks.Infrastructure.Outbox;
 using DevFlow.BuildingBlocks.Infrastructure.Persistence.Interceptors;
 using DevFlow.BuildingBlocks.Infrastructure.Services;
 using DevFlow.SharedKernel.Abstractions;
@@ -23,6 +25,8 @@ public static class DependencyInjection
         // Interceptors are registered as singletons in EF Core
         services.AddSingleton<AuditableInterceptor>();
         services.AddSingleton<SoftDeleteInterceptor>();
+        services.AddScoped<DomainEventDispatchInterceptor>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<DomainEventDispatchInterceptor>();
 
         return services;

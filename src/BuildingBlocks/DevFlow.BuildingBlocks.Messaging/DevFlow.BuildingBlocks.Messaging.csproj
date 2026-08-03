@@ -20,4 +20,8 @@
     <ProjectReference Include="..\DevFlow.SharedKernel\DevFlow.SharedKernel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>

@@ -6,29 +6,31 @@ namespace DevFlow.BuildingBlocks.Infrastructure.Outbox;
 /// <summary>
 /// EF Core configuration for the OutboxMessage entity.
 /// </summary>
-public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
+public sealed class OutboxMessageConfiguration
+    : IEntityTypeConfiguration<OutboxMessage>
 {
-    public void Configure(EntityTypeBuilder<OutboxMessage> builder)
+    public void Configure(
+        EntityTypeBuilder<OutboxMessage> builder)
     {
-        builder.ToTable("outbox_messages");
+        builder.ToTable("OutboxMessages");
 
-        builder.HasKey(o => o.Id);
+        builder.HasKey(x => x.Id);
 
-        builder.Property(o => o.Id)
-            .ValueGeneratedNever();
-
-        builder.Property(o => o.Type)
-            .IsRequired()
-            .HasMaxLength(500);
-
-        builder.Property(o => o.Content)
+        builder.Property(x => x.Type)
+            .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(o => o.Error)
-            .HasMaxLength(2000);
+        builder.Property(x => x.Content)
+            .IsRequired();
 
-        builder.HasIndex(o => o.ProcessedOnUtc)
-            .HasFilter("processed_on_utc IS NULL")
-            .HasDatabaseName("ix_outbox_messages_unprocessed");
+        builder.Property(x => x.CreatedOnUtc)
+            .IsRequired();
+
+        builder.Property(x => x.ProcessedOnUtc);
+
+        builder.Property(x => x.Error);
+
+        builder.Property(x => x.RetryCount)
+            .IsRequired();
     }
 }

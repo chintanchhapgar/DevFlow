@@ -1,3 +1,5 @@
+using DevFlow.BuildingBlocks.Infrastructure.Outbox;
+using DevFlow.BuildingBlocks.Messaging;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Notifications;
 using DevFlow.Identity.Application.Common.Abstractions.Options;
