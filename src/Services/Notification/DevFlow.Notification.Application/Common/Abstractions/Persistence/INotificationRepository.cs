@@ -1,4 +1,5 @@
 using DevFlow.Notification.Domain.Notifications;
+
 namespace DevFlow.Notification.Application.Common.Abstractions.Persistence;
 
 public interface INotificationRepository

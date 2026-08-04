@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.SharedKernel.Domain.DomainEvents;
 using FluentValidation;
 using MediatR;
@@ -15,16 +16,17 @@ public static class DependencyInjection
 
         Assembly assembly = typeof(DependencyInjection).Assembly;
 
-        services.AddMediatR(configuration =>
-        {
-            configuration.RegisterServicesFromAssembly(assembly);
-        });
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(assembly));
 
         services.AddValidatorsFromAssembly(assembly);
 
+        services.AddEndpoints(assembly);
+
         services.Scan(scan => scan
             .FromAssemblies(assembly)
-            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventConsumer<>)))
+            .AddClasses(classes =>
+                classes.AssignableTo(typeof(IDomainEventConsumer<>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 

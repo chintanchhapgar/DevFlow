@@ -1,11 +1,10 @@
 using DevFlow.BuildingBlocks.Api.Middleware;
 using DevFlow.BuildingBlocks.Messaging;
 using DevFlow.BuildingBlocks.Security.Extensions;
-using DevFlow.Identity.Api.Extensions;
 using DevFlow.Identity.Application;
 using DevFlow.Identity.Application.Common.Abstractions.Requests;
 using DevFlow.Identity.Infrastructure;
-using DevFlow.Identity.Infrastructure.Persistence;
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.Identity.Infrastructure.Requests;
 using DevFlow.Identity.Infrastructure.Seed;
 
