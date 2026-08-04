@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Api/DevFlow.BuildingBlocks.Api.csproj" />
+    <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Contracts/DevFlow.BuildingBlocks.Contracts.csproj" />
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Infrastructure/DevFlow.BuildingBlocks.Infrastructure.csproj" />
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Messaging/DevFlow.BuildingBlocks.Messaging.csproj" />
     <Project Path="src/BuildingBlocks/DevFlow.BuildingBlocks.Observability/DevFlow.BuildingBlocks.Observability.csproj" />
@@ -20,6 +21,13 @@
     <Project Path="src/Services/Identity/DevFlow.Identity.Infrastructure/DevFlow.Identity.Infrastructure.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.IntegrationTests/DevFlow.Identity.IntegrationTests.csproj" />
     <Project Path="src/Services/Identity/DevFlow.Identity.UnitTests/DevFlow.Identity.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Notification/">
+    <Project Path="src/Services/Notification/DevFlow.Notification.Api/DevFlow.Notification.Api.csproj" />
+    <Project Path="src/Services/Notification/DevFlow.Notification.Application/DevFlow.Notification.Application.csproj" />
+    <Project Path="src/Services/Notification/DevFlow.Notification.Contracts/DevFlow.Notification.Contracts.csproj" />
+    <Project Path="src/Services/Notification/DevFlow.Notification.Domain/DevFlow.Notification.Domain.csproj" />
+    <Project Path="src/Services/Notification/DevFlow.Notification.Infrastructure/DevFlow.Notification.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Project/">
     <Project Path="src/Services/Project/DevFlow.Project.Api/DevFlow.Project.Api.csproj" />

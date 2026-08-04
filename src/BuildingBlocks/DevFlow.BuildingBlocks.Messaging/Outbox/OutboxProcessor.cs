@@ -20,14 +20,14 @@ public abstract class OutboxProcessor<TContext> : BackgroundService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OutboxProcessor<TContext>> _logger;
     private readonly Serialization.IMessageSerializer _serializer;
-    private readonly IEventTypeResolver _eventTypeResolver;
+    private readonly IIntegrationEventTypeResolver _eventTypeResolver;
     private readonly TimeSpan _interval;
 
     protected OutboxProcessor(
         IServiceScopeFactory scopeFactory,
         ILogger<OutboxProcessor<TContext>> logger,
         Serialization.IMessageSerializer serializer,
-        IEventTypeResolver eventTypeResolver,
+        IIntegrationEventTypeResolver eventTypeResolver,
         TimeSpan? interval = null)
     {
         ArgumentNullException.ThrowIfNull(scopeFactory);

@@ -1,5 +1,5 @@
+using DevFlow.BuildingBlocks.Contracts.IntegrationEvents.Identity;
 using DevFlow.BuildingBlocks.Messaging.IntegrationEvents;
-using DevFlow.Identity.Application.Authentication.Users.IntegrationEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Domain.DomainEvents;
 

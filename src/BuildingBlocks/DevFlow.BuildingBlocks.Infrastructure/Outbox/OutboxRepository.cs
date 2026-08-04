@@ -34,7 +34,7 @@ public sealed class OutboxRepository<TContext> : IOutboxRepository
     {
         return await _dbContext
             .Set<OutboxMessage>()
-            .Where(x => !x.IsProcessed)
+             .Where(x => x.ProcessedOnUtc == null)
             .OrderBy(x => x.CreatedOnUtc)
             .Take(batchSize)
             .ToListAsync(cancellationToken);

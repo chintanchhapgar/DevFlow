@@ -2,37 +2,38 @@ using Microsoft.Extensions.Logging;
 
 namespace DevFlow.BuildingBlocks.Messaging.Logging;
 
-public static class IntegrationEventLogMessages
+public static partial class IntegrationEventLogMessages
 {
-    private static readonly Action<ILogger, string, Exception?> s_storingIntegrationEvent =
-        LoggerMessage.Define<string>(
-            LogLevel.Debug,
-            new EventId(3000, nameof(LogStoringIntegrationEvent)),
-            "Storing integration event '{IntegrationEventType}' in outbox.");
-
-    private static readonly Action<ILogger, string, Exception?> s_integrationEventStored =
-        LoggerMessage.Define<string>(
-            LogLevel.Information,
-            new EventId(3001, nameof(LogIntegrationEventStored)),
-            "Integration event '{IntegrationEventType}' stored successfully.");
-
-    public static void LogStoringIntegrationEvent(
+    [LoggerMessage(
+        EventId = 7000,
+        Level = LogLevel.Information,
+        Message = "User registered: {Email}")]
+    public static partial void LogUserRegistered(
         this ILogger logger,
-        string eventType)
-    {
-        s_storingIntegrationEvent(
-            logger,
-            eventType,
-            null);
-    }
+        string email);
 
-    public static void LogIntegrationEventStored(
+    [LoggerMessage(
+        EventId = 7001,
+        Level = LogLevel.Information,
+        Message = "Received integration event {EventType}")]
+    public static partial void LogIntegrationEventReceived(
         this ILogger logger,
-        string eventType)
-    {
-        s_integrationEventStored(
-            logger,
-            eventType,
-            null);
-    }
+        string eventType);
+
+    [LoggerMessage(
+        EventId = 7002,
+        Level = LogLevel.Information,
+        Message = "Published integration event {EventType}")]
+    public static partial void LogIntegrationEventPublished(
+        this ILogger logger,
+        string eventType);
+
+    [LoggerMessage(
+        EventId = 7003,
+        Level = LogLevel.Error,
+        Message = "Failed processing integration event {EventType}")]
+    public static partial void LogIntegrationEventFailed(
+        this ILogger logger,
+        Exception exception,
+        string eventType);
 }

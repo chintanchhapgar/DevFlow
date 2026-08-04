@@ -1,7 +1,7 @@
 using DevFlow.BuildingBlocks.Messaging.Configuration;
 using DevFlow.BuildingBlocks.Messaging.EventBus;
+using DevFlow.BuildingBlocks.Messaging.Outbox;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -9,16 +9,15 @@ using System.Reflection;
 namespace DevFlow.BuildingBlocks.Messaging;
 
 /// <summary>
-/// Registers the complete messaging infrastructure.
+/// Registers the messaging infrastructure.
 /// </summary>
 public static class DependencyInjection
 {
-    public static IServiceCollection AddMessaging<TContext>(
-    this IServiceCollection services,
-    IConfiguration configuration,
-    Action<IBusRegistrationConfigurator>? configureConsumers = null,
-    params Assembly[] consumerAssemblies)
-    where TContext : DbContext
+    public static IServiceCollection AddMessaging(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Action<IBusRegistrationConfigurator>? configureConsumers = null,
+        params Assembly[] consumerAssemblies)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -26,8 +25,7 @@ public static class DependencyInjection
         services
             .AddSerialization()
             .AddDomainEventDispatching()
-            .AddIntegrationEvents()
-            .AddOutbox<TContext>();
+            .AddOutbox();
 
         RegisterMassTransit(
             services,
@@ -42,12 +40,11 @@ public static class DependencyInjection
         IServiceCollection services,
         IConfiguration configuration,
         Action<IBusRegistrationConfigurator>? configureConsumers,
-        Assembly[] consumerAssemblies)
+        params Assembly[] consumerAssemblies)
     {
-        var settings =
-            configuration
-                .GetSection(RabbitMqSettings.SectionName)
-                .Get<RabbitMqSettings>()
+        var settings = configuration
+            .GetSection(RabbitMqSettings.SectionName)
+            .Get<RabbitMqSettings>()
             ?? new RabbitMqSettings();
 
         services.AddMassTransit(bus =>
@@ -62,8 +59,7 @@ public static class DependencyInjection
             bus.UsingRabbitMq((context, rabbitMq) =>
             {
                 rabbitMq.Host(
-                    new Uri(
-                        $"rabbitmq://{settings.Host}:{settings.Port}/{settings.VirtualHost}"),
+                    new Uri($"rabbitmq://{settings.Host}:{settings.Port}/{settings.VirtualHost}"),
                     host =>
                     {
                         host.Username(settings.Username);

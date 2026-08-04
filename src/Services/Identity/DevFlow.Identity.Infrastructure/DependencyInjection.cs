@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Infrastructure.Outbox;
 using DevFlow.BuildingBlocks.Messaging;
+using DevFlow.BuildingBlocks.Messaging.Outbox;
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Notifications;
 using DevFlow.Identity.Application.Common.Abstractions.Options;
@@ -10,6 +11,7 @@ using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Infrastructure.Authentication;
 using DevFlow.Identity.Infrastructure.Authentication.MultiFactor;
 using DevFlow.Identity.Infrastructure.Notifications;
+using DevFlow.Identity.Infrastructure.Outbox;
 using DevFlow.Identity.Infrastructure.Persistence;
 using DevFlow.Identity.Infrastructure.Persistence.Repositories;
 using DevFlow.Identity.Infrastructure.Requests;
@@ -67,6 +69,10 @@ public static class DependencyInjection
         services.AddScoped<ISecurityEventLogger,  SecurityEventLogger>();
 
         services.AddScoped<IdentitySeeder>();
+
+        services.AddTransactionalOutbox<IdentityDbContext>();
+
+        services.AddHostedService<IdentityOutboxProcessor>();
 
         return services;
     }

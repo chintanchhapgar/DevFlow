@@ -26,7 +26,7 @@ builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddMessaging<ProjectDbContext>(
+builder.Services.AddMessaging(
     builder.Configuration,
     consumerAssemblies:
     [

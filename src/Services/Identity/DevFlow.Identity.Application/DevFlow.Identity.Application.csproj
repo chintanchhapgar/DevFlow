@@ -18,11 +18,16 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Scrutor" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Api\DevFlow.BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Domain\DevFlow.Identity.Domain.csproj" />
     <ProjectReference Include="..\DevFlow.Identity.Contracts\DevFlow.Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Messaging\DevFlow.BuildingBlocks.Messaging.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Contracts\DevFlow.BuildingBlocks.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Users\IntegrationEvents\" />
   </ItemGroup>
 </Project>

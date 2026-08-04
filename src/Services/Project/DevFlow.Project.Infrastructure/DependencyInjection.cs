@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Infrastructure.Outbox;
 using DevFlow.BuildingBlocks.Messaging;
+using DevFlow.BuildingBlocks.Messaging.Outbox;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Application.Common.Abstractions.Identity;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
@@ -67,6 +68,8 @@ public static class DependencyInjection
         services.AddScoped<IVelocityRepository, VelocityRepository>();
 
         services.AddScoped<IWorkloadRepository, WorkloadRepository>();
+
+        services.AddTransactionalOutbox<ProjectDbContext>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {

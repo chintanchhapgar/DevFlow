@@ -1,10 +1,7 @@
 using DevFlow.BuildingBlocks.Messaging.IntegrationEvents;
 
-namespace DevFlow.Identity.Application.Authentication.Users.IntegrationEvents;
+namespace DevFlow.BuildingBlocks.Contracts.IntegrationEvents.Identity;
 
-/// <summary>
-/// Published when a user has been successfully registered.
-/// </summary>
 public sealed record UserRegisteredIntegrationEvent(
     Guid UserId,
     string Email,

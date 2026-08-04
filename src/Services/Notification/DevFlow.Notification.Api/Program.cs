@@ -1,14 +1,11 @@
+using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Middleware;
 using DevFlow.BuildingBlocks.Messaging;
+using DevFlow.BuildingBlocks.Messaging.Configuration;
 using DevFlow.BuildingBlocks.Security.Extensions;
-using DevFlow.Identity.Api.Extensions;
-using DevFlow.Identity.Application;
-using DevFlow.Identity.Application.Common.Abstractions.Requests;
-using DevFlow.Identity.Infrastructure;
-using DevFlow.Identity.Infrastructure.Persistence;
-using DevFlow.Identity.Infrastructure.Requests;
-using DevFlow.Identity.Infrastructure.Seed;
-
+using DevFlow.Notification.Application;
+using DevFlow.Notification.Infrastructure;
+using DevFlow.Notification.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
@@ -17,7 +14,6 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddSecurity(builder.Configuration);
 
-builder.Services.AddScoped<ICurrentRequestInfo, CurrentRequestInfo>();
 
 builder.Services.AddMessaging(
     builder.Configuration,
@@ -43,7 +39,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapEndpoints();
-
-await app.SeedDemoDataAsync();
 
 app.Run();
