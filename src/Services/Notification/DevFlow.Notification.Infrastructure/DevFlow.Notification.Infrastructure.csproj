@@ -5,4 +5,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DevFlow.Notification.Application\DevFlow.Notification.Application.csproj" />
+    <ProjectReference Include="..\DevFlow.Notification.Contracts\DevFlow.Notification.Contracts.csproj" />
+    <ProjectReference Include="..\DevFlow.Notification.Domain\DevFlow.Notification.Domain.csproj" />
+  </ItemGroup>
 </Project>

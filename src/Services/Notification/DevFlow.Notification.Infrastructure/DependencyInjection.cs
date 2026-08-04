@@ -1,7 +1,10 @@
+using DevFlow.BuildingBlocks.Messaging.Outbox;
+using DevFlow.Notification.Application.Common.Abstractions.Persistence;
 using DevFlow.Notification.Infrastructure.Persistence;
+using DevFlow.Notification.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Notification.Infrastructure;
 
@@ -15,8 +18,17 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddDbContext<NotificationDbContext>(options =>
-            options.UseNpgsql(
-                configuration.GetConnectionString("NotificationDatabase")));
+        options.UseNpgsql(
+            configuration.GetConnectionString("NotificationDatabase")));
+
+        services.AddScoped<NotificationRepository,
+            NotificationRepository>();
+
+        services.AddTransactionalOutbox<NotificationDbContext>();
+
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

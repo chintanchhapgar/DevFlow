@@ -1,7 +1,6 @@
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
 using DevFlow.Identity.Domain.Authentication.Users.Owned;
 using DevFlow.Identity.Domain.Authentication.Users.ValueObjects;
-using DevFlow.SharedKernel.Results;
 
 namespace DevFlow.Identity.Domain.Authentication.Users;
 

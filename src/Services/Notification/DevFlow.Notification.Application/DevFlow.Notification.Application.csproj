@@ -4,5 +4,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\DevFlow.BuildingBlocks.Contracts\DevFlow.BuildingBlocks.Contracts.csproj" />
+    <ProjectReference Include="..\DevFlow.Notification.Domain\DevFlow.Notification.Domain.csproj" />
   </ItemGroup>
 </Project>
