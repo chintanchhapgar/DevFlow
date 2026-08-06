@@ -2,38 +2,38 @@ using DevFlow.BuildingBlocks.Infrastructure.DomainEvents;
 using DevFlow.SharedKernel.Abstractions;
 using DevFlow.SharedKernel.Domain;
 using DevFlow.SharedKernel.Domain.DomainEvents;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace DevFlow.BuildingBlocks.Infrastructure.Persistence.Interceptors;
 
-/// <summary>
-/// EF Core SaveChanges interceptor that dispatches domain events after persistence.
-/// Events are dispatched AFTER the transaction commits to ensure consistency.
-/// </summary>
-public sealed class DomainEventDispatchInterceptor : SaveChangesInterceptor
+public sealed class DomainEventDispatchInterceptor
+    : SaveChangesInterceptor
 {
     private readonly IDomainEventDispatcher _dispatcher;
 
     public DomainEventDispatchInterceptor(
-     IDomainEventDispatcher dispatcher)
+        IDomainEventDispatcher dispatcher)
     {
         _dispatcher = dispatcher;
     }
 
-    
-    public override async ValueTask<int> SavedChangesAsync(
-        SaveChangesCompletedEventData eventData,
-        int result,
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
         if (eventData.Context is not null)
         {
-            await DispatchDomainEventsAsync(eventData.Context, cancellationToken);
+            await DispatchDomainEventsAsync(
+                eventData.Context,
+                cancellationToken);
         }
 
-        return await base.SavedChangesAsync(eventData, result, cancellationToken);
+        return await base.SavingChangesAsync(
+            eventData,
+            result,
+            cancellationToken);
     }
 
     private async Task DispatchDomainEventsAsync(
@@ -41,18 +41,31 @@ public sealed class DomainEventDispatchInterceptor : SaveChangesInterceptor
         CancellationToken cancellationToken)
     {
         var entities = context.ChangeTracker
-        .Entries<IHasDomainEvents>()
-        .Select(entry => entry.Entity)
-        .Where(entity => entity.DomainEvents.Count > 0)
-        .ToList();
+            .Entries<IHasDomainEvents>()
+            .Select(x => x.Entity)
+            .Where(x => x.DomainEvents.Count > 0)
+            .ToList();
 
-            var domainEvents = entities
-                .SelectMany(entity => entity.DomainEvents)
-                .OrderBy(e => (e as DomainEvent)?.OccurredOnUtc ?? DateTime.MinValue)
-                .ToList();
+        if (entities.Count == 0)
+        {
+            return;
+        }
 
-            entities.ForEach(entity => entity.ClearDomainEvents());
+        var domainEvents = entities
+            .SelectMany(x => x.DomainEvents)
+            .OrderBy(x => (x as DomainEvent)?.OccurredOnUtc ?? DateTime.MinValue)
+            .ToList();
 
+        foreach (var entity in entities)
+        {
+            entity.ClearDomainEvents();
+        }
+        Console.WriteLine($"Dispatching {domainEvents.Count} domain event(s)");
+
+        foreach (var e in domainEvents)
+        {
+            Console.WriteLine(e.GetType().Name);
+        }
         await _dispatcher.DispatchAsync(
             domainEvents,
             cancellationToken);

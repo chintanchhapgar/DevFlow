@@ -1,3 +1,4 @@
+using DevFlow.BuildingBlocks.Infrastructure.Outbox;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.Attachments.Entities;
 using DevFlow.Project.Domain.Comments.Entities;
@@ -12,8 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Project.Infrastructure.Persistence;
 
-public sealed class ProjectDbContext
-    : DbContext, IUnitOfWork
+public sealed class ProjectDbContext : DbContext, IUnitOfWork
 {
     public ProjectDbContext(
         DbContextOptions<ProjectDbContext> options)
@@ -28,8 +28,10 @@ public sealed class ProjectDbContext
     public DbSet<Label> Labels => Set<Label>();
     public DbSet<WorkItemLabel> WorkItemLabels => Set<WorkItemLabel>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
-    public DbSet<EpicAggregate> Epics  => Set<EpicAggregate>();
+    public DbSet<EpicAggregate> Epics => Set<EpicAggregate>();
     public DbSet<WorklogAggregate> Worklogs => Set<WorklogAggregate>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,5 +45,4 @@ public sealed class ProjectDbContext
 
         base.OnModelCreating(modelBuilder);
     }
-
 }

@@ -1,5 +1,6 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Middleware;
+using DevFlow.BuildingBlocks.Infrastructure;
 using DevFlow.BuildingBlocks.Messaging;
 using DevFlow.BuildingBlocks.Messaging.Configuration;
 using DevFlow.BuildingBlocks.Security.Extensions;
@@ -10,6 +11,8 @@ using DevFlow.Notification.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
+
+builder.Services.AddInfrastructureServices();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 

@@ -36,13 +36,20 @@ internal sealed class IntegrationEventPublisher
             ?? throw new InvalidOperationException(
                 $"Assembly-qualified name not found for '{eventType.FullName}'.");
 
+        Console.WriteLine("=== IntegrationEventPublisher.PublishAsync ===");
+        Console.WriteLine(new System.Diagnostics.StackTrace(true).ToString());
+
         var message = OutboxMessage.Create(
             typeName,
             _serializer.Serialize(integrationEvent),
             integrationEvent.OccurredOnUtc);
 
+        
+
         await _outboxRepository.AddAsync(
             message,
             cancellationToken);
+
+        Console.WriteLine("=== Outbox message added ===");
     }
 }

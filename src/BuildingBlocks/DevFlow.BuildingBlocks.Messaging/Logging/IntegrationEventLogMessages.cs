@@ -36,4 +36,12 @@ public static partial class IntegrationEventLogMessages
         this ILogger logger,
         Exception exception,
         string eventType);
+
+    [LoggerMessage(
+    EventId = 7004,
+    Level = LogLevel.Information,
+    Message = "Project created: {ProjectName}")]
+    public static partial void LogProjectCreated(
+    this ILogger logger,
+    string projectName);
 }

@@ -45,6 +45,8 @@ public abstract class OutboxProcessor<TContext> : BackgroundService
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
     {
+        Console.WriteLine("=== Outbox ExecuteAsync started ===");
+
         _logger.LogOutboxProcessorStarted(
             _interval.TotalSeconds);
 
@@ -92,10 +94,14 @@ public abstract class OutboxProcessor<TContext> : BackgroundService
             scope.ServiceProvider
                 .GetRequiredService<IPublishEndpoint>();
 
+        Console.WriteLine("=== Processing Outbox ===");
+
         var messages =
             await outboxRepository.GetPendingMessagesAsync(
                 BatchSize,
                 cancellationToken);
+
+        Console.WriteLine($"Pending messages: {messages.Count}");
 
         if (messages.Count == 0)
         {
@@ -107,46 +113,55 @@ public abstract class OutboxProcessor<TContext> : BackgroundService
 
         foreach (var message in messages)
         {
+            Console.WriteLine($"Processing: {message.Type}");
+
             try
             {
-                var messageType =
-                    _eventTypeResolver.Resolve(
-                        message.Type);
+                Console.WriteLine("Resolving type...");
+                var messageType = _eventTypeResolver.Resolve(message.Type);
 
-                var payload =
-                    _serializer.Deserialize(
-                        message.Content,
-                        messageType);
+                Console.WriteLine($"Resolved: {messageType.FullName}");
 
+                Console.WriteLine("Deserializing...");
+                var payload = _serializer.Deserialize(
+                    message.Content,
+                    messageType);
+
+                if (payload is null)
+                {
+                    Console.WriteLine("Payload is NULL!");
+                    throw new InvalidOperationException("Deserialized payload is null.");
+                }
+
+                Console.WriteLine($"Payload type: {payload.GetType().FullName}");
+
+                Console.WriteLine("Publishing...");
                 await publishEndpoint.Publish(
                     payload,
                     messageType,
                     cancellationToken);
 
-                var processedOnUtc =
-                    DateTime.UtcNow;
+                Console.WriteLine("Published successfully.");
 
-                message.MarkAsProcessed(
-                    processedOnUtc);
+                message.MarkAsProcessed(DateTime.UtcNow);
 
-                _logger.LogMessagePublished(
-                    message.Id,
-                    message.Type);
+                Console.WriteLine("Marked processed.");
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                message.MarkAsFailed(
-                    exception.Message);
+                Console.WriteLine("FAILED");
+                Console.WriteLine(ex);
 
-                _logger.LogMessageProcessingFailed(
-                    exception,
-                    message.Id);
+                message.MarkAsFailed(ex.ToString());
             }
         }
 
+        Console.WriteLine("Saving...");
         await SaveChangesAsync(
             scope.ServiceProvider,
             cancellationToken);
+
+        Console.WriteLine("Saved.");
     }
 
     /// <summary>

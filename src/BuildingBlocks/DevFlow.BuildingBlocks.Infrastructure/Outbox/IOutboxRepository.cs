@@ -9,7 +9,7 @@ public interface IOutboxRepository
         OutboxMessage message,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<OutboxMessage>> GetPendingMessagesAsync(
+    Task<IReadOnlyList<OutboxMessage>>  GetPendingMessagesAsync(
         int batchSize,
         CancellationToken cancellationToken = default);
 }

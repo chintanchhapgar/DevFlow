@@ -1,4 +1,5 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
+using DevFlow.BuildingBlocks.Infrastructure;
 using DevFlow.BuildingBlocks.Messaging;
 using DevFlow.BuildingBlocks.Security.Extensions;
 using DevFlow.Project.Application;
@@ -23,6 +24,8 @@ builder.Host.UseSerilog((context, services, configuration) =>
 // ------------------------------------------------------------
 
 builder.Services.AddApplication();
+
+builder.Services.AddInfrastructureServices();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 

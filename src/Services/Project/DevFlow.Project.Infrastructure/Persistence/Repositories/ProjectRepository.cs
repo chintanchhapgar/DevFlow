@@ -20,6 +20,8 @@ internal sealed class ProjectRepository
     {
         _context = context;
         _sorting = sorting;
+
+        Console.WriteLine($"Repository DbContext: {_context.ContextId}");
     }
 
     public async Task<ProjectAggregate?> GetByIdAsync(

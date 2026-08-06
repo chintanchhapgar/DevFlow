@@ -22,12 +22,10 @@ public static class DependencyInjection
 
         services.AddSingleton<IClock, SystemClock>();
 
-        // Interceptors are registered as singletons in EF Core
-        services.AddSingleton<AuditableInterceptor>();
-        services.AddSingleton<SoftDeleteInterceptor>();
+        services.AddScoped<AuditableInterceptor>();
+        services.AddScoped<SoftDeleteInterceptor>();
         services.AddScoped<DomainEventDispatchInterceptor>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-        services.AddScoped<DomainEventDispatchInterceptor>();
 
         return services;
     }

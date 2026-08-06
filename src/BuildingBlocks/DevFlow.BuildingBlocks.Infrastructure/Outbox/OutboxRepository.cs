@@ -32,6 +32,11 @@ public sealed class OutboxRepository<TContext> : IOutboxRepository
         int batchSize,
         CancellationToken cancellationToken = default)
     {
+        Console.WriteLine(
+    $"DB = {_dbContext.Database.GetDbConnection().Database}");
+
+        Console.WriteLine(
+    $"Context = {_dbContext.ContextId}");
         return await _dbContext
             .Set<OutboxMessage>()
              .Where(x => x.ProcessedOnUtc == null)

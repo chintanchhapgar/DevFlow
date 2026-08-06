@@ -1,4 +1,5 @@
 using DevFlow.BuildingBlocks.Infrastructure.Outbox;
+using DevFlow.BuildingBlocks.Infrastructure.Persistence.Interceptors;
 using DevFlow.BuildingBlocks.Messaging;
 using DevFlow.BuildingBlocks.Messaging.Outbox;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
@@ -13,6 +14,7 @@ using DevFlow.Project.Domain.Sprints.Repositories;
 using DevFlow.Project.Domain.WorkItems.Repositories;
 using DevFlow.Project.Domain.Worklogs.Repositories;
 using DevFlow.Project.Infrastructure.Identity;
+using DevFlow.Project.Infrastructure.Outbox;
 using DevFlow.Project.Infrastructure.Persistence;
 using DevFlow.Project.Infrastructure.Persistence.Repositories;
 using DevFlow.Project.Infrastructure.Persistence.Sorting;
@@ -30,10 +32,14 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<ProjectDbContext>(options =>
+        services.AddDbContext<ProjectDbContext>((serviceProvider, options) =>
         {
             options.UseNpgsql(
                 configuration.GetConnectionString("ProjectDb"));
+
+            options.AddInterceptors(
+                serviceProvider.GetRequiredService<AuditableInterceptor>(),
+                serviceProvider.GetRequiredService<SoftDeleteInterceptor>());
         });
 
         services.AddScoped<IProjectRepository, ProjectRepository>();
@@ -42,7 +48,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ProjectDbContext>());
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<ISprintRepository, SprintRepository>();
 
@@ -70,6 +76,8 @@ public static class DependencyInjection
         services.AddScoped<IWorkloadRepository, WorkloadRepository>();
 
         services.AddTransactionalOutbox<ProjectDbContext>();
+
+        services.AddHostedService<ProjectOutboxProcessor>();
 
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {

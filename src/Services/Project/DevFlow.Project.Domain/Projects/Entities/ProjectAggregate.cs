@@ -38,7 +38,11 @@ public sealed class ProjectAggregate
                 ProjectRole.Owner));
 
         RaiseDomainEvent(
-            new ProjectCreatedDomainEvent(id));
+    new ProjectCreatedDomainEvent(
+        id,
+        ownerId,
+        name,
+        description));
     }
 
     private ProjectAggregate()
