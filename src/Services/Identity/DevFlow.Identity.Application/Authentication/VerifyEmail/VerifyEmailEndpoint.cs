@@ -1,6 +1,5 @@
 using DevFlow.BuildingBlocks.Api.Endpoints;
 using DevFlow.BuildingBlocks.Api.Extensions;
-using DevFlow.Identity.Application.Authentication.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -15,27 +14,26 @@ internal sealed class VerifyEmailEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost(
+        app.MapGet(
             "/api/auth/verify-email",
             async (
-                VerifyEmailCommand command,
+                Guid token,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(
-                    command,
+                    new VerifyEmailCommand(token),
                     cancellationToken);
 
                 return result.ToApiResult(httpContext);
             })
-            .WithTags("User")
+            .WithTags("Authentication")
             .AllowAnonymous()
             .WithName("VerifyEmail")
             .WithSummary("Verify user email")
-            .Produces(StatusCodes.Status200OK)
+            .Produces<VerifyEmailResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound);
-
     }
 }

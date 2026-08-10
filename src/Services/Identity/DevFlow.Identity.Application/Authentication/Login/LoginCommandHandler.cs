@@ -11,7 +11,6 @@ using DevFlow.SharedKernel.Results;
 using MediatR;
 using Microsoft.Extensions.Options;
 
-
 namespace DevFlow.Identity.Application.Authentication.Login;
 
 /// <summary>
@@ -37,8 +36,7 @@ internal sealed class LoginCommandHandler
         IRefreshTokenGenerator refreshTokenGenerator,
         ICurrentRequestInfo currentRequestInfo,
         IOptions<LockoutOptions> lockoutOptions,
-        ISecurityEventLogger securityEventLogger
-        )
+        ISecurityEventLogger securityEventLogger)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
@@ -66,7 +64,6 @@ internal sealed class LoginCommandHandler
 
         if (user.IsLockedOut)
         {
-
             await _securityEventLogger.LogAsync(
                 user.Id,
                 SecurityEventType.AccountLocked,
@@ -76,13 +73,18 @@ internal sealed class LoginCommandHandler
                 UserErrors.AccountLocked);
         }
 
+        // --------------------------------------------------
+        // Password validation
+        // --------------------------------------------------
+
         if (!_passwordHasher.Verify(
-            request.Password,
-            user.PasswordHash))
+                request.Password,
+                user.PasswordHash))
         {
             user.RecordFailedLogin(
                 _lockoutOptions.MaxFailedAttempts,
-                TimeSpan.FromMinutes(_lockoutOptions.DurationMinutes));
+                TimeSpan.FromMinutes(
+                    _lockoutOptions.DurationMinutes));
 
             await _userRepository.UpdateAsync(
                 user,
@@ -98,11 +100,35 @@ internal sealed class LoginCommandHandler
                 UserErrors.InvalidCredentials);
         }
 
+        // --------------------------------------------------
+        // Email verification
+        // --------------------------------------------------
+
+        if (!user.EmailVerified)
+        {
+            await _securityEventLogger.LogAsync(
+                user.Id,
+                SecurityEventType.LoginFailed,
+                "Email address has not been verified.",
+                cancellationToken);
+
+            return Result.Failure<AuthenticationResponse>(
+                UserErrors.EmailNotConfirmed);
+        }
+
+        // --------------------------------------------------
+        // Account status
+        // --------------------------------------------------
+
         if (!user.IsActive)
         {
             return Result.Failure<AuthenticationResponse>(
                 UserErrors.UserInactive);
         }
+
+        // --------------------------------------------------
+        // Two-factor authentication
+        // --------------------------------------------------
 
         if (user.IsTwoFactorEnabled)
         {
@@ -110,7 +136,12 @@ internal sealed class LoginCommandHandler
                 user.Id.Value);
         }
 
-        if (user.AccessFailedCount > 0 || user.LockoutEndUtc is not null)
+        // --------------------------------------------------
+        // Reset failed login state after successful login
+        // --------------------------------------------------
+
+        if (user.AccessFailedCount > 0 ||
+            user.LockoutEndUtc is not null)
         {
             user.ResetFailedLogin();
 
@@ -118,6 +149,10 @@ internal sealed class LoginCommandHandler
                 user,
                 cancellationToken);
         }
+
+        // --------------------------------------------------
+        // Refresh token
+        // --------------------------------------------------
 
         var refreshTokenValue =
             _refreshTokenGenerator.Generate();
@@ -138,10 +173,18 @@ internal sealed class LoginCommandHandler
             refreshToken,
             cancellationToken);
 
+        // --------------------------------------------------
+        // Security event
+        // --------------------------------------------------
+
         await _securityEventLogger.LogAsync(
             user.Id,
             SecurityEventType.LoginSucceeded,
             cancellationToken: cancellationToken);
+
+        // --------------------------------------------------
+        // Access token
+        // --------------------------------------------------
 
         var accessToken =
             _jwtProvider.GenerateAccessToken(

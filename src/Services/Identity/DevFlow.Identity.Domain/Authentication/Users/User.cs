@@ -27,7 +27,7 @@ public sealed partial class User : AggregateRoot<UserId>
 
         Role = UserRole.Member;
         Status = UserStatus.Active;
-        EmailConfirmed = true;
+        EmailVerified = false;
 
         CreatedOnUtc = DateTime.UtcNow;
 
@@ -52,7 +52,11 @@ public sealed partial class User : AggregateRoot<UserId>
 
     public UserStatus Status { get; private set; }
 
-    public bool EmailConfirmed { get; private set; }
+    public bool EmailVerified { get; private set; }
+
+    public Guid? EmailVerificationToken { get; private set; }
+
+    public DateTime? EmailVerificationTokenExpiresOnUtc { get; private set; }
 
     public DateTime CreatedOnUtc { get; private set; }
 
@@ -107,22 +111,69 @@ public sealed partial class User : AggregateRoot<UserId>
             firstName.Trim(),
             lastName.Trim());
 
+        var token = user.GenerateEmailVerificationToken();
+
         user.RaiseDomainEvent(
             new UserRegisteredDomainEvent(
                 user.Id,
                 user.Email,
                 user.FirstName,
-                user.LastName));
+                user.LastName,
+                token));
 
         return user;
     }
 
-    public void ConfirmEmail()
+    public Guid GenerateEmailVerificationToken()
     {
-        EmailConfirmed = true;
-        Status = UserStatus.Active;
+        var token = Guid.NewGuid();
+
+        EmailVerificationToken = token;
+        EmailVerificationTokenExpiresOnUtc =
+            DateTime.UtcNow.AddHours(24);
 
         UpdatedOnUtc = DateTime.UtcNow;
+
+        return token;
+    }
+    public Guid RegenerateEmailVerificationToken()
+    {
+        if (EmailVerified)
+        {
+            throw new InvalidOperationException(
+                "Email is already verified.");
+        }
+
+        return GenerateEmailVerificationToken();
+    }
+    public Result VerifyEmail(Guid token)
+    {
+        if (EmailVerified)
+        {
+            return Result.Success();
+        }
+
+        if (EmailVerificationToken != token)
+        {
+            return Result.Failure(
+                UserErrors.InvalidEmailVerificationToken);
+        }
+
+        if (EmailVerificationTokenExpiresOnUtc is null ||
+            EmailVerificationTokenExpiresOnUtc < DateTime.UtcNow)
+        {
+            return Result.Failure(
+                UserErrors.EmailVerificationTokenExpired);
+        }
+
+        EmailVerified = true;
+
+        EmailVerificationToken = null;
+        EmailVerificationTokenExpiresOnUtc = null;
+
+        UpdatedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
     }
 
     public void ChangePassword(string passwordHash)
@@ -309,5 +360,25 @@ public sealed partial class User : AggregateRoot<UserId>
         LockoutEndUtc = null;
 
         UpdatedOnUtc = DateTime.UtcNow;
+    }
+
+    public Result<string> GenerateNewEmailVerificationToken()
+    {
+        if (EmailVerified)
+        {
+            return Result.Failure<string>(
+                UserErrors.EmailAlreadyVerified);
+        }
+
+        var token = GenerateEmailVerificationToken();
+
+        RaiseDomainEvent(
+            new EmailVerificationResentDomainEvent(
+                Id,
+                Email,
+                FirstName,
+                token));
+
+        return token.ToString();
     }
 }

@@ -1,4 +1,3 @@
-using DevFlow.BuildingBlocks.Contracts.IntegrationEvents.Identity;
 using DevFlow.BuildingBlocks.Contracts.IntegrationEvents.Users;
 using DevFlow.Notification.Api.Logging;
 using DevFlow.Notification.Infrastructure.Email.Verification;
@@ -6,26 +5,26 @@ using MassTransit;
 
 namespace DevFlow.Notification.Api.Consumers;
 
-public sealed class UserRegisteredIntegrationEventConsumer
-    : IConsumer<UserRegisteredIntegrationEvent>
+public sealed class UserEmailVerificationResentIntegrationEventConsumer
+    : IConsumer<UserEmailVerificationResentIntegrationEvent>
 {
     private readonly VerificationEmailSender _verificationEmailSender;
-    private readonly ILogger<UserRegisteredIntegrationEventConsumer> _logger;
+    private readonly ILogger<UserEmailVerificationResentIntegrationEventConsumer> _logger;
 
-    public UserRegisteredIntegrationEventConsumer(
+    public UserEmailVerificationResentIntegrationEventConsumer(
         VerificationEmailSender verificationEmailSender,
-        ILogger<UserRegisteredIntegrationEventConsumer> logger)
+        ILogger<UserEmailVerificationResentIntegrationEventConsumer> logger)
     {
         _verificationEmailSender = verificationEmailSender;
         _logger = logger;
     }
 
     public async Task Consume(
-        ConsumeContext<UserRegisteredIntegrationEvent> context)
+        ConsumeContext<UserEmailVerificationResentIntegrationEvent> context)
     {
         var message = context.Message;
 
-        _logger.UserRegisteredEventReceived(
+        _logger.VerificationResentEventReceived(
             message.UserId);
 
         await _verificationEmailSender.SendAsync(

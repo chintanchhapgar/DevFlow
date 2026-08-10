@@ -6,7 +6,6 @@ namespace DevFlow.Identity.Application.Authentication.ResendVerification;
 /// Response returned after requesting a new verification email.
 /// </summary>
 public sealed record ResendVerificationResponse(
-    string VerificationToken,
     string SuccessMessage)
     : IApiMessage
 {

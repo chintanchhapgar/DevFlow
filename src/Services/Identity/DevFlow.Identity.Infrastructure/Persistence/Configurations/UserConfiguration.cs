@@ -45,13 +45,30 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Status)
             .HasConversion<int>();
 
-        builder.Property(x => x.EmailConfirmed);
+        builder.Property(x => x.EmailVerified)
+            .IsRequired();
 
         builder.Property(x => x.CreatedOnUtc);
 
         builder.Property(x => x.UpdatedOnUtc);
 
+        // ------------------------------------------------------
+        // Email Verification
+        // ------------------------------------------------------
+
+        builder.Property(x => x.EmailVerificationToken)
+            .HasColumnName("EmailVerificationToken");
+
+        builder.Property(x => x.EmailVerificationTokenExpiresOnUtc)
+            .HasColumnName("EmailVerificationTokenExpiresOnUtc");
+
+        builder.HasIndex(x => x.EmailVerificationToken)
+            .IsUnique();
+
+        // ------------------------------------------------------
         // Computed properties
+        // ------------------------------------------------------
+
         builder.Ignore(x => x.IsActive);
         builder.Ignore(x => x.FullName);
         builder.Ignore(x => x.IsTwoFactorEnabled);
@@ -59,17 +76,17 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Ignore(x => x.TwoFactorSecret);
         builder.Ignore(x => x.TwoFactorEnabledOnUtc);
 
-        //------------------------------------------------------
+        // ------------------------------------------------------
         // Refresh Tokens
-        //------------------------------------------------------
+        // ------------------------------------------------------
 
         builder.HasMany(x => x.RefreshTokens)
             .WithOne()
             .HasForeignKey(x => x.UserId);
 
-        //------------------------------------------------------
+        // ------------------------------------------------------
         // Multi Factor (Owned)
-        //------------------------------------------------------
+        // ------------------------------------------------------
 
         builder.OwnsOne(
             x => x.MultiFactor,

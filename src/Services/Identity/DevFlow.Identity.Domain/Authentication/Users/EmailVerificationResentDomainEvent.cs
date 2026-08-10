@@ -1,15 +1,13 @@
-using DevFlow.Identity.Domain.Authentication.Users.ValueObjects;
 using DevFlow.SharedKernel.Domain.DomainEvents;
 
 namespace DevFlow.Identity.Domain.Authentication.Users;
 
 /// <summary>
-/// Raised when a new user is registered.
+/// Raised when a user requests another email verification email.
 /// </summary>
-public sealed record UserRegisteredDomainEvent(
+public sealed record EmailVerificationResentDomainEvent(
     UserId UserId,
     string Email,
     string FirstName,
-    string LastName,
     Guid VerificationToken)
     : DomainEvent;

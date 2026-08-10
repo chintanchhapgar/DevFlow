@@ -1,31 +1,24 @@
-using DevFlow.SharedKernel.Common;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
-using DevFlow.Identity.Domain.Authentication.EmailVerificationTokens;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.ResendVerification;
 
-/// <summary>
-/// Handles resending email verification.
-/// </summary>
 internal sealed class ResendVerificationCommandHandler
-    : IRequestHandler<ResendVerificationCommand, Result<ResendVerificationResponse>>
+    : IRequestHandler<
+        ResendVerificationCommand,
+        Result<ResendVerificationResponse>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IEmailVerificationTokenRepository _verificationRepository;
-    private readonly IEmailVerificationTokenGenerator _tokenGenerator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public ResendVerificationCommandHandler(
         IUserRepository userRepository,
-        IEmailVerificationTokenRepository verificationRepository,
-        IEmailVerificationTokenGenerator tokenGenerator)
+        IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
-        _verificationRepository = verificationRepository;
-        _tokenGenerator = tokenGenerator;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<ResendVerificationResponse>> Handle(
@@ -40,47 +33,32 @@ internal sealed class ResendVerificationCommandHandler
         if (user is null)
         {
             return new ResendVerificationResponse(
-                "If the account exists, a verification email has been sent.",
-                 string.Empty);
+                "If the account exists, a verification email has been sent.");
         }
 
-        if (user.EmailConfirmed)
+        if (user.EmailVerified)
         {
             return new ResendVerificationResponse(
-                "Email is already verified.",
-                 string.Empty);
+                "Email is already verified.");
         }
 
-        var activeTokens =
-            await _verificationRepository.GetActiveByUserIdAsync(
-                user.Id,
-                cancellationToken);
+        var tokenResult =
+            user.GenerateNewEmailVerificationToken();
 
-        foreach (var token in activeTokens)
+        if (tokenResult.IsFailure)
         {
-            token.Expire();
-
-            await _verificationRepository.UpdateAsync(
-                token,
-                cancellationToken);
+            return Result.Failure<ResendVerificationResponse>(
+                tokenResult.Error);
         }
 
-        var tokenValue = _tokenGenerator.Generate();
-
-        var verificationToken =
-            EmailVerificationToken.Create(
-                user.Id,
-                tokenValue,
-                DateTime.UtcNow.AddHours(24));
-
-        await _verificationRepository.AddAsync(
-            verificationToken,
+        await _userRepository.UpdateAsync(
+            user,
             cancellationToken);
 
-        // Notification event will be published here later.
+        await _unitOfWork.SaveChangesAsync(
+            cancellationToken);
 
         return new ResendVerificationResponse(
-            "Verification email has been sent.",
-            verificationToken.Token);
+            "Verification email has been sent.");
     }
 }

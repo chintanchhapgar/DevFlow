@@ -1,5 +1,4 @@
 using DevFlow.BuildingBlocks.Infrastructure.Outbox;
-using DevFlow.Identity.Domain.Authentication.EmailVerificationTokens;
 using DevFlow.Identity.Domain.Authentication.PasswordResetTokens;
 using DevFlow.Identity.Domain.Authentication.RefreshTokens;
 using DevFlow.Identity.Domain.Authentication.SecurityEvents;
@@ -22,7 +21,6 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens  => Set<PasswordResetToken>();
-    public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
     public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();

@@ -8,7 +8,6 @@ internal sealed class VerifyEmailCommandValidator
     public VerifyEmailCommandValidator()
     {
         RuleFor(x => x.Token)
-            .NotEmpty()
-            .MaximumLength(512);
+            .NotEmpty();
     }
 }

@@ -7,22 +7,16 @@ using MediatR;
 
 namespace DevFlow.Identity.Application.Authentication.VerifyEmail;
 
-/// <summary>
-/// Handles email verification.
-/// </summary>
 internal sealed class VerifyEmailCommandHandler
     : IRequestHandler<VerifyEmailCommand, Result<VerifyEmailResponse>>
 {
-    private readonly IEmailVerificationTokenRepository _verificationRepository;
     private readonly IUserRepository _userRepository;
     private readonly ISecurityEventLogger _securityEventLogger;
 
     public VerifyEmailCommandHandler(
-        IEmailVerificationTokenRepository verificationRepository,
         IUserRepository userRepository,
         ISecurityEventLogger securityEventLogger)
     {
-        _verificationRepository = verificationRepository;
         _userRepository = userRepository;
         _securityEventLogger = securityEventLogger;
     }
@@ -31,31 +25,24 @@ internal sealed class VerifyEmailCommandHandler
         VerifyEmailCommand request,
         CancellationToken cancellationToken)
     {
-        var verification =
-            await _verificationRepository.GetByTokenAsync(
-                request.Token,
-                cancellationToken);
-
-        if (verification is null || !verification.IsActive)
-        {
-            return Result.Failure<VerifyEmailResponse>(
-                UserErrors.InvalidVerificationToken);
-        }
-
         var user =
-            await _userRepository.GetByIdAsync(
-                verification.UserId,
+            await _userRepository.GetByEmailVerificationTokenAsync(
+                request.Token,
                 cancellationToken);
 
         if (user is null)
         {
             return Result.Failure<VerifyEmailResponse>(
-                UserErrors.NotFound);
+                UserErrors.InvalidVerificationToken);
         }
 
-        user.ConfirmEmail();
+        var result = user.VerifyEmail(request.Token);
 
-        verification.MarkAsUsed();
+        if (result.IsFailure)
+        {
+            return Result.Failure<VerifyEmailResponse>(
+                result.Error);
+        }
 
         await _userRepository.UpdateAsync(
             user,
@@ -65,10 +52,6 @@ internal sealed class VerifyEmailCommandHandler
             user.Id,
             SecurityEventType.EmailVerified,
             cancellationToken: cancellationToken);
-
-        await _verificationRepository.UpdateAsync(
-            verification,
-            cancellationToken);
 
         return new VerifyEmailResponse(
             user.Id.Value);

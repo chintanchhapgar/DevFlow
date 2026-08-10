@@ -70,4 +70,14 @@ public static class UserErrors
         AppError.Conflict(
             "Users.EmailAlreadyVerified",
             "Email has already been verified.");
+
+    public static readonly AppError InvalidEmailVerificationToken =
+    AppError.Validation(
+        "Users.InvalidEmailVerificationToken",
+        "The email verification token is invalid.");
+
+    public static readonly AppError EmailVerificationTokenExpired =
+        AppError.Validation(
+            "Users.EmailVerificationTokenExpired",
+            "The email verification token has expired.");
 }

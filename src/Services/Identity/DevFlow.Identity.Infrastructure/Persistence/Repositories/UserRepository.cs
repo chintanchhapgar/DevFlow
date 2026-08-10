@@ -104,4 +104,14 @@ internal sealed class UserRepository : IUserRepository
 
         return (users, totalCount);
     }
+
+    public async Task<User?> GetByEmailVerificationTokenAsync(
+    Guid token,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(
+                x => x.EmailVerificationToken == token,
+                cancellationToken);
+    }
 }

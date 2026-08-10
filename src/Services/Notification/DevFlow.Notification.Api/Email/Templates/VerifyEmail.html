@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Verify your DevFlow email</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background-color:#f4f6f8;padding:40px 20px;">
+
+        <tr>
+            <td align="center">
+
+                <table width="600" cellpadding="0" cellspacing="0" border="0"
+                       style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="center"
+                            style="background-color:#111827;padding:28px 20px;">
+
+                            <div style="font-size:28px;font-weight:bold;color:#ffffff;">
+                                DevFlow
+                            </div>
+
+                            <div style="font-size:14px;color:#9ca3af;margin-top:6px;">
+                                Project Management Platform
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:40px 40px 30px 40px;">
+
+                            <h1 style="margin:0 0 20px 0;font-size:26px;color:#111827;">
+                                Verify your email
+                            </h1>
+
+                            <p style="margin:0 0 16px 0;font-size:16px;line-height:1.6;">
+                                Hello {{FirstName}},
+                            </p>
+
+                            <p style="margin:0 0 20px 0;font-size:16px;line-height:1.6;">
+                                Welcome to DevFlow.
+                                Please verify your email address to activate your account
+                                and continue using DevFlow.
+                            </p>
+
+                            <!-- Button -->
+                            <table cellpadding="0" cellspacing="0" border="0"
+                                   style="margin:30px auto;">
+
+                                <tr>
+                                    <td align="center"
+                                        style="background-color:#2563eb;border-radius:8px;">
+
+                                        <a href="{{VerificationUrl}}"
+                                           style="display:inline-block;padding:14px 28px;
+                                                  color:#ffffff;
+                                                  font-size:16px;
+                                                  font-weight:bold;
+                                                  text-decoration:none;">
+                                            Verify Email
+                                        </a>
+
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            <p style="margin:0 0 12px 0;font-size:14px;line-height:1.6;color:#6b7280;">
+                                If the button above does not work, copy and paste the
+                                following URL into your browser:
+                            </p>
+
+                            <p style="margin:0 0 25px 0;font-size:13px;line-height:1.6;word-break:break-all;">
+                                <a href="{{VerificationUrl}}"
+                                   style="color:#2563eb;">
+                                    {{VerificationUrl}}
+                                </a>
+                            </p>
+
+                            <p style="margin:0;font-size:14px;line-height:1.6;color:#6b7280;">
+                                This verification link is valid for 24 hours.
+                                If you did not create a DevFlow account, you can safely
+                                ignore this email.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:20px 40px;background-color:#f9fafb;text-align:center;">
+
+                            <p style="margin:0;font-size:12px;color:#9ca3af;">
+                                © {{Year}} DevFlow. All rights reserved.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IntegrationEvents\Common\" />
+    <Folder Include="IntegrationEvents\Users\" />
     <Folder Include="IntegrationEvents\WorkItems\" />
   </ItemGroup>
 

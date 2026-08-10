@@ -7,5 +7,5 @@ namespace DevFlow.Identity.Application.Authentication.VerifyEmail;
 /// Verifies a user's email address.
 /// </summary>
 public sealed record VerifyEmailCommand(
-    string Token)
+    Guid Token)
     : IRequest<Result<VerifyEmailResponse>>;

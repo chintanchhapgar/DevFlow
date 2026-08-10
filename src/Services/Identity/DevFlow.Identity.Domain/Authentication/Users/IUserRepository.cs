@@ -34,4 +34,8 @@ public interface IUserRepository
         int pageSize,
         string? search,
         CancellationToken cancellationToken);
+
+    Task<User?> GetByEmailVerificationTokenAsync(
+    Guid token,
+    CancellationToken cancellationToken = default);
 }

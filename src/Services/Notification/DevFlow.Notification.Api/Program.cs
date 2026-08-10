@@ -7,6 +7,7 @@ using DevFlow.BuildingBlocks.Security.Extensions;
 using DevFlow.Notification.Application;
 using DevFlow.Notification.Application.Notifications.GetMyNotifications;
 using DevFlow.Notification.Infrastructure;
+using DevFlow.Notification.Infrastructure.Email.Configuration;
 using DevFlow.Notification.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,17 @@ builder.Services.AddMessaging(
     [
         typeof(Program).Assembly
     ]);
+
+builder.Services
+    .AddOptions<EmailSettings>()
+    .BindConfiguration(EmailSettings.SectionName)
+    .Validate(
+        settings => Uri.TryCreate(
+            settings.VerificationBaseUrl,
+            UriKind.Absolute,
+            out _),
+        "Email:VerificationBaseUrl must be a valid absolute URL.")
+    .ValidateOnStart();
 
 var app = builder.Build();
 

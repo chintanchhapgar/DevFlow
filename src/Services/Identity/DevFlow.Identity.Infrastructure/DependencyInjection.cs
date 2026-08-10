@@ -54,8 +54,6 @@ public static class DependencyInjection
 
         services.AddScoped<IEmailSender, ConsoleEmailSender>();
 
-        services.AddScoped<IEmailVerificationTokenRepository,EmailVerificationTokenRepository>();
-
         services.AddSingleton<IEmailVerificationTokenGenerator,EmailVerificationTokenGenerator>();
 
         services.AddSingleton<IRecoveryCodeGenerator, RecoveryCodeGenerator>();
