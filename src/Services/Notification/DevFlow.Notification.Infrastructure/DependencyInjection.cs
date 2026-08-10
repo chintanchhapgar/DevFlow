@@ -1,6 +1,7 @@
 using DevFlow.BuildingBlocks.Messaging.Outbox;
 using DevFlow.Notification.Application.Common.Abstractions.Persistence;
 using DevFlow.Notification.Infrastructure.Email.Options;
+using DevFlow.Notification.Infrastructure.Email.PasswordReset;
 using DevFlow.Notification.Infrastructure.Email.Rendering;
 using DevFlow.Notification.Infrastructure.Email.Sending;
 using DevFlow.Notification.Infrastructure.Email.Verification;
@@ -41,6 +42,8 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender,SmtpEmailSender>();
 
         services.AddScoped<VerificationEmailSender>();
+
+        services.AddScoped<PasswordResetEmailSender>();
 
         return services;
     }

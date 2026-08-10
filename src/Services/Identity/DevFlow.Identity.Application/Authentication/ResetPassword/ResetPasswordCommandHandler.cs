@@ -1,4 +1,3 @@
-
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Security;
@@ -9,6 +8,9 @@ using MediatR;
 
 namespace DevFlow.Identity.Application.Authentication.ResetPassword;
 
+/// <summary>
+/// Handles password reset using a valid password reset token.
+/// </summary>
 internal sealed class ResetPasswordCommandHandler
     : IRequestHandler<ResetPasswordCommand, Result<ResetPasswordResponse>>
 {
@@ -17,6 +19,7 @@ internal sealed class ResetPasswordCommandHandler
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ISecurityEventLogger _securityEventLogger;
+
     public ResetPasswordCommandHandler(
         IPasswordResetTokenRepository passwordResetRepository,
         IUserRepository userRepository,
@@ -24,6 +27,12 @@ internal sealed class ResetPasswordCommandHandler
         IPasswordHasher passwordHasher,
         ISecurityEventLogger securityEventLogger)
     {
+        ArgumentNullException.ThrowIfNull(passwordResetRepository);
+        ArgumentNullException.ThrowIfNull(userRepository);
+        ArgumentNullException.ThrowIfNull(refreshTokenRepository);
+        ArgumentNullException.ThrowIfNull(passwordHasher);
+        ArgumentNullException.ThrowIfNull(securityEventLogger);
+
         _passwordResetRepository = passwordResetRepository;
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
@@ -46,9 +55,10 @@ internal sealed class ResetPasswordCommandHandler
                 UserErrors.InvalidResetToken);
         }
 
-        var user = await _userRepository.GetByIdAsync(
-            resetToken.UserId,
-            cancellationToken);
+        var user =
+            await _userRepository.GetByIdAsync(
+                resetToken.UserId,
+                cancellationToken);
 
         if (user is null)
         {
@@ -56,10 +66,16 @@ internal sealed class ResetPasswordCommandHandler
                 UserErrors.UserNotFound);
         }
 
-        user.ChangePassword(
-            _passwordHasher.Hash(request.NewPassword));
+        var passwordHash =
+            _passwordHasher.Hash(request.NewPassword);
+
+        user.ChangePassword(passwordHash);
 
         resetToken.MarkAsUsed();
+
+        await _userRepository.UpdateAsync(
+            user,
+            cancellationToken);
 
         await _passwordResetRepository.UpdateAsync(
             resetToken,
@@ -70,12 +86,12 @@ internal sealed class ResetPasswordCommandHandler
                 user.Id,
                 cancellationToken);
 
-        foreach (var token in refreshTokens)
+        foreach (var refreshToken in refreshTokens)
         {
-            token.Revoke();
+            refreshToken.Revoke();
 
             await _refreshTokenRepository.UpdateAsync(
-                token,
+                refreshToken,
                 cancellationToken);
         }
 

@@ -6,22 +6,22 @@ using DevFlow.Notification.Infrastructure.Email.Sending;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DevFlow.Notification.Infrastructure.Email.Verification;
+namespace DevFlow.Notification.Infrastructure.Email.PasswordReset;
 
-public sealed class VerificationEmailSender
+public sealed class PasswordResetEmailSender
 {
-    private const string TemplateName = "VerifyEmail.html";
+    private const string TemplateName = "ResetPassword.html";
 
     private readonly IEmailTemplateRenderer _templateRenderer;
     private readonly IEmailSender _emailSender;
     private readonly EmailSettings _settings;
-    private readonly ILogger<VerificationEmailSender> _logger;
+    private readonly ILogger<PasswordResetEmailSender> _logger;
 
-    public VerificationEmailSender(
+    public PasswordResetEmailSender(
         IEmailTemplateRenderer templateRenderer,
         IEmailSender emailSender,
         IOptions<EmailSettings> settings,
-        ILogger<VerificationEmailSender> logger)
+        ILogger<PasswordResetEmailSender> logger)
     {
         ArgumentNullException.ThrowIfNull(templateRenderer);
         ArgumentNullException.ThrowIfNull(emailSender);
@@ -37,18 +37,12 @@ public sealed class VerificationEmailSender
     public async Task SendAsync(
         string email,
         string firstName,
-        Guid verificationToken,
+        string resetToken,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
-
-        if (verificationToken == Guid.Empty)
-        {
-            throw new ArgumentException(
-                "Verification token cannot be empty.",
-                nameof(verificationToken));
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(resetToken);
 
         if (string.IsNullOrWhiteSpace(
                 _settings.FrontendBaseUrl))
@@ -57,15 +51,9 @@ public sealed class VerificationEmailSender
                 "Email verification base URL is not configured.");
         }
 
-        _logger.SendingVerificationEmail(email);
-
-        var token = verificationToken.ToString(
-            "D",
-            CultureInfo.InvariantCulture);
-
-        var verificationUrl =
+        var resetUrl =
             $"{_settings.FrontendBaseUrl.TrimEnd('/')}" +
-            $"/verify-email?token={Uri.EscapeDataString(token)}";
+            $"/reset-password?token={Uri.EscapeDataString(resetToken)}";
 
         var html = await _templateRenderer.RenderAsync(
             TemplateName,
@@ -73,7 +61,7 @@ public sealed class VerificationEmailSender
                 StringComparer.Ordinal)
             {
                 ["FirstName"] = firstName,
-                ["VerificationUrl"] = verificationUrl,
+                ["ResetUrl"] = resetUrl,
                 ["Year"] = DateTime.UtcNow.Year.ToString(
                     CultureInfo.InvariantCulture)
             },
@@ -85,7 +73,7 @@ public sealed class VerificationEmailSender
                 firstName,
                 email),
 
-            Subject = "Verify your DevFlow email",
+            Subject = "Reset your DevFlow password",
 
             HtmlBody = html
         };
@@ -94,6 +82,6 @@ public sealed class VerificationEmailSender
             message,
             cancellationToken);
 
-        _logger.VerificationEmailSent(email);
+        _logger.PasswordResetEmailSent(email);
     }
 }

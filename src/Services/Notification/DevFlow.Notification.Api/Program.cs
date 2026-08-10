@@ -31,10 +31,10 @@ builder.Services
     .BindConfiguration(EmailSettings.SectionName)
     .Validate(
         settings => Uri.TryCreate(
-            settings.VerificationBaseUrl,
+            settings.FrontendBaseUrl,
             UriKind.Absolute,
             out _),
-        "Email:VerificationBaseUrl must be a valid absolute URL.")
+        "Email:FrontendBaseUrl must be a valid absolute URL.")
     .ValidateOnStart();
 
 var app = builder.Build();

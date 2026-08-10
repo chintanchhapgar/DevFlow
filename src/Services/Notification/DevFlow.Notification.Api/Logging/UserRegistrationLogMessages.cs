@@ -19,4 +19,12 @@ internal static partial class UserRegistrationLogMessages
     public static partial void VerificationResentEventReceived(
         this ILogger logger,
         Guid userId);
+
+    [LoggerMessage(
+     EventId = 7201,
+     Level = LogLevel.Information,
+     Message = "Password reset email requested for user {UserId}.")]
+    public static partial void PasswordResetEmailRequested(
+     this ILogger logger,
+     Guid userId);
 }

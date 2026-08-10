@@ -1,11 +1,11 @@
-using DevFlow.SharedKernel.Common;
-using DevFlow.Identity.Application.Common.Abstractions.Notifications;
+using DevFlow.BuildingBlocks.Contracts.IntegrationEvents.Identity;
+using DevFlow.BuildingBlocks.Messaging.EventBus;
+using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Domain.Authentication.PasswordResetTokens;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Results;
 using MediatR;
-using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 
 namespace DevFlow.Identity.Application.Authentication.ForgotPassword;
 
@@ -15,18 +15,23 @@ internal sealed class ForgotPasswordCommandHandler
     private readonly IUserRepository _userRepository;
     private readonly IPasswordResetTokenRepository _passwordResetRepository;
     private readonly IPasswordResetTokenGenerator _tokenGenerator;
-    private readonly IEmailSender _emailSender;
+    private readonly IEventBus _eventBus;
 
     public ForgotPasswordCommandHandler(
         IUserRepository userRepository,
         IPasswordResetTokenRepository passwordResetRepository,
         IPasswordResetTokenGenerator tokenGenerator,
-        IEmailSender emailSender)
+        IEventBus eventBus)
     {
+        ArgumentNullException.ThrowIfNull(userRepository);
+        ArgumentNullException.ThrowIfNull(passwordResetRepository);
+        ArgumentNullException.ThrowIfNull(tokenGenerator);
+        ArgumentNullException.ThrowIfNull(eventBus);
+
         _userRepository = userRepository;
         _passwordResetRepository = passwordResetRepository;
         _tokenGenerator = tokenGenerator;
-        _emailSender = emailSender;
+        _eventBus = eventBus;
     }
 
     public async Task<Result<ForgotPasswordResponse>> Handle(
@@ -37,7 +42,7 @@ internal sealed class ForgotPasswordCommandHandler
             request.Email,
             cancellationToken);
 
-        // Prevent email enumeration
+        // Prevent email enumeration.
         if (user is null)
         {
             return new ForgotPasswordResponse();
@@ -48,19 +53,22 @@ internal sealed class ForgotPasswordCommandHandler
         var resetToken = PasswordResetToken.Create(
             user.Id,
             tokenValue,
-            DateTime.UtcNow.AddHours(1));       
+            DateTime.UtcNow.AddHours(1));
 
         await _passwordResetRepository.AddAsync(
             resetToken,
             cancellationToken);
 
-        await _emailSender.SendPasswordResetEmailAsync(
-           user.Email,
-           tokenValue,
-           cancellationToken);
+        var integrationEvent =
+            new UserPasswordResetRequestedIntegrationEvent(
+                user.Id.Value,
+                user.Email,
+                user.FirstName,
+                tokenValue);
 
-        // Email sending will be implemented next.
-        // For now, the token is persisted.
+        await _eventBus.PublishAsync(
+            integrationEvent,
+            cancellationToken);
 
         return new ForgotPasswordResponse();
     }
