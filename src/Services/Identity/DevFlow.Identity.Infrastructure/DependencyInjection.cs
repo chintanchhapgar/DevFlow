@@ -17,6 +17,7 @@ using DevFlow.Identity.Infrastructure.Persistence.Repositories;
 using DevFlow.Identity.Infrastructure.Requests;
 using DevFlow.Identity.Infrastructure.Security;
 using DevFlow.Identity.Infrastructure.Seed;
+using DevFlow.SharedKernel.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,8 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
+
+        services.AddScoped<ISessionValidator, SessionValidator>();
 
         services.AddScoped<IPasswordResetTokenRepository,PasswordResetTokenRepository>();
 
