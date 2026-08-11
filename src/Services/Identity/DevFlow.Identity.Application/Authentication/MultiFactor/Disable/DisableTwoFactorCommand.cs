@@ -9,7 +9,6 @@ namespace DevFlow.Identity.Application.Authentication.MultiFactor.Disable;
 /// or a valid recovery code.
 /// </summary>
 public sealed record DisableTwoFactorCommand(
-    Guid UserId,
     string Code,
     bool IsRecoveryCode)
     : IRequest<Result<DisableTwoFactorResponse>>;

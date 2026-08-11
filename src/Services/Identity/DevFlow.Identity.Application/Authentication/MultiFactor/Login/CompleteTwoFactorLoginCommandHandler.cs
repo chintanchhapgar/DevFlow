@@ -120,6 +120,11 @@ internal sealed class CompleteTwoFactorLoginCommandHandler
                 cancellationToken: cancellationToken);
         }
 
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.LoginSucceeded,
+            cancellationToken: cancellationToken);
+
         return AuthenticationResponse.Success(
             accessToken,
             refreshToken.Token,

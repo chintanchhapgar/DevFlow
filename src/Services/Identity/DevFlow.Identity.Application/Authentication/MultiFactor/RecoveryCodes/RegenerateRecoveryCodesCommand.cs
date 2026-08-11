@@ -8,7 +8,6 @@ namespace DevFlow.Identity.Application.Authentication.MultiFactor.RecoveryCodes;
 /// Requires a valid TOTP or recovery code.
 /// </summary>
 public sealed record RegenerateRecoveryCodesCommand(
-    Guid UserId,
     string Code,
     bool IsRecoveryCode)
     : IRequest<Result<RegenerateRecoveryCodesResponse>>;

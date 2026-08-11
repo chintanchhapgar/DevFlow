@@ -1,6 +1,5 @@
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
-using DevFlow.Identity.Application.Common.Abstractions.Security;
 using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.SharedKernel.Common;
@@ -16,15 +15,16 @@ internal sealed class SetupTwoFactorCommandHandler
 {
     private readonly IUserRepository _users;
     private readonly ITotpService _totp;
-    private readonly ISecurityEventLogger _securityEventLogger;
+    private readonly ICurrentUser _currentUser;
+
     public SetupTwoFactorCommandHandler(
         IUserRepository users,
         ITotpService totp,
-        ISecurityEventLogger securityEventLogger)
+        ICurrentUser currentUser)
     {
         _users = users;
         _totp = totp;
-        _securityEventLogger = securityEventLogger;
+        _currentUser = currentUser;
     }
 
     public async Task<Result<SetupTwoFactorResponse>> Handle(
@@ -32,7 +32,7 @@ internal sealed class SetupTwoFactorCommandHandler
         CancellationToken cancellationToken)
     {
         var user = await _users.GetByIdAsync(
-            new UserId(request.UserId),
+            new UserId(_currentUser.UserId),
             cancellationToken);
 
         if (user is null)
@@ -51,17 +51,11 @@ internal sealed class SetupTwoFactorCommandHandler
                 result.Error);
         }
 
-        Console.WriteLine($"Pending: {user.MultiFactor.Pending}");
-        Console.WriteLine($"Secret : {user.MultiFactor.Secret}");
+        // NEVER log the TOTP secret.
 
         await _users.UpdateAsync(
             user,
             cancellationToken);
-
-        await _securityEventLogger.LogAsync(
-            user.Id,
-            SecurityEventType.TwoFactorEnabled,
-            cancellationToken: cancellationToken);
 
         var qrUri = _totp.GenerateQrCodeUri(
             "DevFlow",

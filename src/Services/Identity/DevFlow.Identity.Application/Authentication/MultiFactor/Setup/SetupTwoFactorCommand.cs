@@ -3,6 +3,5 @@ using MediatR;
 
 namespace DevFlow.Identity.Application.Authentication.MultiFactor.Setup;
 
-public sealed record SetupTwoFactorCommand(
-    Guid UserId)
+public sealed record SetupTwoFactorCommand
     : IRequest<Result<SetupTwoFactorResponse>>;

@@ -1,7 +1,10 @@
 using DevFlow.Identity.Application.Common.Abstractions.Authentication;
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Application.Common.Abstractions.Security;
+using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Identity.Domain.Authentication.Users.Owned;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -15,15 +18,20 @@ internal sealed class RegenerateRecoveryCodesCommandHandler
     private readonly IUserRepository _users;
     private readonly ITotpService _totp;
     private readonly IRecoveryCodeGenerator _recoveryCodeGenerator;
-
+    private readonly ICurrentUser _currentUser;
+    private readonly ISecurityEventLogger _securityEventLogger;
     public RegenerateRecoveryCodesCommandHandler(
         IUserRepository users,
         ITotpService totp,
-        IRecoveryCodeGenerator recoveryCodeGenerator)
+        IRecoveryCodeGenerator recoveryCodeGenerator,
+        ICurrentUser currentUser,
+        ISecurityEventLogger securityEventLogger)
     {
         _users = users;
         _totp = totp;
         _recoveryCodeGenerator = recoveryCodeGenerator;
+        _currentUser = currentUser;
+        _securityEventLogger = securityEventLogger;
     }
 
     public async Task<Result<RegenerateRecoveryCodesResponse>> Handle(
@@ -31,7 +39,7 @@ internal sealed class RegenerateRecoveryCodesCommandHandler
         CancellationToken cancellationToken)
     {
         var user = await _users.GetByIdAsync(
-            new UserId(request.UserId),
+            new UserId(_currentUser.UserId),
             cancellationToken);
 
         if (user is null)
@@ -75,6 +83,11 @@ internal sealed class RegenerateRecoveryCodesCommandHandler
         await _users.UpdateAsync(
             user,
             cancellationToken);
+
+        await _securityEventLogger.LogAsync(
+            user.Id,
+            SecurityEventType.RecoveryCodesRegenerated,
+            cancellationToken: cancellationToken);
 
         return Result.Success(
             new RegenerateRecoveryCodesResponse(

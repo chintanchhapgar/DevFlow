@@ -16,22 +16,21 @@ internal sealed class DisableTwoFactorEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
-            "/api/auth/mfa/disable",
-            async (
-                DisableTwoFactorCommand command,
-                ISender sender,
-                HttpContext httpContext,
-                CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(
-                    command,
-                    cancellationToken);
+        "/api/auth/mfa/disable",
+        async (
+            DisableTwoFactorCommand command,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            var result = await sender.Send(
+                command,
+                cancellationToken);
 
-                return result.ToApiResult(httpContext);
-            })
-            .WithTags("MFA")
+            return result.ToApiResult(httpContext);
+        })
+        .WithTags("MFA")
         .WithName("DisableTwoFactor")
-        .WithSummary("Disable two-factor authentication")
         .WithDescription(
             "Disables two-factor authentication after verifying a TOTP or recovery code.")
         .Produces(StatusCodes.Status200OK)

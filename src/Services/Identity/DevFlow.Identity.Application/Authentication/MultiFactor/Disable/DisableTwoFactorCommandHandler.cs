@@ -4,6 +4,7 @@ using DevFlow.Identity.Application.Common.Abstractions.Persistence;
 using DevFlow.Identity.Application.Common.Abstractions.Security;
 using DevFlow.Identity.Domain.Authentication.SecurityEvents;
 using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Results;
 using MediatR;
 
@@ -17,14 +18,16 @@ internal sealed class DisableTwoFactorCommandHandler
     private readonly IUserRepository _users;
     private readonly ITotpService _totp;
     private readonly ISecurityEventLogger _securityEventLogger;
+    private readonly ICurrentUser _currentUser;
     public DisableTwoFactorCommandHandler(
         IUserRepository users,
         ITotpService totp,
-        ISecurityEventLogger securityEventLogger)
+        ISecurityEventLogger securityEventLogger, ICurrentUser currentUser)
     {
         _users = users;
         _totp = totp;
         _securityEventLogger = securityEventLogger;
+        _currentUser = currentUser;
     }
 
     public async Task<Result<DisableTwoFactorResponse>> Handle(
@@ -32,7 +35,7 @@ internal sealed class DisableTwoFactorCommandHandler
         CancellationToken cancellationToken)
     {
         var user = await _users.GetByIdAsync(
-            new UserId(request.UserId),
+            new UserId(_currentUser.UserId),
             cancellationToken);
 
         if (user is null)
@@ -73,7 +76,7 @@ internal sealed class DisableTwoFactorCommandHandler
         if (result.IsFailure)
         {
             return Result.Failure<DisableTwoFactorResponse>(
-               verificationResult.Error);
+                result.Error);
         }
 
         await _users.UpdateAsync(

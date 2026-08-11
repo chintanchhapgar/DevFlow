@@ -22,5 +22,6 @@ public enum SecurityEventType
 
     EmailVerified = 13,
 
-    AccountLocked = 14
+    AccountLocked = 14,
+    RecoveryCodesRegenerated = 15
 }

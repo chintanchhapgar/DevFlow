@@ -7,7 +7,5 @@ internal sealed class SetupTwoFactorValidator
 {
     public SetupTwoFactorValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty();
     }
 }

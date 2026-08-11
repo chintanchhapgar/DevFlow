@@ -7,8 +7,6 @@ internal sealed class VerifyTwoFactorValidator
 {
     public VerifyTwoFactorValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty();
 
         RuleFor(x => x.Code)
             .NotEmpty()
