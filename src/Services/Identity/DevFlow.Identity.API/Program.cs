@@ -28,6 +28,24 @@ builder.Services.AddMessaging(
         typeof(Program).Assembly
     ]);
 
+const string DevFlowCorsPolicy = "DevFlowCors";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        DevFlowCorsPolicy,
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:5174",
+                    "https://localhost:5174")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -39,6 +57,8 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors(DevFlowCorsPolicy);
 
 app.UseAuthentication();
 
