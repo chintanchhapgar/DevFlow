@@ -9,72 +9,70 @@ export function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        Loading...
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <span className="text-sm text-slate-400">
+          Loading...
+        </span>
       </div>
     );
   }
 
   if (isError || !profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Unable to load your profile.</p>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-slate-400">
+          Unable to load your profile.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-bold">
-            DevFlow
-          </h1>
-
-          <span className="text-sm text-slate-400">
-            {profile.email}
-          </span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-6 py-10">
-        <h2 className="text-3xl font-bold">
+    <div className="mx-auto w-full max-w-7xl">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
           Welcome, {profile.firstName}
-        </h2>
+        </h1>
 
         <p className="mt-2 text-slate-400">
           You're successfully authenticated.
         </p>
+      </div>
 
-        <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">
-            Profile
-          </h3>
+      <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-6">
+        <h2 className="text-lg font-semibold">
+          Profile
+        </h2>
 
-          <div className="mt-4 space-y-2 text-sm">
-            <p>
-              <span className="text-slate-400">
-                Name:
-              </span>{" "}
+        <div className="mt-4 space-y-3 text-sm">
+          <p>
+            <span className="text-slate-400">
+              Name:
+            </span>{" "}
+            <span className="text-white">
               {profile.fullName}
-            </p>
+            </span>
+          </p>
 
-            <p>
-              <span className="text-slate-400">
-                Email:
-              </span>{" "}
+          <p>
+            <span className="text-slate-400">
+              Email:
+            </span>{" "}
+            <span className="text-white">
               {profile.email}
-            </p>
+            </span>
+          </p>
 
-            <p>
-              <span className="text-slate-400">
-                Role:
-              </span>{" "}
+          <p>
+            <span className="text-slate-400">
+              Role:
+            </span>{" "}
+            <span className="text-white">
               {profile.role}
-            </p>
-          </div>
+            </span>
+          </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
