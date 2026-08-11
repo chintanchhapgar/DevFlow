@@ -30,20 +30,16 @@ internal sealed class RevokeSessionCommandHandler
         RevokeSessionCommand request,
         CancellationToken cancellationToken)
     {
-        var tokens = await _refreshTokens.GetBySessionIdAsync(
-            request.SessionId,
-            cancellationToken);
+        var tokens =
+    await _refreshTokens.GetByUserIdAndSessionIdAsync(
+        new UserId(_currentUser.UserId),
+        request.SessionId,
+        cancellationToken);
 
         if (tokens.Count == 0)
         {
             return Result.Failure<RevokeSessionResponse>(
                 UserErrors.InvalidRefreshToken);
-        }
-
-        if (tokens[0].UserId != new UserId(_currentUser.UserId))
-        {
-            return Result.Failure<RevokeSessionResponse>(
-                UserErrors.Unauthorized);
         }
 
 

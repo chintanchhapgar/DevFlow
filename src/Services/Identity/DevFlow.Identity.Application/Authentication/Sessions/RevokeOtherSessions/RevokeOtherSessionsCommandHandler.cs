@@ -32,10 +32,15 @@ internal sealed class RevokeOtherSessionsCommandHandler
         CancellationToken cancellationToken)
     {
         var sessions =
-            await _refreshTokens.GetActiveOtherSessionsAsync(
-                new UserId(_currentUser.UserId),
-                _currentUser.SessionId,
-                cancellationToken);
+    await _refreshTokens.GetActiveOtherSessionsAsync(
+        new UserId(_currentUser.UserId),
+        _currentUser.SessionId,
+        cancellationToken);
+
+        var sessionCount = sessions
+            .Select(x => x.SessionId)
+            .Distinct()
+            .Count();
 
         foreach (var token in sessions)
         {
@@ -54,7 +59,7 @@ internal sealed class RevokeOtherSessionsCommandHandler
 
         return Result.Success(
             new RevokeOtherSessionsResponse(
-                sessions.Count,
+                sessionCount,
                 "Other sessions revoked successfully."));
     }
 }

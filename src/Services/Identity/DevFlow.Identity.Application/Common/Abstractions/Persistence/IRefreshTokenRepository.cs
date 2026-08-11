@@ -37,5 +37,9 @@ public interface IRefreshTokenRepository
         UserId userId,
         Guid currentSessionId,
         CancellationToken cancellationToken);
+    Task<List<RefreshToken>> GetByUserIdAndSessionIdAsync(
+        UserId userId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default);
 
 }
