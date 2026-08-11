@@ -14,9 +14,11 @@ internal sealed class LogoutCommandHandler
 
     public LogoutCommandHandler(
         IRefreshTokenRepository refreshTokenRepository,
-        ISecurityEventLogger securityEventLogger
-        )
+        ISecurityEventLogger securityEventLogger)
     {
+        ArgumentNullException.ThrowIfNull(refreshTokenRepository);
+        ArgumentNullException.ThrowIfNull(securityEventLogger);
+
         _refreshTokenRepository = refreshTokenRepository;
         _securityEventLogger = securityEventLogger;
     }
@@ -31,8 +33,7 @@ internal sealed class LogoutCommandHandler
                 cancellationToken);
 
         // Idempotent logout:
-        // If the token doesn't exist or is already inactive,
-        // still return success.
+        // If the token doesn't exist, return success.
         if (refreshToken is null)
         {
             return new LogoutResponse();
