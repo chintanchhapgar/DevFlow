@@ -86,8 +86,8 @@ export function UserMenu() {
       }
     } catch {
       /*
-       * Local authentication must still be cleared
-       * if the logout API request fails.
+       * Even if the API request fails,
+       * clear local authentication state.
        */
     } finally {
       authStorage.clear();
@@ -140,14 +140,15 @@ export function UserMenu() {
           items-center
           justify-center
           rounded-full
-          bg-primary
+          bg-blue-600
           font-semibold
-          text-primary-foreground
+          text-white
+          shadow-sm
           transition
-          hover:opacity-90
+          hover:bg-blue-700
           focus:outline-none
           focus:ring-2
-          focus:ring-primary/50
+          focus:ring-blue-500/30
         "
       >
         {initials}
@@ -166,15 +167,16 @@ export function UserMenu() {
             overflow-hidden
             rounded-xl
             border
-            border-white/10
-            bg-slate-900
-            shadow-xl
-            shadow-black/30
+            border-slate-200
+            bg-white
+            shadow-lg
+            shadow-slate-900/10
           "
         >
           {/* User Information */}
-          <div className="border-b border-white/10 px-4 py-4">
+          <div className="border-b border-slate-200 px-4 py-4">
             <div className="flex items-center gap-3">
+
               {/* Avatar */}
               <div
                 className="
@@ -185,9 +187,9 @@ export function UserMenu() {
                   items-center
                   justify-center
                   rounded-full
-                  bg-primary
+                  bg-blue-50
                   font-semibold
-                  text-primary-foreground
+                  text-blue-600
                 "
               >
                 {initials}
@@ -195,11 +197,11 @@ export function UserMenu() {
 
               {/* User Details */}
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">
+                <p className="truncate text-sm font-semibold text-slate-900">
                   {profile?.fullName ?? "User"}
                 </p>
 
-                <p className="truncate text-xs text-slate-400">
+                <p className="truncate text-xs text-slate-500">
                   {profile?.email ?? ""}
                 </p>
               </div>
@@ -208,6 +210,7 @@ export function UserMenu() {
 
           {/* Menu Items */}
           <div className="p-2">
+
             {/* Profile */}
             <button
               type="button"
@@ -222,13 +225,13 @@ export function UserMenu() {
                 px-3
                 py-2
                 text-sm
-                text-slate-300
+                text-slate-600
                 transition
-                hover:bg-white/5
-                hover:text-white
+                hover:bg-slate-50
+                hover:text-slate-900
               "
             >
-              <User className="h-4 w-4" />
+              <User className="h-4 w-4 text-slate-400" />
 
               <span>Profile</span>
             </button>
@@ -247,19 +250,19 @@ export function UserMenu() {
                 px-3
                 py-2
                 text-sm
-                text-slate-300
+                text-slate-600
                 transition
-                hover:bg-white/5
-                hover:text-white
+                hover:bg-slate-50
+                hover:text-slate-900
               "
             >
-              <Shield className="h-4 w-4" />
+              <Shield className="h-4 w-4 text-slate-400" />
 
               <span>Security</span>
             </button>
 
             {/* Divider */}
-            <div className="my-2 border-t border-white/10" />
+            <div className="my-2 border-t border-slate-200" />
 
             {/* Logout */}
             <button
@@ -276,10 +279,10 @@ export function UserMenu() {
                 px-3
                 py-2
                 text-sm
-                text-red-400
+                text-red-600
                 transition
-                hover:bg-red-500/10
-                hover:text-red-300
+                hover:bg-red-50
+                hover:text-red-700
                 disabled:cursor-not-allowed
                 disabled:opacity-50
               "
