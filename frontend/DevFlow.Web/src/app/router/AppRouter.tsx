@@ -9,7 +9,8 @@ import { AppLayout } from "@/app/layout/AppLayout";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ProtectedRoute } from "./ProtectedRoute";
-
+import { ProfilePage } from "@/features/profile/pages/ProfilePage";
+import { SecurityPage } from "@/features/security/pages/SecurityPage";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -49,16 +50,12 @@ export function AppRouter() {
 
             <Route
               path="/profile"
-              element={
-                <div>Profile</div>
-              }
+              element={<ProfilePage />}
             />
 
             <Route
               path="/security"
-              element={
-                <div>Security</div>
-              }
+              element={<SecurityPage />}
             />
 
             <Route

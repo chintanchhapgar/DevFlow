@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { LogOut, Settings, User } from "lucide-react";
+import {
+  LogOut,
+  Shield,
+  User,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { useProfile } from "@/features/auth/hooks/use-profile";
@@ -82,8 +86,8 @@ export function UserMenu() {
       }
     } catch {
       /*
-       * Even if the backend request fails,
-       * clear local authentication state.
+       * Local authentication must still be cleared
+       * if the logout API request fails.
        */
     } finally {
       authStorage.clear();
@@ -104,10 +108,10 @@ export function UserMenu() {
     navigate("/profile");
   }
 
-  function handleSettings() {
+  function handleSecurity() {
     setIsOpen(false);
 
-    navigate("/settings");
+    navigate("/security");
   }
 
   const initials =
@@ -229,11 +233,11 @@ export function UserMenu() {
               <span>Profile</span>
             </button>
 
-            {/* Settings */}
+            {/* Security */}
             <button
               type="button"
               role="menuitem"
-              onClick={handleSettings}
+              onClick={handleSecurity}
               className="
                 flex
                 w-full
@@ -249,9 +253,9 @@ export function UserMenu() {
                 hover:text-white
               "
             >
-              <Settings className="h-4 w-4" />
+              <Shield className="h-4 w-4" />
 
-              <span>Settings</span>
+              <span>Security</span>
             </button>
 
             {/* Divider */}
