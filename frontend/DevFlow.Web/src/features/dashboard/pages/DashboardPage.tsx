@@ -93,8 +93,19 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="flex items-center gap-3 text-sm text-slate-500">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+        <div className="flex items-center gap-3 text-sm text-[var(--devflow-text-muted)]">
+          <div
+            className="
+              h-5
+              w-5
+              animate-spin
+              rounded-full
+              border-2
+              border-[var(--devflow-border)]
+              border-t-[var(--devflow-primary)]
+            "
+          />
+
           Loading dashboard...
         </div>
       </div>
@@ -102,23 +113,23 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6">
-
+    <div className="mx-auto w-full max-w-7xl space-y-8">
       {/* Header */}
       <div>
-        <p className="text-sm font-medium text-blue-600">
+        <p className="text-sm font-medium text-[var(--devflow-primary)]">
           Workspace
         </p>
 
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--devflow-text)]">
           Welcome back
           {profile?.firstName
             ? `, ${profile.firstName}`
             : ""}
         </h1>
 
-        <p className="mt-1 text-sm text-slate-500">
-          Here's what's happening across your DevFlow workspace.
+        <p className="mt-1.5 text-sm text-[var(--devflow-text-muted)]">
+          Here&apos;s what&apos;s happening across your DevFlow
+          workspace.
         </p>
       </div>
 
@@ -131,7 +142,6 @@ export function DashboardPage() {
 
         <RecentActivity activities={activities} />
       </div>
-
     </div>
   );
 }

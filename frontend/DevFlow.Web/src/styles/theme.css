@@ -1,19 +1,55 @@
 :root {
-  --devflow-bg: #080b12;
-  --devflow-surface: #10151f;
-  --devflow-surface-hover: #151c28;
+  /* ─────────────────────────────────────────
+     DevFlow Brand
+     ───────────────────────────────────────── */
 
-  --devflow-border: rgba(255, 255, 255, 0.07);
+  --devflow-bg: #f8fafc;
 
-  --devflow-primary: #7c5cff;
-  --devflow-primary-hover: #8b70ff;
+  --devflow-surface: #ffffff;
+  --devflow-surface-hover: #f8fafc;
 
-  --devflow-text: #f8fafc;
-  --devflow-text-muted: #94a3b8;
-  --devflow-text-subtle: #64748b;
+  --devflow-border: #e2e8f0;
+  --devflow-border-subtle: #eef2f7;
 
-  --devflow-success: #22c55e;
-  --devflow-warning: #f59e0b;
-  --devflow-danger: #ef4444;
-  --devflow-info: #38bdf8;
+  /* Soft blue-gray accent */
+  --devflow-primary: #456b9a;
+  --devflow-primary-hover: #3f618c;
+  --devflow-primary-soft: #eef3f8;
+  --devflow-primary-border: #dbe4ed;
+
+  /* Text */
+  --devflow-text: #0f172a;
+  --devflow-text-secondary: #334155;
+  --devflow-text-muted: #64748b;
+  --devflow-text-subtle: #94a3b8;
+
+  /* Status */
+  --devflow-success: #16a34a;
+  --devflow-success-soft: #f0fdf4;
+
+  --devflow-warning: #d97706;
+  --devflow-warning-soft: #fffbeb;
+
+  --devflow-danger: #dc2626;
+  --devflow-danger-soft: #fef2f2;
+
+  --devflow-info: #3b82f6;
+  --devflow-info-soft: #eff6ff;
+
+  /* Layout */
+  --devflow-radius-sm: 0.375rem;
+  --devflow-radius: 0.625rem;
+  --devflow-radius-lg: 0.75rem;
+  --devflow-radius-xl: 1rem;
+
+  /* Shadows */
+  --devflow-shadow-sm:
+    0 1px 2px rgb(15 23 42 / 0.04);
+
+  --devflow-shadow:
+    0 1px 3px rgb(15 23 42 / 0.06),
+    0 1px 2px rgb(15 23 42 / 0.04);
+
+  --devflow-shadow-lg:
+    0 10px 25px rgb(15 23 42 / 0.08);
 }

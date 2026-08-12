@@ -36,6 +36,24 @@ builder.Services
             out _),
         "Email:FrontendBaseUrl must be a valid absolute URL.")
     .ValidateOnStart();
+const string DevFlowCorsPolicy = "DevFlowCors";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        DevFlowCorsPolicy,
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:5174",
+                    "https://localhost:5174",
+                    "http://localhost:5173",
+                    "https://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -48,6 +66,8 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors(DevFlowCorsPolicy);
 
 app.UseAuthentication();
 

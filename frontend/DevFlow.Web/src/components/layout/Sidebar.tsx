@@ -67,100 +67,133 @@ function NavigationItem({
       end={path === "/"}
       className={({ isActive }) =>
         [
-          "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150",
+          "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
           isActive
-            ? "bg-blue-50 text-blue-700"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+            ? "bg-[#eef3f8] text-[#456b9a]"
+            : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
         ].join(" ")
       }
     >
-      {({ isActive }) => (
-        <>
-          {isActive && (
-            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-blue-600" />
-          )}
+      <Icon className="h-[18px] w-[18px] shrink-0" />
 
-          <Icon
-            className={[
-              "h-4 w-4 shrink-0",
-              isActive
-                ? "text-blue-600"
-                : "text-slate-400 group-hover:text-slate-600",
-            ].join(" ")}
-          />
-
-          <span className="font-medium">
-            {label}
-          </span>
-        </>
-      )}
+      <span>{label}</span>
     </NavLink>
   );
 }
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
-
+    <aside
+      className="
+        hidden
+        w-64
+        shrink-0
+        border-r
+        border-slate-200
+        bg-white
+        md:flex
+        md:flex-col
+      "
+    >
       {/* Brand */}
-      <div className="flex h-16 items-center border-b border-slate-200 px-5">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm">
+      <div
+        className="
+          flex
+          h-16
+          shrink-0
+          items-center
+          border-b
+          border-slate-200
+          px-5
+        "
+      >
+        <NavLink
+          to="/"
+          className="flex items-center gap-3"
+        >
+          {/* Logo */}
+          <div
+            className="
+              flex
+              h-9
+              w-9
+              items-center
+              justify-center
+              rounded-lg
+              bg-[#eef3f8]
+              text-sm
+              font-bold
+              text-[#456b9a]
+              ring-1
+              ring-[#dbe4ed]
+            "
+          >
             ◆
           </div>
 
-          <span className="text-sm font-bold tracking-tight text-slate-900">
-            DEVFLOW
-          </span>
-        </div>
+          {/* Brand Name */}
+          <div>
+            <div className="text-sm font-bold tracking-tight text-slate-900">
+              DEVFLOW
+            </div>
+
+            <div className="mt-0.5 text-[11px] font-medium text-slate-400">
+              Project Management
+            </div>
+          </div>
+        </NavLink>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-5">
+      <nav className="flex-1 overflow-y-auto px-3 py-5">
+        {/* Main */}
+        <div>
+          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Workspace
+          </p>
 
-        <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-          Workspace
+          <div className="space-y-1">
+            {navigation.map((item) => (
+              <NavigationItem
+                key={item.path}
+                {...item}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="space-y-1">
-          {navigation.map((item) => (
-            <NavigationItem
-              key={item.path}
-              {...item}
-            />
-          ))}
-        </div>
+        {/* Divider */}
+        <div className="my-6 border-t border-slate-100" />
 
-        <div className="my-6 h-px bg-slate-200" />
+        {/* Account */}
+        <div>
+          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Account
+          </p>
 
-        <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-          Account
-        </div>
-
-        <div className="space-y-1">
-          {accountNavigation.map((item) => (
-            <NavigationItem
-              key={item.path}
-              {...item}
-            />
-          ))}
+          <div className="space-y-1">
+            {accountNavigation.map((item) => (
+              <NavigationItem
+                key={item.path}
+                {...item}
+              />
+            ))}
+          </div>
         </div>
       </nav>
 
-      {/* Workspace footer */}
-      <div className="border-t border-slate-200 p-3">
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-xs font-semibold text-blue-600">
-            D
-          </div>
+      {/* Bottom Status */}
+      <div className="border-t border-slate-100 p-4">
+        <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2.5">
+          <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
 
           <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-slate-700">
-              DevFlow Workspace
+            <p className="text-xs font-medium text-slate-700">
+              System Online
             </p>
 
-            <p className="truncate text-[11px] text-slate-400">
-              Personal workspace
+            <p className="truncate text-[10px] text-slate-400">
+              All services operational
             </p>
           </div>
         </div>

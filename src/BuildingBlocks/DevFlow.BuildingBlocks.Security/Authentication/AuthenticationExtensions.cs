@@ -64,37 +64,58 @@ public static class AuthenticationExtensions
                 {
                     OnTokenValidated = async context =>
                     {
+                        /*
+                         * Session validation is optional.
+                         *
+                         * Identity API registers ISessionValidator,
+                         * so Identity validates the JWT session against
+                         * its refresh-token/session store.
+                         *
+                         * Other services, such as Project API, do not
+                         * register ISessionValidator and therefore rely
+                         * on normal JWT validation.
+                         */
+                        var sessionValidator =
+                            context.HttpContext.RequestServices
+                                .GetService<ISessionValidator>();
+
+                        if (sessionValidator is null)
+                        {
+                            return;
+                        }
+
                         var userIdValue =
                             context.Principal?
-                                .FindFirstValue(ClaimTypes.NameIdentifier);
+                                .FindFirstValue(
+                                    ClaimTypes.NameIdentifier);
 
                         var sessionIdValue =
                             context.Principal?
                                 .FindFirstValue("sid");
 
-                        if (!Guid.TryParse(userIdValue, out var userId) ||
-                            !Guid.TryParse(sessionIdValue, out var sessionId))
+                        if (!Guid.TryParse(
+                                userIdValue,
+                                out var userId) ||
+                            !Guid.TryParse(
+                                sessionIdValue,
+                                out var sessionId))
                         {
                             context.Fail("Invalid session.");
                             return;
                         }
 
-                        var sessionValidator =
-                            context.HttpContext.RequestServices
-                                .GetRequiredService<ISessionValidator>();
-
                         var isSessionActive =
-                            await sessionValidator.IsSessionActiveAsync(
-                                userId,
-                                sessionId,
-                                context.HttpContext.RequestAborted);
-
-                        Console.WriteLine(
-                            $"JWT SESSION CHECK: UserId={userId}, SessionId={sessionId}, Active={isSessionActive}");
+                            await sessionValidator
+                                .IsSessionActiveAsync(
+                                    userId,
+                                    sessionId,
+                                    context.HttpContext
+                                        .RequestAborted);
 
                         if (!isSessionActive)
                         {
-                            context.Fail("Session has been revoked.");
+                            context.Fail(
+                                "Session has been revoked.");
                         }
                     },
 
@@ -108,19 +129,25 @@ public static class AuthenticationExtensions
                         context.Response.ContentType =
                             "application/json";
 
-                        var response = new ApiResponse<object?>
-                        {
-                            Success = false,
-                            Message = "You do not have permission to perform this action.",
-                            Data = null,
-                            Error = new ApiError
+                        var response =
+                            new ApiResponse<object?>
                             {
-                                Code = "Authentication.Unauthorized",
-                                Type = ErrorType.Unauthorized
-                            },
-                            TraceId = context.HttpContext.TraceIdentifier,
-                            Timestamp = DateTime.UtcNow
-                        };
+                                Success = false,
+                                Message =
+                                    "You do not have permission to perform this action.",
+                                Data = null,
+                                Error = new ApiError
+                                {
+                                    Code =
+                                        "Authentication.Unauthorized",
+                                    Type =
+                                        ErrorType.Unauthorized
+                                },
+                                TraceId =
+                                    context.HttpContext
+                                        .TraceIdentifier,
+                                Timestamp = DateTime.UtcNow
+                            };
 
                         await context.Response.WriteAsync(
                             JsonSerializer.Serialize(response));
@@ -134,19 +161,24 @@ public static class AuthenticationExtensions
                         context.Response.ContentType =
                             "application/json";
 
-                        var response = new ApiResponse<object?>
-                        {
-                            Success = false,
-                            Message = "Forbidden.",
-                            Data = null,
-                            Error = new ApiError
+                        var response =
+                            new ApiResponse<object?>
                             {
-                                Code = "Authorization.Forbidden",
-                                Type = ErrorType.Forbidden
-                            },
-                            TraceId = context.HttpContext.TraceIdentifier,
-                            Timestamp = DateTime.UtcNow
-                        };
+                                Success = false,
+                                Message = "Forbidden.",
+                                Data = null,
+                                Error = new ApiError
+                                {
+                                    Code =
+                                        "Authorization.Forbidden",
+                                    Type =
+                                        ErrorType.Forbidden
+                                },
+                                TraceId =
+                                    context.HttpContext
+                                        .TraceIdentifier,
+                                Timestamp = DateTime.UtcNow
+                            };
 
                         await context.Response.WriteAsync(
                             JsonSerializer.Serialize(response));

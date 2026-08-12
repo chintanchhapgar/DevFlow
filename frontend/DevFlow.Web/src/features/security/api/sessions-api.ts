@@ -28,7 +28,7 @@ export async function revokeSession(
 }
 
 export async function revokeOtherSessions(): Promise<void> {
-  await apiClient.post(
-    "/api/auth/sessions/revoke-others"
+  await apiClient.delete(
+    "/api/auth/sessions/others"
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  ChevronDown,
   LogOut,
   Shield,
   User,
@@ -32,7 +33,9 @@ export function UserMenu() {
     function handleClickOutside(event: MouseEvent) {
       if (
         menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
+        !menuRef.current.contains(
+          event.target as Node,
+        )
       ) {
         setIsOpen(false);
       }
@@ -46,23 +49,23 @@ export function UserMenu() {
 
     document.addEventListener(
       "mousedown",
-      handleClickOutside
+      handleClickOutside,
     );
 
     document.addEventListener(
       "keydown",
-      handleKeyDown
+      handleKeyDown,
     );
 
     return () => {
       document.removeEventListener(
         "mousedown",
-        handleClickOutside
+        handleClickOutside,
       );
 
       document.removeEventListener(
         "keydown",
-        handleKeyDown
+        handleKeyDown,
       );
     };
   }, [isOpen]);
@@ -86,8 +89,8 @@ export function UserMenu() {
       }
     } catch {
       /*
-       * Even if the API request fails,
-       * clear local authentication state.
+       * Local authentication must still be cleared
+       * if the logout API request fails.
        */
     } finally {
       authStorage.clear();
@@ -104,20 +107,17 @@ export function UserMenu() {
 
   function handleProfile() {
     setIsOpen(false);
-
     navigate("/profile");
   }
 
   function handleSecurity() {
     setIsOpen(false);
-
     navigate("/security");
   }
 
   const initials =
-    profile?.firstName
-      ?.charAt(0)
-      .toUpperCase() ?? "U";
+    profile?.firstName?.charAt(0).toUpperCase() ??
+    "U";
 
   return (
     <div
@@ -140,15 +140,17 @@ export function UserMenu() {
           items-center
           justify-center
           rounded-full
-          bg-blue-600
+          bg-[#eef3f8]
+          text-sm
           font-semibold
-          text-white
-          shadow-sm
+          text-[#456b9a]
+          ring-1
+          ring-[#dbe4ed]
           transition
-          hover:bg-blue-700
+          hover:bg-[#e5edf5]
           focus:outline-none
           focus:ring-2
-          focus:ring-blue-500/30
+          focus:ring-[#456b9a]/20
         "
       >
         {initials}
@@ -163,33 +165,43 @@ export function UserMenu() {
             right-0
             top-12
             z-50
-            w-64
+            w-72
             overflow-hidden
             rounded-xl
             border
             border-slate-200
             bg-white
-            shadow-lg
+            shadow-xl
             shadow-slate-900/10
           "
         >
           {/* User Information */}
-          <div className="border-b border-slate-200 px-4 py-4">
+          <div
+            className="
+              border-b
+              border-slate-100
+              bg-slate-50/70
+              px-4
+              py-4
+            "
+          >
             <div className="flex items-center gap-3">
-
               {/* Avatar */}
               <div
                 className="
                   flex
-                  h-10
-                  w-10
+                  h-11
+                  w-11
                   shrink-0
                   items-center
                   justify-center
                   rounded-full
-                  bg-blue-50
+                  bg-[#eef3f8]
+                  text-sm
                   font-semibold
-                  text-blue-600
+                  text-[#456b9a]
+                  ring-1
+                  ring-[#dbe4ed]
                 "
               >
                 {initials}
@@ -201,16 +213,33 @@ export function UserMenu() {
                   {profile?.fullName ?? "User"}
                 </p>
 
-                <p className="truncate text-xs text-slate-500">
+                <p className="mt-0.5 truncate text-xs text-slate-500">
                   {profile?.email ?? ""}
                 </p>
+
+                {profile?.role && (
+                  <span
+                    className="
+                      mt-2
+                      inline-flex
+                      rounded-full
+                      bg-[#eef3f8]
+                      px-2
+                      py-0.5
+                      text-[10px]
+                      font-semibold
+                      text-[#456b9a]
+                    "
+                  >
+                    {profile.role}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
           {/* Menu Items */}
           <div className="p-2">
-
             {/* Profile */}
             <button
               type="button"
@@ -223,17 +252,36 @@ export function UserMenu() {
                 gap-3
                 rounded-lg
                 px-3
-                py-2
+                py-2.5
                 text-sm
+                font-medium
                 text-slate-600
-                transition
+                transition-colors
                 hover:bg-slate-50
                 hover:text-slate-900
+                focus:outline-none
+                focus:ring-2
+                focus:ring-[#456b9a]/10
               "
             >
-              <User className="h-4 w-4 text-slate-400" />
+              <span
+                className="
+                  flex
+                  h-8
+                  w-8
+                  items-center
+                  justify-center
+                  rounded-lg
+                  bg-slate-50
+                  text-slate-500
+                "
+              >
+                <User className="h-4 w-4" />
+              </span>
 
-              <span>Profile</span>
+              <span className="flex-1 text-left">
+                Profile
+              </span>
             </button>
 
             {/* Security */}
@@ -248,21 +296,40 @@ export function UserMenu() {
                 gap-3
                 rounded-lg
                 px-3
-                py-2
+                py-2.5
                 text-sm
+                font-medium
                 text-slate-600
-                transition
+                transition-colors
                 hover:bg-slate-50
                 hover:text-slate-900
+                focus:outline-none
+                focus:ring-2
+                focus:ring-[#456b9a]/10
               "
             >
-              <Shield className="h-4 w-4 text-slate-400" />
+              <span
+                className="
+                  flex
+                  h-8
+                  w-8
+                  items-center
+                  justify-center
+                  rounded-lg
+                  bg-slate-50
+                  text-slate-500
+                "
+              >
+                <Shield className="h-4 w-4" />
+              </span>
 
-              <span>Security</span>
+              <span className="flex-1 text-left">
+                Security
+              </span>
             </button>
 
             {/* Divider */}
-            <div className="my-2 border-t border-slate-200" />
+            <div className="my-2 border-t border-slate-100" />
 
             {/* Logout */}
             <button
@@ -277,19 +344,38 @@ export function UserMenu() {
                 gap-3
                 rounded-lg
                 px-3
-                py-2
+                py-2.5
                 text-sm
-                text-red-600
-                transition
+                font-medium
+                text-slate-600
+                transition-colors
                 hover:bg-red-50
-                hover:text-red-700
-                disabled:cursor-not-allowed
+                hover:text-red-600
+                focus:outline-none
+                focus:ring-2
+                focus:ring-red-500/10
+                disabled:pointer-events-none
                 disabled:opacity-50
               "
             >
-              <LogOut className="h-4 w-4" />
+              <span
+                className="
+                  flex
+                  h-8
+                  w-8
+                  items-center
+                  justify-center
+                  rounded-lg
+                  bg-slate-50
+                  text-slate-500
+                  transition-colors
+                  group-hover:bg-red-50
+                "
+              >
+                <LogOut className="h-4 w-4" />
+              </span>
 
-              <span>
+              <span className="flex-1 text-left">
                 {isLoggingOut
                   ? "Logging out..."
                   : "Logout"}

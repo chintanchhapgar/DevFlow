@@ -11,6 +11,7 @@ import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { SecurityPage } from "@/features/security/pages/SecurityPage";
+import { ProjectsPage } from "@/features/projects/pages/ProjectsPage";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -29,9 +30,7 @@ export function AppRouter() {
 
             <Route
               path="/projects"
-              element={
-                <div>Projects</div>
-              }
+              element={<ProjectsPage />} 
             />
 
             <Route

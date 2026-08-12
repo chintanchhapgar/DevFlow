@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./styles/theme.css";
 
 :root {
   --background: #080b12;
@@ -11,7 +10,7 @@
   --popover: #10151f;
   --popover-foreground: #f8fafc;
 
-  --primary: #7c5cff;
+  --primary: #456b9a;
   --primary-foreground: #ffffff;
 
   --secondary: #151c28;
@@ -28,17 +27,21 @@
 
   --border: rgba(255, 255, 255, 0.07);
   --input: rgba(255, 255, 255, 0.08);
-  --ring: #7c5cff;
+  --ring: #456b9a;
+
+  --devflow-primary: #456b9a;
 
   --radius: 0.75rem;
 }
 
+/* Tailwind v4 border default */
 * {
   border-color: var(--border);
 }
 
 html {
   background: var(--background);
+  color-scheme: light;
 }
 
 body {
@@ -46,18 +49,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
 
-  background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(124, 92, 255, 0.10),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 85% 15%,
-      rgba(56, 189, 248, 0.05),
-      transparent 25%
-    ),
-    var(--background);
+  background: #f8fafc;
 
   color: var(--foreground);
 
@@ -74,6 +66,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Better form consistency */
 button,
 input,
 textarea,
@@ -87,4 +80,34 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+/* Remove browser search decoration */
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+/* Selection */
+::selection {
+  background: #dbe4ed;
+  color: #0f172a;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

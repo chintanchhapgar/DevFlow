@@ -5,7 +5,6 @@ using DevFlow.SharedKernel.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
 namespace DevFlow.Project.Application.Projects.GetAll;
@@ -18,12 +17,23 @@ public sealed class GetProjectsEndpoint : IEndpoint
         app.MapGet(
             "/api/projects",
             async (
-                [AsParameters] PaginationRequest pagination,
+                int? page,
+                int? pageSize,
+                string? sortBy,
+                string? sortDirection,
                 string? search,
                 ISender sender,
                 HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
+                var pagination = new PaginationRequest
+                {
+                    Page = page ?? 1,
+                    PageSize = pageSize ?? 20,
+                    SortBy = sortBy,
+                    SortDirection = sortDirection ?? "asc"
+                };
+
                 var query = new GetProjectsQuery(
                     pagination,
                     search);
@@ -34,11 +44,13 @@ public sealed class GetProjectsEndpoint : IEndpoint
 
                 return result.ToApiResult(httpContext);
             })
-            .WithTags("Projects")
-            .WithName("Projects_GetAll")
-            .WithSummary("Get paged projects")
-            .WithDescription("Returns a paginated list of projects.")
-            .Produces<PagedList<ProjectListItemResponse>>(StatusCodes.Status200OK)
-            .RequireAuthorization(PolicyNames.ProjectViewer);
+        .WithTags("Projects")
+        .WithName("Projects_GetAll")
+        .WithSummary("Get paged projects")
+        .WithDescription("Returns a paginated list of projects.")
+        .Produces<PagedList<ProjectListItemResponse>>(
+            StatusCodes.Status200OK)
+        .RequireAuthorization(
+            PolicyNames.ProjectViewer);
     }
 }
