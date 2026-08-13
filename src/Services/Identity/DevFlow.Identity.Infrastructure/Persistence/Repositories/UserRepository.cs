@@ -1,4 +1,5 @@
 using DevFlow.Identity.Domain.Authentication.Users;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFlow.Identity.Infrastructure.Persistence.Repositories;
@@ -113,5 +114,30 @@ internal sealed class UserRepository : IUserRepository
             .FirstOrDefaultAsync(
                 x => x.EmailVerificationToken == token,
                 cancellationToken);
+    }
+    public async Task<IReadOnlyList<User>> GetByIdsAsync(
+    IReadOnlyCollection<Guid> userIds,
+    CancellationToken cancellationToken = default)
+    {
+        if (userIds.Count == 0)
+        {
+            return [];
+        }
+
+        var ids = userIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .Select(id => new UserId(id))
+            .ToArray();
+
+        if (ids.Length == 0)
+        {
+            return [];
+        }
+
+        return await _context.Users
+            .AsNoTracking()
+            .Where(user => ids.Contains(user.Id))
+            .ToListAsync(cancellationToken);
     }
 }

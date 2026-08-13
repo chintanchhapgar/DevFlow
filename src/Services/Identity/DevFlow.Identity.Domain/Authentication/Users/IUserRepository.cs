@@ -38,4 +38,8 @@ public interface IUserRepository
     Task<User?> GetByEmailVerificationTokenAsync(
     Guid token,
     CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<User>> GetByIdsAsync(
+    IReadOnlyCollection<Guid> userIds,
+    CancellationToken cancellationToken = default);
 }

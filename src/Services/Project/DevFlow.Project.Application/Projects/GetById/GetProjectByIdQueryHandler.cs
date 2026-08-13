@@ -1,3 +1,4 @@
+using DevFlow.Project.Application.Common.Abstractions.Identity;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.Projects.Errors;
 using DevFlow.Project.Domain.Projects.ValueObjects;
@@ -7,29 +8,76 @@ using MediatR;
 namespace DevFlow.Project.Application.Projects.GetById;
 
 internal sealed class GetProjectByIdQueryHandler
-    : IRequestHandler<GetProjectByIdQuery, Result<GetProjectResponse>>
+    : IRequestHandler<
+        GetProjectByIdQuery,
+        Result<GetProjectResponse>>
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IUserLookupService _userLookupService;
 
     public GetProjectByIdQueryHandler(
-        IProjectRepository projectRepository)
+        IProjectRepository projectRepository,
+        IUserLookupService userLookupService)
     {
         _projectRepository = projectRepository;
+        _userLookupService = userLookupService;
     }
 
     public async Task<Result<GetProjectResponse>> Handle(
         GetProjectByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetByIdAsync(
-            new ProjectId(request.ProjectId),
-            cancellationToken);
+        var project =
+            await _projectRepository.GetByIdAsync(
+                new ProjectId(request.ProjectId),
+                cancellationToken);
 
         if (project is null)
         {
             return Result.Failure<GetProjectResponse>(
                 ProjectErrors.NotFound);
         }
+
+        // Collect owner + member IDs and remove duplicates.
+        var userIds = project.Members
+            .Select(member => member.UserId)
+            .Append(project.OwnerId)
+            .Distinct()
+            .ToArray();
+
+        // Resolve all names with a single Identity API call.
+        var userNames =
+            await _userLookupService.GetNamesAsync(
+                userIds,
+                cancellationToken);
+
+        // Resolve owner name.
+        var ownerName =
+            userNames.TryGetValue(
+                project.OwnerId,
+                out var resolvedOwnerName)
+                ? resolvedOwnerName
+                : "Unknown User";
+
+        // Resolve member names.
+        var members =
+            project.Members
+                .Select(member =>
+                {
+                    var memberName =
+                        userNames.TryGetValue(
+                            member.UserId,
+                            out var resolvedMemberName)
+                            ? resolvedMemberName
+                            : "Unknown User";
+
+                    return new ProjectMemberResponse(
+                        member.UserId,
+                        member.Role.ToString(),
+                        memberName,
+                        member.JoinedOnUtc);
+                })
+                .ToList();
 
         var response = new GetProjectResponse(
             project.Id.Value,
@@ -39,13 +87,8 @@ internal sealed class GetProjectByIdQueryHandler
             project.Status.ToString(),
             project.Visibility.ToString(),
             project.OwnerId,
-            project.Members
-                .Select(member =>
-                    new ProjectMemberResponse(
-                        member.UserId,
-                        member.Role.ToString(),
-                        member.JoinedOnUtc))
-                .ToList());
+            ownerName,
+            members);
 
         return Result.Success(
             response,

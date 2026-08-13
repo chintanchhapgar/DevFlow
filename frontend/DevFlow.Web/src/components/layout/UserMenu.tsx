@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  ChevronDown,
   LogOut,
   Shield,
   User,

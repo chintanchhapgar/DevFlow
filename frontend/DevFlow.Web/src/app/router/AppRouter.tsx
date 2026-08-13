@@ -6,32 +6,60 @@ import {
 } from "react-router-dom";
 
 import { AppLayout } from "@/app/layout/AppLayout";
+
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { ProjectsPage } from "@/features/projects/pages/ProjectsPage";
+import { ProjectDetailPage } from "@/features/projects/pages/ProjectDetailPage";
+
 import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { SecurityPage } from "@/features/security/pages/SecurityPage";
-import { ProjectsPage } from "@/features/projects/pages/ProjectsPage";
+
+import { ProtectedRoute } from "./ProtectedRoute";
+
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* ================================================================== */}
+        {/* PUBLIC ROUTES                                                     */}
+        {/* ================================================================== */}
+
         <Route
           path="/login"
           element={<LoginPage />}
         />
 
+        {/* ================================================================== */}
+        {/* PROTECTED ROUTES                                                  */}
+        {/* ================================================================== */}
+
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
+
+            {/* Dashboard */}
             <Route
               path="/"
               element={<DashboardPage />}
             />
 
+            {/* ============================================================ */}
+            {/* PROJECTS                                                      */}
+            {/* ============================================================ */}
+
             <Route
               path="/projects"
-              element={<ProjectsPage />} 
+              element={<ProjectsPage />}
             />
+
+            <Route
+              path="/projects/:projectId"
+              element={<ProjectDetailPage />}
+            />
+
+            {/* ============================================================ */}
+            {/* WORK                                                         */}
+            {/* ============================================================ */}
 
             <Route
               path="/work"
@@ -40,6 +68,10 @@ export function AppRouter() {
               }
             />
 
+            {/* ============================================================ */}
+            {/* ACTIVITY                                                     */}
+            {/* ============================================================ */}
+
             <Route
               path="/activity"
               element={
@@ -47,15 +79,27 @@ export function AppRouter() {
               }
             />
 
+            {/* ============================================================ */}
+            {/* PROFILE                                                      */}
+            {/* ============================================================ */}
+
             <Route
               path="/profile"
               element={<ProfilePage />}
             />
 
+            {/* ============================================================ */}
+            {/* SECURITY                                                     */}
+            {/* ============================================================ */}
+
             <Route
               path="/security"
               element={<SecurityPage />}
             />
+
+            {/* ============================================================ */}
+            {/* SETTINGS                                                     */}
+            {/* ============================================================ */}
 
             <Route
               path="/settings"
@@ -63,8 +107,13 @@ export function AppRouter() {
                 <div>Settings</div>
               }
             />
+
           </Route>
         </Route>
+
+        {/* ================================================================== */}
+        {/* FALLBACK                                                          */}
+        {/* ================================================================== */}
 
         <Route
           path="*"

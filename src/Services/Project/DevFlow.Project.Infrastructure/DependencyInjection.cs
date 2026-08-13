@@ -80,13 +80,18 @@ public static class DependencyInjection
 
         services.AddHostedService<ProjectOutboxProcessor>();
 
+        services.AddHttpContextAccessor();
+
+        services.AddTransient<ForwardAuthorizationHandler>();
+
         services.AddHttpClient<IUserLookupService, UserLookupService>(client =>
         {
             client.BaseAddress = new Uri(
                 configuration["Services:Identity"]
                 ?? throw new InvalidOperationException(
                     "Identity Service URL is missing."));
-        });
+        })
+        .AddHttpMessageHandler<ForwardAuthorizationHandler>();
 
         return services;
     }

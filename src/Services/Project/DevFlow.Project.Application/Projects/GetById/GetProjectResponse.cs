@@ -8,9 +8,11 @@ public sealed record GetProjectResponse(
     string Status,
     string Visibility,
     Guid OwnerId,
+    string OwnerName,
     IReadOnlyCollection<ProjectMemberResponse> Members);
 
 public sealed record ProjectMemberResponse(
     Guid UserId,
     string Role,
+    string MemberName,
     DateTime JoinedOnUtc);
