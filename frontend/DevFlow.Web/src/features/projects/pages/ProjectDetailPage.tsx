@@ -5,6 +5,7 @@ import {
 } from "react";
 import {
   AlertCircle,
+  ArrowLeft,
   FileText,
   FolderKanban,
   LoaderCircle,
@@ -12,8 +13,14 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { useParams } from "react-router-dom";
 
+
+import {
+  Link,
+  useParams,
+} from "react-router-dom";
+
+import { ProjectInsightsTab } from "../components/ProjectInsightsTab";
 import { Button } from "@/components/ui/button";
 import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
 import { downloadAttachment } from "../api/project-resources-api";
@@ -27,7 +34,12 @@ import { useProjectWorkItems } from "../hooks/use-project-resources";
 import { LayoutList, PanelsTopLeft } from "lucide-react";
 import { WorkBoard } from "../components/WorkBoard";
 
-type Tab = "overview" | "members" | "work" | "attachments";
+type Tab =
+  | "overview"
+  | "insights"
+  | "members"
+  | "work"
+  | "attachments";
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -111,6 +123,13 @@ export function ProjectDetailPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
+      <Link
+        to="/projects"
+        className="inline-flex w-fit items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to projects
+      </Link>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 items-start gap-4">
@@ -158,6 +177,13 @@ export function ProjectDetailPage() {
           </TabButton>
 
           <TabButton
+            active={activeTab === "insights"}
+            onClick={() => setActiveTab("insights")}
+          >
+            Insights
+          </TabButton>
+
+          <TabButton
             active={activeTab === "members"}
             onClick={() => setActiveTab("members")}
           >
@@ -188,6 +214,10 @@ export function ProjectDetailPage() {
           onManageMembers={() => setIsMembersOpen(true)}
           onViewWork={() => setActiveTab("work")}
         />
+      )}
+
+      {activeTab === "insights" && (
+        <ProjectInsightsTab projectId={project.projectId} />
       )}
 
       {activeTab === "members" && (
