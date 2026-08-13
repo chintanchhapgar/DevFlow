@@ -51,7 +51,7 @@ internal sealed class UpdateWorkItemCommandHandler
         workItem.Update(
             request.Title,
             request.Description,
-            request.DueDate,
+            NormalizeUtc(request.DueDate),
             request.EstimateHours);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -61,5 +61,23 @@ internal sealed class UpdateWorkItemCommandHandler
                 workItem.Id.Value,
                 workItem.Title),
             "Work item updated successfully.");
+    }
+
+    private static DateTime? NormalizeUtc(DateTime? value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        return value.Value.Kind switch
+        {
+            DateTimeKind.Utc => value.Value,
+            DateTimeKind.Local => value.Value.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(
+                value.Value,
+                DateTimeKind.Utc),
+            _ => value.Value
+        };
     }
 }

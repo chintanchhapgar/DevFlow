@@ -11,7 +11,9 @@ using MediatR;
 namespace DevFlow.Project.Application.Attachments.Delete;
 
 internal sealed class DeleteAttachmentCommandHandler
-    : IRequestHandler<DeleteAttachmentCommand, Result>
+    : IRequestHandler<
+        DeleteAttachmentCommand,
+        Result<DeleteAttachmentResponse>>
 {
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IFileStorage _fileStorage;
@@ -30,9 +32,9 @@ internal sealed class DeleteAttachmentCommandHandler
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> Handle(
-        DeleteAttachmentCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<DeleteAttachmentResponse>> Handle(
+            DeleteAttachmentCommand request,
+            CancellationToken cancellationToken)
     {
         var attachment =
             await _attachmentRepository.GetByIdAsync(
@@ -41,13 +43,13 @@ internal sealed class DeleteAttachmentCommandHandler
 
         if (attachment is null)
         {
-            return Result.Failure(
+            return Result.Failure<DeleteAttachmentResponse>(
                 AttachmentErrors.NotFound);
         }
 
         if (attachment.IsDeleted)
         {
-            return Result.Failure(
+            return Result.Failure<DeleteAttachmentResponse>(
                 AttachmentErrors.AlreadyDeleted);
         }
 

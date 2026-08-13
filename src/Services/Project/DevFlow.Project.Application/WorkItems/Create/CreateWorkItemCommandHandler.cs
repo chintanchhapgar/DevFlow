@@ -56,7 +56,7 @@ internal sealed class CreateWorkItemCommandHandler
             request.Priority,
             _currentUser.UserId,
             request.AssigneeId,
-            request.DueDate,
+            NormalizeUtc(request.DueDate),
             request.EstimateHours);
 
         await _workItemRepository.AddAsync(
@@ -72,5 +72,23 @@ internal sealed class CreateWorkItemCommandHandler
                 workItem.Key,
                 workItem.Title),
             "Work item created successfully.");
+    }
+
+    private static DateTime? NormalizeUtc(DateTime? value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        return value.Value.Kind switch
+        {
+            DateTimeKind.Utc => value.Value,
+            DateTimeKind.Local => value.Value.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(
+                value.Value,
+                DateTimeKind.Utc),
+            _ => value.Value
+        };
     }
 }

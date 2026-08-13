@@ -1,620 +1,569 @@
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
 import {
-  ArrowLeft,
-  CalendarDays,
-  Check,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  AlertCircle,
+  FileText,
   FolderKanban,
-  MoreHorizontal,
+  LoaderCircle,
   Pencil,
-  Shield,
+  Plus,
   Users,
 } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { projectApiClient } from "@/lib/api/project-api-client";
 
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
-/* -------------------------------------------------------------------------- */
+import { downloadAttachment } from "../api/project-resources-api";
+import { AttachmentsPanel } from "../components/AttachmentsPanel";
+import { MemberDialog } from "../components/MemberDialog";
+import { ProjectDialog } from "../components/ProjectDialog";
+import { WorkItemDialog } from "../components/WorkItemDialog";
+import { useProject } from "../hooks/use-project";
+import { useProjectWorkItems } from "../hooks/use-project-resources";
 
-interface ProjectDetail {
-  projectId: string;
-  key: string;
-  name: string;
-  description: string | null;
-  status: string;
-  visibility: string;
-  ownerId: string;
-  ownerName: string;
-  members: ProjectMemberResponse[];
-}
-
-interface ProjectMemberResponse {
-  userId: string;
-  role: string;
-  memberName: string;
-  joinedOnUtc: string;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Page                                                                       */
-/* -------------------------------------------------------------------------- */
+type Tab = "overview" | "members" | "work" | "attachments";
 
 export function ProjectDetailPage() {
-  const { projectId } = useParams<{
-    projectId: string;
-  }>();
+  const { projectId } = useParams<{ projectId: string }>();
 
-  const navigate = useNavigate();
+  const projectQuery = useProject(projectId);
+  const workItemsQuery = useProjectWorkItems(projectId);
 
-  const [project, setProject] =
-    useState<ProjectDetail | null>(null);
-
-  const [isLoading, setIsLoading] =
-    useState(true);
-
-  const [isError, setIsError] =
+  const [activeTab, setActiveTab] =
+    useState<Tab>("overview");
+  const [isEditProjectOpen, setIsEditProjectOpen] =
     useState(false);
+  const [isMembersOpen, setIsMembersOpen] =
+    useState(false);
+  const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] =
+    useState(false);
+  const [workItemToEditId, setWorkItemToEditId] =
+    useState<string | null>(null);
+  const [selectedWorkItemId, setSelectedWorkItemId] =
+    useState<string | null>(null);
 
-  /* ------------------------------------------------------------------------ */
-  /* Load project                                                             */
-  /* ------------------------------------------------------------------------ */
+  const project = projectQuery.data;
+  const workItems = workItemsQuery.data?.items ?? [];
+
+  const selectedWorkItem = useMemo(
+    () =>
+      workItems.find(
+        (workItem) => workItem.id === selectedWorkItemId,
+      ) ?? null,
+    [selectedWorkItemId, workItems],
+  );
 
   useEffect(() => {
-    if (!projectId) {
-      setProject(null);
-      setIsLoading(false);
-      setIsError(true);
-      return;
+    if (
+      selectedWorkItemId &&
+      !workItems.some(
+        (workItem) => workItem.id === selectedWorkItemId,
+      )
+    ) {
+      setSelectedWorkItemId(null);
     }
+  }, [selectedWorkItemId, workItems]);
 
-    const currentProjectId = projectId;
+  if (projectQuery.isLoading) {
+    return <ProjectDetailSkeleton />;
+  }
 
-    let cancelled = false;
-
-    async function loadProject() {
-      setIsLoading(true);
-      setIsError(false);
-
-      try {
-        const response = await projectApiClient.get(
-          `/api/projects/${currentProjectId}`,
-        );
-
-        if (cancelled) {
-          return;
-        }
-
-        const data = response.data?.data as
-          | ProjectDetail
-          | undefined;
-
-        if (!data) {
-          setProject(null);
-          setIsError(true);
-          return;
-        }
-
-        setProject(data);
-      } catch {
-        if (!cancelled) {
-          setProject(null);
-          setIsError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadProject();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [projectId]);
-
-  /* ------------------------------------------------------------------------ */
-  /* Loading                                                                  */
-  /* ------------------------------------------------------------------------ */
-
-  if (isLoading) {
+  if (projectQuery.isError || !project) {
     return (
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="space-y-6">
-          <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-5 py-16 text-center">
+        <AlertCircle className="h-8 w-8 text-red-600" />
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="flex items-start gap-4">
-              <div className="h-14 w-14 animate-pulse rounded-xl bg-slate-100" />
+        <h1 className="mt-3 text-lg font-semibold text-red-900">
+          Unable to load project
+        </h1>
 
-              <div className="flex-1 space-y-3">
-                <div className="h-6 w-56 animate-pulse rounded bg-slate-100" />
+        <p className="mt-1 text-sm text-red-700">
+          The project may not exist, or you may not have access.
+        </p>
 
-                <div className="h-4 w-80 animate-pulse rounded bg-slate-100" />
-
-                <div className="flex gap-2">
-                  <div className="h-6 w-16 animate-pulse rounded-full bg-slate-100" />
-                  <div className="h-6 w-20 animate-pulse rounded-full bg-slate-100" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="h-72 animate-pulse rounded-2xl bg-slate-100" />
-            <div className="h-72 animate-pulse rounded-2xl bg-slate-100" />
-          </div>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-5"
+          onClick={() => projectQuery.refetch()}
+        >
+          Try again
+        </Button>
       </div>
     );
   }
 
-  /* ------------------------------------------------------------------------ */
-  /* Error                                                                    */
-  /* ------------------------------------------------------------------------ */
+  const members = project.members ?? [];
+  const workItemToEdit =
+    workItems.find(
+      (workItem) => workItem.id === workItemToEditId,
+    ) ?? null;
 
-  if (isError || !project) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] w-full max-w-7xl items-center justify-center">
-        <div className="max-w-md text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-400 ring-1 ring-slate-200">
-            <FolderKanban className="h-6 w-6" />
+  return (
+    <div className="mx-auto w-full max-w-7xl space-y-6">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-600">
+              {project.key.slice(0, 2).toUpperCase()}
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-2xl font-semibold tracking-tight text-slate-900">
+                  {project.name}
+                </h1>
+
+                <Badge value={project.status} />
+                <Badge value={project.visibility} />
+              </div>
+
+              <p className="mt-2 max-w-3xl text-sm text-slate-500">
+                {project.description ||
+                  "No project description has been added."}
+              </p>
+
+              <p className="mt-3 text-xs text-slate-400">
+                Key: {project.key}
+              </p>
+            </div>
           </div>
-
-          <h1 className="mt-4 text-lg font-semibold text-slate-900">
-            Project not found
-          </h1>
-
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            We couldn't load this project. It may have been
-            removed or you may not have access to it.
-          </p>
 
           <Button
             type="button"
             variant="outline"
-            className="mt-5 border-slate-200 text-slate-700 hover:bg-slate-50"
-            onClick={() => navigate("/projects")}
+            onClick={() => setIsEditProjectOpen(true)}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to projects
+            <Pencil className="h-4 w-4" />
+            Edit project
           </Button>
         </div>
-      </div>
-    );
-  }
 
-  const memberCount = project.members?.length ?? 0;
+        <div className="mt-6 flex gap-5 overflow-x-auto border-t border-slate-100">
+          <TabButton
+            active={activeTab === "overview"}
+            onClick={() => setActiveTab("overview")}
+          >
+            Overview
+          </TabButton>
 
-  /* ------------------------------------------------------------------------ */
-  /* Render                                                                   */
-  /* ------------------------------------------------------------------------ */
+          <TabButton
+            active={activeTab === "members"}
+            onClick={() => setActiveTab("members")}
+          >
+            Members ({members.length})
+          </TabButton>
 
-  return (
-    <div className="mx-auto w-full max-w-7xl space-y-6">
-      {/* Back */}
-      <Link
-        to="/projects"
-        className="
-          inline-flex
-          items-center
-          gap-2
-          text-sm
-          font-medium
-          text-slate-500
-          transition-colors
-          hover:text-slate-900
-        "
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Projects
-      </Link>
+          <TabButton
+            active={activeTab === "work"}
+            onClick={() => setActiveTab("work")}
+          >
+            Work ({workItemsQuery.data?.totalCount ?? 0})
+          </TabButton>
 
-      {/* ================================================================== */}
-      {/* PROJECT HEADER                                                      */}
-      {/* ================================================================== */}
-
-      <section
-        className="
-          overflow-hidden
-          rounded-2xl
-          border
-          border-slate-200
-          bg-white
-          shadow-[0_1px_2px_rgba(15,23,42,0.04)]
-        "
-      >
-        <div className="p-6">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex min-w-0 items-start gap-4">
-              {/* Project Icon */}
-              <div
-                className="
-                  flex
-                  h-14
-                  w-14
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-xl
-                  bg-slate-50
-                  text-sm
-                  font-semibold
-                  text-slate-600
-                  ring-1
-                  ring-slate-200
-                "
-              >
-                {getProjectInitials(project)}
-              </div>
-
-              {/* Project Information */}
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-                    {project.name || "Unnamed project"}
-                  </h1>
-
-                  {project.key && (
-                    <span
-                      className="
-                        rounded-md
-                        bg-slate-100
-                        px-2
-                        py-1
-                        text-xs
-                        font-semibold
-                        text-slate-600
-                      "
-                    >
-                      {project.key}
-                    </span>
-                  )}
-                </div>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  {project.description ||
-                    "No project description has been added yet."}
-                </p>
-
-                {/* Owner */}
-                <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
-                  <span>Owned by</span>
-
-                  <span className="font-medium text-slate-800">
-                    {project.ownerName || "Unknown User"}
-                  </span>
-                </div>
-
-                {/* Badges */}
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <ProjectStatus
-                    status={project.status}
-                  />
-
-                  <ProjectVisibility
-                    visibility={project.visibility}
-                  />
-
-                  <span
-                    className="
-                      inline-flex
-                      items-center
-                      gap-1.5
-                      rounded-full
-                      bg-slate-50
-                      px-2.5
-                      py-1
-                      text-xs
-                      font-medium
-                      text-slate-600
-                    "
-                  >
-                    <Users className="h-3.5 w-3.5" />
-
-                    {memberCount}{" "}
-                    {memberCount === 1
-                      ? "member"
-                      : "members"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex shrink-0 items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="
-                  border-slate-200
-                  text-slate-700
-                  hover:bg-slate-50
-                "
-              >
-                <Pencil className="h-4 w-4" />
-                Edit
-              </Button>
-
-              <button
-                type="button"
-                aria-label="Project actions"
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-lg
-                  border
-                  border-slate-200
-                  text-slate-400
-                  transition-colors
-                  hover:bg-slate-50
-                  hover:text-slate-700
-                "
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-t border-slate-100 px-6">
-          <nav className="flex gap-6 overflow-x-auto">
-            <ProjectTab
-              active
-              label="Overview"
-            />
-
-            <ProjectTab
-              label="Members"
-              count={memberCount}
-            />
-
-            <ProjectTab label="Work" />
-
-            <ProjectTab label="Attachments" />
-          </nav>
+          <TabButton
+            active={activeTab === "attachments"}
+            onClick={() => setActiveTab("attachments")}
+          >
+            Attachments
+          </TabButton>
         </div>
       </section>
 
-      {/* ================================================================== */}
-      {/* CONTENT                                                             */}
-      {/* ================================================================== */}
+      {activeTab === "overview" && (
+        <OverviewTab
+          project={project}
+          memberCount={members.length}
+          workItemCount={workItemsQuery.data?.totalCount ?? 0}
+          onManageMembers={() => setIsMembersOpen(true)}
+          onViewWork={() => setActiveTab("work")}
+        />
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        {/* Project Overview */}
-        <section
-          className="
-            overflow-hidden
-            rounded-2xl
-            border
-            border-slate-200
-            bg-white
-            shadow-[0_1px_2px_rgba(15,23,42,0.04)]
-          "
-        >
-          <div className="border-b border-slate-100 px-6 py-5">
-            <h2 className="text-base font-semibold text-slate-900">
-              Project overview
-            </h2>
+      {activeTab === "members" && (
+        <MembersTab
+          members={members}
+          ownerId={project.ownerId}
+          onManage={() => setIsMembersOpen(true)}
+        />
+      )}
 
-            <p className="mt-1 text-sm text-slate-500">
-              Basic information about this project.
-            </p>
-          </div>
-
-          <div className="grid gap-px bg-slate-100 sm:grid-cols-2">
-            <InfoItem
-              label="Project key"
-              value={project.key || "—"}
-            />
-
-            <InfoItem
-              label="Status"
-              value={project.status || "—"}
-            />
-
-            <InfoItem
-              label="Visibility"
-              value={project.visibility || "—"}
-            />
-
-            <InfoItem
-              label="Owner"
-              value={project.ownerName || "Unknown User"}
-            />
-
-            <InfoItem
-              label="Owner ID"
-              value={project.ownerId}
-              mono
-            />
-
-            <InfoItem
-              label="Project ID"
-              value={project.projectId}
-              mono
-            />
-          </div>
-        </section>
-
-        {/* Members */}
-        <section
-          className="
-            overflow-hidden
-            rounded-2xl
-            border
-            border-slate-200
-            bg-white
-            shadow-[0_1px_2px_rgba(15,23,42,0.04)]
-          "
-        >
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+      {activeTab === "work" && (
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-base font-semibold text-slate-900">
-                Members
+                Work items
               </h2>
 
-              <p className="mt-0.5 text-xs text-slate-500">
-                {memberCount}{" "}
-                {memberCount === 1
-                  ? "member"
-                  : "members"}
+              <p className="mt-1 text-sm text-slate-500">
+                Plan and track the work in this project.
               </p>
             </div>
 
-            <button
+            <Button
               type="button"
-              className="
-                text-xs
-                font-medium
-                text-slate-500
-                transition-colors
-                hover:text-slate-900
-              "
+              size="sm"
+              onClick={() => setIsCreateWorkItemOpen(true)}
             >
-              Manage
-            </button>
+              <Plus className="h-4 w-4" />
+              New work item
+            </Button>
           </div>
 
-          {/* Members Empty */}
-          {memberCount === 0 && (
-            <div className="px-5 py-10 text-center">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
-                <Users className="h-5 w-5" />
-              </div>
-
-              <p className="mt-3 text-sm font-medium text-slate-900">
-                No members
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                This project doesn't have any members yet.
-              </p>
-            </div>
-          )}
-
-          {/* Members */}
-          {memberCount > 0 && (
-            <div className="divide-y divide-slate-100">
-              {project.members.map((member) => (
-                <MemberRow
-                  key={member.userId}
-                  member={member}
-                  ownerId={project.ownerId}
+          {workItemsQuery.isLoading && (
+            <div className="space-y-3 p-5">
+              {[0, 1, 2, 3].map((index) => (
+                <div
+                  key={index}
+                  className="h-16 animate-pulse rounded-lg bg-slate-100"
                 />
               ))}
             </div>
           )}
+
+          {workItemsQuery.isError && (
+            <div className="p-5">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                <p className="font-medium text-red-800">
+                  Unable to load work items.
+                </p>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => workItemsQuery.refetch()}
+                >
+                  Try again
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!workItemsQuery.isLoading &&
+            !workItemsQuery.isError &&
+            workItems.length === 0 && (
+              <EmptyState
+                icon={<FileText className="h-6 w-6" />}
+                title="No work items yet"
+                description="Create a work item to start tracking work."
+                action="New work item"
+                onAction={() => setIsCreateWorkItemOpen(true)}
+              />
+            )}
+
+          {!workItemsQuery.isLoading &&
+            !workItemsQuery.isError &&
+            workItems.length > 0 && (
+              <div className="divide-y divide-slate-100">
+                {workItems.map((workItem) => (
+                  <button
+                    key={workItem.id}
+                    type="button"
+                    className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50"
+                    onClick={() => setWorkItemToEditId(workItem.id)}
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                      <FileText className="h-4 w-4" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-slate-900">
+                        {workItem.title}
+                      </p>
+
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {workItem.key} · {enumLabel(workItem.status)}
+                        {" · "}
+                        {enumLabel(workItem.priority)}
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedWorkItemId(workItem.id);
+                        setActiveTab("attachments");
+                      }}
+                    >
+                      Attachments
+                    </Button>
+                  </button>
+                ))}
+              </div>
+            )}
         </section>
-      </div>
+      )}
 
-      {/* ================================================================== */}
-      {/* QUICK INFO                                                          */}
-      {/* ================================================================== */}
+      {activeTab === "attachments" && (
+        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-100 px-4 py-4">
+              <h2 className="font-semibold text-slate-900">
+                Work items
+              </h2>
+            </div>
 
-      <section
-        className="
-          rounded-2xl
-          border
-          border-slate-200
-          bg-white
-          shadow-[0_1px_2px_rgba(15,23,42,0.04)]
-        "
-      >
-        <div className="grid divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <QuickInfo
-            icon={<Users className="h-4 w-4" />}
-            label="Team"
-            value={`${memberCount} ${
-              memberCount === 1
-                ? "member"
-                : "members"
-            }`}
+            {workItems.length === 0 ? (
+              <p className="px-4 py-8 text-sm text-slate-500">
+                No work items are available.
+              </p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {workItems.map((workItem) => (
+                  <button
+                    key={workItem.id}
+                    type="button"
+                    onClick={() =>
+                      setSelectedWorkItemId(workItem.id)
+                    }
+                    className={`w-full px-4 py-3 text-left text-sm transition-colors ${
+                      selectedWorkItemId === workItem.id
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className="block truncate font-medium">
+                      {workItem.title}
+                    </span>
+
+                    <span className="mt-0.5 block text-xs text-slate-400">
+                      {workItem.key}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <AttachmentsPanel
+            workItemId={selectedWorkItem?.id}
+            workItemTitle={selectedWorkItem?.title}
           />
+        </div>
+      )}
 
-          <QuickInfo
-            icon={<Shield className="h-4 w-4" />}
-            label="Visibility"
-            value={project.visibility || "Unknown"}
-          />
+      <ProjectDialog
+        mode="edit"
+        open={isEditProjectOpen}
+        onOpenChange={setIsEditProjectOpen}
+        project={project}
+      />
 
-          <QuickInfo
-            icon={<CalendarDays className="h-4 w-4" />}
-            label="Owner"
-            value={project.ownerName || "Unknown User"}
-          />
+      <MemberDialog
+        open={isMembersOpen}
+        onOpenChange={setIsMembersOpen}
+        project={project}
+      />
+
+      <WorkItemDialog
+        mode="create"
+        open={isCreateWorkItemOpen}
+        onOpenChange={setIsCreateWorkItemOpen}
+        projectId={project.projectId}
+      />
+
+      {workItemToEdit && (
+        <WorkItemDialog
+          mode="edit"
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setWorkItemToEditId(null);
+            }
+          }}
+          projectId={project.projectId}
+          workItem={workItemToEdit}
+        />
+      )}
+    </div>
+  );
+}
+
+function OverviewTab({
+  project,
+  memberCount,
+  workItemCount,
+  onManageMembers,
+  onViewWork,
+}: {
+  project: {
+    key: string;
+    ownerName: string;
+    ownerId: string;
+    visibility: string;
+    status: string;
+  };
+  memberCount: number;
+  workItemCount: number;
+  onManageMembers: () => void;
+  onViewWork: () => void;
+}) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-3">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+        <div className="border-b border-slate-100 px-5 py-4">
+          <h2 className="font-semibold text-slate-900">
+            Project overview
+          </h2>
+        </div>
+
+        <dl className="grid gap-px bg-slate-100 sm:grid-cols-2">
+          <Info label="Project key" value={project.key} />
+          <Info label="Status" value={project.status} />
+          <Info label="Visibility" value={project.visibility} />
+          <Info label="Owner" value={project.ownerName} />
+          <Info label="Owner ID" value={project.ownerId} mono />
+        </dl>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="font-semibold text-slate-900">
+          Quick actions
+        </h2>
+
+        <div className="mt-4 space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onManageMembers}
+          >
+            <Users className="h-4 w-4" />
+            Manage {memberCount} members
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onViewWork}
+          >
+            <FolderKanban className="h-4 w-4" />
+            View {workItemCount} work items
+          </Button>
         </div>
       </section>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Project Tab                                                                */
-/* -------------------------------------------------------------------------- */
-
-function ProjectTab({
-  label,
-  count,
-  active = false,
+function MembersTab({
+  members,
+  ownerId,
+  onManage,
 }: {
-  label: string;
-  count?: number;
-  active?: boolean;
+  members: {
+    userId: string;
+    memberName: string;
+    role: string;
+  }[];
+  ownerId: string;
+  onManage: () => void;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <h2 className="font-semibold text-slate-900">
+            Members
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-500">
+            People with access to this project.
+          </p>
+        </div>
+
+        <Button type="button" size="sm" onClick={onManage}>
+          Manage members
+        </Button>
+      </div>
+
+      {members.length === 0 ? (
+        <EmptyState
+          icon={<Users className="h-6 w-6" />}
+          title="No members yet"
+          description="Invite people to collaborate on this project."
+          action="Manage members"
+          onAction={onManage}
+        />
+      ) : (
+        <div className="divide-y divide-slate-100">
+          {members.map((member) => (
+            <div
+              key={member.userId}
+              className="flex items-center gap-3 px-5 py-4"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                {initials(member.memberName)}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-slate-900">
+                  {member.memberName || "Unknown user"}
+                </p>
+
+                <p className="truncate text-xs text-slate-500">
+                  {member.userId}
+                </p>
+              </div>
+
+              <Badge
+                value={
+                  member.userId === ownerId
+                    ? "Owner"
+                    : member.role
+                }
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function TabButton({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      className={
+      onClick={onClick}
+      className={`relative whitespace-nowrap py-3 text-sm font-medium ${
         active
-          ? `
-            relative
-            whitespace-nowrap
-            py-3
-            text-sm
-            font-medium
-            text-slate-900
-            after:absolute
-            after:inset-x-0
-            after:bottom-0
-            after:h-0.5
-            after:bg-slate-900
-          `
-          : `
-            whitespace-nowrap
-            py-3
-            text-sm
-            font-medium
-            text-slate-400
-            transition-colors
-            hover:text-slate-700
-          `
-      }
+          ? "text-slate-900 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-slate-900"
+          : "text-slate-400 hover:text-slate-700"
+      }`}
     >
-      {label}
-
-      {typeof count === "number" && (
-        <span className="ml-1.5 text-xs text-slate-400">
-          {count}
-        </span>
-      )}
+      {children}
     </button>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Info Item                                                                  */
-/* -------------------------------------------------------------------------- */
+function Badge({ value }: { value: string }) {
+  return (
+    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+      {value || "Unknown"}
+    </span>
+  );
+}
 
-function InfoItem({
+function Info({
   label,
   value,
   mono = false,
@@ -624,287 +573,88 @@ function InfoItem({
   mono?: boolean;
 }) {
   return (
-    <div className="bg-white px-6 py-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+    <div className="bg-white px-5 py-4">
+      <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
         {label}
-      </p>
+      </dt>
 
-      <p
-        className={
-          mono
-            ? "mt-1 truncate font-mono text-xs text-slate-600"
-            : "mt-1 truncate text-sm font-medium text-slate-800"
-        }
+      <dd
+        className={`mt-1 truncate text-sm text-slate-700 ${
+          mono ? "font-mono text-xs" : "font-medium"
+        }`}
       >
         {value}
-      </p>
+      </dd>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Member Row                                                                 */
-/* -------------------------------------------------------------------------- */
-
-function MemberRow({
-  member,
-  ownerId,
-}: {
-  member: ProjectMemberResponse;
-  ownerId: string;
-}) {
-  const isOwner =
-    member.userId === ownerId;
-
-  const memberName =
-    member.memberName?.trim() || "Unknown User";
-
-  return (
-    <div className="flex items-center gap-3 px-5 py-3.5">
-      {/* Avatar */}
-      <div
-        className="
-          flex
-          h-9
-          w-9
-          shrink-0
-          items-center
-          justify-center
-          rounded-full
-          bg-slate-100
-          text-xs
-          font-semibold
-          text-slate-600
-        "
-      >
-        {getMemberInitials(memberName)}
-      </div>
-
-      {/* User */}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-800">
-          {memberName}
-        </p>
-
-        <p className="mt-0.5 truncate font-mono text-[10px] text-slate-400">
-          {member.userId}
-        </p>
-      </div>
-
-      {/* Role */}
-      <div className="flex shrink-0 items-center gap-1.5">
-        {isOwner ? (
-          <span
-            className="
-              inline-flex
-              items-center
-              gap-1
-              rounded-full
-              bg-slate-100
-              px-2
-              py-1
-              text-[10px]
-              font-medium
-              text-slate-600
-            "
-          >
-            <Check className="h-3 w-3" />
-            Owner
-          </span>
-        ) : (
-          <span
-            className="
-              rounded-full
-              bg-slate-50
-              px-2
-              py-1
-              text-[10px]
-              font-medium
-              text-slate-500
-            "
-          >
-            {member.role || "Member"}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Quick Info                                                                 */
-/* -------------------------------------------------------------------------- */
-
-function QuickInfo({
+function EmptyState({
   icon,
-  label,
-  value,
+  title,
+  description,
+  action,
+  onAction,
 }: {
-  icon: ReactNode;
-  label: string;
-  value: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  action: string;
+  onAction: () => void;
 }) {
   return (
-    <div className="flex items-center gap-3 px-6 py-5">
-      <div
-        className="
-          flex
-          h-9
-          w-9
-          shrink-0
-          items-center
-          justify-center
-          rounded-lg
-          bg-slate-50
-          text-slate-500
-          ring-1
-          ring-slate-200
-        "
+    <div className="flex min-h-[250px] flex-col items-center justify-center px-5 text-center">
+      <div className="text-slate-400">{icon}</div>
+
+      <h3 className="mt-3 text-sm font-semibold text-slate-900">
+        {title}
+      </h3>
+
+      <p className="mt-1 max-w-sm text-sm text-slate-500">
+        {description}
+      </p>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="mt-4"
+        onClick={onAction}
       >
-        {icon}
-      </div>
+        {action}
+      </Button>
+    </div>
+  );
+}
 
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          {label}
-        </p>
+function ProjectDetailSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-7xl space-y-6">
+      <div className="h-52 animate-pulse rounded-2xl bg-slate-100" />
 
-        <p className="mt-0.5 truncate text-sm font-medium text-slate-800">
-          {value}
-        </p>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="h-64 animate-pulse rounded-2xl bg-slate-100 lg:col-span-2" />
+        <div className="h-64 animate-pulse rounded-2xl bg-slate-100" />
       </div>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Status Badge                                                               */
-/* -------------------------------------------------------------------------- */
-
-function ProjectStatus({
-  status,
-}: {
-  status: string | null;
-}) {
-  const normalized =
-    status?.toLowerCase().trim() ?? "";
-
-  const isActive =
-    normalized === "active";
-
-  return (
-    <span
-      className={
-        isActive
-          ? `
-            inline-flex
-            items-center
-            gap-1.5
-            rounded-full
-            bg-emerald-50
-            px-2.5
-            py-1
-            text-xs
-            font-medium
-            text-emerald-700
-          `
-          : `
-            inline-flex
-            items-center
-            gap-1.5
-            rounded-full
-            bg-slate-100
-            px-2.5
-            py-1
-            text-xs
-            font-medium
-            text-slate-600
-          `
-      }
-    >
-      <span
-        className={
-          isActive
-            ? "h-1.5 w-1.5 rounded-full bg-emerald-500"
-            : "h-1.5 w-1.5 rounded-full bg-slate-400"
-        }
-      />
-
-      {status || "Unknown"}
-    </span>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Visibility Badge                                                           */
-/* -------------------------------------------------------------------------- */
-
-function ProjectVisibility({
-  visibility,
-}: {
-  visibility: string | null;
-}) {
-  return (
-    <span
-      className="
-        inline-flex
-        rounded-full
-        bg-slate-100
-        px-2.5
-        py-1
-        text-xs
-        font-medium
-        text-slate-600
-      "
-    >
-      {visibility || "Unknown"}
-    </span>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Helpers                                                                    */
-/* -------------------------------------------------------------------------- */
-
-function getProjectInitials(
-  project: ProjectDetail,
-) {
-  if (project.key?.trim()) {
-    return project.key
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  if (project.name?.trim()) {
-    return project.name
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  return "PR";
-}
-
-function getMemberInitials(
-  name: string,
-) {
-  const value = name.trim();
-
-  if (!value) {
-    return "U";
-  }
-
-  const parts = value
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (parts.length >= 2) {
-    return (
-      parts[0][0] +
-      parts[parts.length - 1][0]
-    ).toUpperCase();
-  }
-
+function initials(value: string) {
   return value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .slice(0, 2)
-    .toUpperCase();
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "U";
+}
+
+function enumLabel(value: string | number) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return String(value);
 }
