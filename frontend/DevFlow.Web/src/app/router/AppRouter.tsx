@@ -15,7 +15,7 @@ import { ProjectDetailPage } from "@/features/projects/pages/ProjectDetailPage";
 import { InvitationResponsePage } from "@/features/projects/pages/InvitationResponsePage";
 import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { SecurityPage } from "@/features/security/pages/SecurityPage";
-
+import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 export function AppRouter() {
@@ -105,9 +105,7 @@ export function AppRouter() {
 
             <Route
               path="/settings"
-              element={
-                <div>Settings</div>
-              }
+              element={<SettingsPage />}
             />
 
           </Route>
