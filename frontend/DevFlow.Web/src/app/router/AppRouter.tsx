@@ -7,6 +7,7 @@ import {
 
 import { AppLayout } from "@/app/layout/AppLayout";
 import { WorkPage } from "@/features/projects/pages/WorkPage";
+import { ActivityPage } from "@/features/activity/pages/ActivityPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ProjectsPage } from "@/features/projects/pages/ProjectsPage";
@@ -77,9 +78,7 @@ export function AppRouter() {
 
             <Route
               path="/activity"
-              element={
-                <div>Activity</div>
-              }
+              element={<ActivityPage />}
             />
 
             {/* ============================================================ */}
