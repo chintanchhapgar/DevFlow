@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 
 import { AppLayout } from "@/app/layout/AppLayout";
-
+import { WorkPage } from "@/features/projects/pages/WorkPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ProjectsPage } from "@/features/projects/pages/ProjectsPage";
@@ -56,7 +56,7 @@ export function AppRouter() {
               path="/invitations/respond"
               element={<InvitationResponsePage />}
             />
-            
+
             <Route
               path="/projects/:projectId"
               element={<ProjectDetailPage />}
@@ -68,9 +68,7 @@ export function AppRouter() {
 
             <Route
               path="/work"
-              element={
-                <div>Work</div>
-              }
+              element={<WorkPage />}
             />
 
             {/* ============================================================ */}
