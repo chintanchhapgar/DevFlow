@@ -13,6 +13,8 @@ import {
   revokeProjectInvitation,
   updateProject,
   updateProjectMemberRole,
+  acceptProjectInvitation,
+  declineProjectInvitation,
   type AddProjectMemberRequest,
   type CreateProjectRequest,
   type InviteProjectMemberRequest,
@@ -316,6 +318,50 @@ export function useRevokeProjectInvitation() {
         queryKey: projectKeys.invitations(
           variables.projectId,
         ),
+      });
+    },
+  });
+}
+
+export function useAcceptProjectInvitation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (token: string) =>
+      acceptProjectInvitation(token),
+
+    onSuccess: async (result) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: projectKeys.detail(result.projectId),
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: projectKeys.members(result.projectId),
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: projectKeys.invitations(result.projectId),
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: projectKeys.lists(),
+        }),
+      ]);
+    },
+  });
+}
+
+export function useDeclineProjectInvitation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (token: string) =>
+      declineProjectInvitation(token),
+
+    onSuccess: async (result) => {
+      await queryClient.invalidateQueries({
+        queryKey: projectKeys.invitations(result.projectId),
       });
     },
   });

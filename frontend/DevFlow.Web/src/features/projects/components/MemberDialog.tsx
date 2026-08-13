@@ -3,8 +3,13 @@ import {
   LoaderCircle,
   Trash2,
   UserPlus,
+  Check,
+  Copy,
 } from "lucide-react";
+import { Mail, XCircle } from "lucide-react";
 
+import { useProjectInvitations } from "../hooks/use-project";
+import { useRevokeProjectInvitation } from "../hooks/use-project-mutations";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -70,6 +75,11 @@ export function MemberDialog({
   const updateMemberRole = useUpdateProjectMemberRole();
   const removeMember = useRemoveProjectMember();
 
+  const invitationsQuery = useProjectInvitations(
+    project.projectId,
+    );
+    const revokeInvitation = useRevokeProjectInvitation();
+
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<ProjectRole>(
     ProjectRole.Member,
@@ -77,12 +87,14 @@ export function MemberDialog({
   const [error, setError] = useState<string | null>(null);
   const [memberToRemove, setMemberToRemove] =
     useState<ProjectMember | null>(null);
-
+  const [inviteLink, setInviteLink] = useState<string | null>(null,);
+    const [copied, setCopied] = useState(false);
   const members = project.members ?? [];
   const isBusy =
     inviteMember.isPending ||
     updateMemberRole.isPending ||
-    removeMember.isPending;
+    removeMember.isPending ||
+    revokeInvitation.isPending;
 
   async function handleInvite(
     event: React.FormEvent<HTMLFormElement>,
@@ -99,13 +111,22 @@ export function MemberDialog({
     setError(null);
 
     try {
-      await inviteMember.mutateAsync({
+      const invitation = await inviteMember.mutateAsync({
         projectId: project.projectId,
         request: {
-          email: value,
-          role,
+            email: value,
+            role,
         },
-      });
+        });
+
+        setInviteLink(
+        `${window.location.origin}/invitations/respond?token=${encodeURIComponent(
+            invitation.token,
+        )}`,
+        );
+        setCopied(false);
+        setEmail("");
+        setRole(ProjectRole.Member);
 
       setEmail("");
       setRole(ProjectRole.Member);
@@ -115,6 +136,21 @@ export function MemberDialog({
       );
     }
   }
+
+  async function handleCopyInviteLink() {
+    if (!inviteLink) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(inviteLink);
+        setCopied(true);
+    } catch {
+        setError(
+        "Unable to copy the link. Please select and copy it manually.",
+        );
+    }
+    }
 
   async function handleRoleChange(
     member: ProjectMember,
@@ -158,6 +194,21 @@ export function MemberDialog({
       setError("Unable to remove this member.");
     }
   }
+
+  async function handleRevokeInvitation(
+    invitationId: string,
+    ) {
+    setError(null);
+
+    try {
+        await revokeInvitation.mutateAsync({
+        projectId: project.projectId,
+        invitationId,
+        });
+    } catch {
+        setError("Unable to revoke this invitation.");
+    }
+    }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -281,7 +332,43 @@ export function MemberDialog({
                 </Button>
               </div>
             </form>
+            
+            {inviteLink && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                    <p className="text-sm font-semibold text-blue-900">
+                    Invitation created
+                    </p>
 
+                    <p className="mt-1 text-sm text-blue-800">
+                    Share this link with the invited member.
+                    </p>
+
+                    <div className="mt-3 flex gap-2">
+                    <Input
+                        readOnly
+                        value={inviteLink}
+                        onFocus={(event) => event.currentTarget.select()}
+                        className="min-w-0 bg-white text-xs"
+                        aria-label="Invitation link"
+                    />
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopyInviteLink}
+                        className="shrink-0 border-blue-200 bg-white text-blue-700 hover:bg-blue-100"
+                    >
+                        {copied ? (
+                        <Check className="h-4 w-4" />
+                        ) : (
+                        <Copy className="h-4 w-4" />
+                        )}
+                        {copied ? "Copied" : "Copy"}
+                    </Button>
+                    </div>
+                </div>
+                )}
             {error && (
               <p className="text-sm text-red-600">{error}</p>
             )}
@@ -376,7 +463,101 @@ export function MemberDialog({
                 </div>
               )}
             </div>
+            
+            <section className="overflow-hidden rounded-xl border border-slate-200">
+                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                    <h3 className="text-sm font-semibold text-slate-900">
+                    Pending invitations
+                    </h3>
+                </div>
 
+                {invitationsQuery.isLoading && (
+                    <div className="space-y-3 p-4">
+                    {[0, 1].map((index) => (
+                        <div
+                        key={index}
+                        className="h-12 animate-pulse rounded-lg bg-slate-100"
+                        />
+                    ))}
+                    </div>
+                )}
+
+                {invitationsQuery.isError && (
+                    <div className="p-4">
+                    <p className="text-sm text-red-600">
+                        Unable to load invitations.
+                    </p>
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => invitationsQuery.refetch()}
+                    >
+                        Try again
+                    </Button>
+                    </div>
+                )}
+
+                {!invitationsQuery.isLoading &&
+                    !invitationsQuery.isError && (
+                    <>
+                        {(invitationsQuery.data ?? []).filter(
+                        (invitation) =>
+                            invitation.status.toLowerCase() === "pending",
+                        ).length === 0 ? (
+                        <p className="px-4 py-8 text-center text-sm text-slate-500">
+                            No pending invitations.
+                        </p>
+                        ) : (
+                        <div className="divide-y divide-slate-100">
+                            {(invitationsQuery.data ?? [])
+                            .filter(
+                                (invitation) =>
+                                invitation.status.toLowerCase() === "pending",
+                            )
+                            .map((invitation) => (
+                                <div
+                                key={invitation.invitationId}
+                                className="flex items-center gap-3 px-4 py-3"
+                                >
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                    <Mail className="h-4 w-4" />
+                                </div>
+
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium text-slate-800">
+                                    {invitation.email}
+                                    </p>
+
+                                    <p className="mt-0.5 text-xs text-slate-500">
+                                    Invited as {invitation.role}
+                                    </p>
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={isBusy}
+                                    onClick={() =>
+                                    handleRevokeInvitation(
+                                        invitation.invitationId,
+                                    )
+                                    }
+                                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                >
+                                    <XCircle className="h-4 w-4" />
+                                    Revoke
+                                </Button>
+                                </div>
+                            ))}
+                        </div>
+                        )}
+                    </>
+                    )}
+                </section>
             <DialogFooter>
               <Button
                 type="button"

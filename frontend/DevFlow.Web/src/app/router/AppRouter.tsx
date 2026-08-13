@@ -11,7 +11,7 @@ import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ProjectsPage } from "@/features/projects/pages/ProjectsPage";
 import { ProjectDetailPage } from "@/features/projects/pages/ProjectDetailPage";
-
+import { InvitationResponsePage } from "@/features/projects/pages/InvitationResponsePage";
 import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { SecurityPage } from "@/features/security/pages/SecurityPage";
 
@@ -52,6 +52,11 @@ export function AppRouter() {
               element={<ProjectsPage />}
             />
 
+            <Route
+              path="/invitations/respond"
+              element={<InvitationResponsePage />}
+            />
+            
             <Route
               path="/projects/:projectId"
               element={<ProjectDetailPage />}

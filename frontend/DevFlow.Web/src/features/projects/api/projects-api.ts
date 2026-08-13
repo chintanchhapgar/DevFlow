@@ -396,3 +396,31 @@ export async function revokeProjectInvitation(
 
   return response.data.data;
 }
+
+export interface InvitationActionResponse {
+  projectId: string;
+  invitationId: string;
+  status: string;
+}
+
+export async function acceptProjectInvitation(
+  token: string,
+): Promise<InvitationActionResponse> {
+  const response = await projectApiClient.post(
+    "/api/projects/invitations/accept",
+    { token },
+  );
+
+  return response.data.data;
+}
+
+export async function declineProjectInvitation(
+  token: string,
+): Promise<InvitationActionResponse> {
+  const response = await projectApiClient.post(
+    "/api/projects/invitations/decline",
+    { token },
+  );
+
+  return response.data.data;
+}

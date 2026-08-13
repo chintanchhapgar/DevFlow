@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getProject } from "../api/projects-api";
+import {
+  getProject,
+  getProjectInvitations,
+} from "../api/projects-api";
+
 
 export const projectKeys = {
   all: ["projects"] as const,
@@ -66,6 +70,28 @@ export function useProject(
 
     staleTime: 30_000,
 
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useProjectInvitations(
+  projectId: string | undefined,
+) {
+  return useQuery({
+    queryKey: projectId
+      ? projectKeys.invitations(projectId)
+      : [...projectKeys.all, "invitations"],
+
+    queryFn: () => {
+      if (!projectId) {
+        throw new Error("Project ID is required.");
+      }
+
+      return getProjectInvitations(projectId);
+    },
+
+    enabled: Boolean(projectId),
+    staleTime: 30_000,
     refetchOnWindowFocus: false,
   });
 }
