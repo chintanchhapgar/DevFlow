@@ -7,12 +7,14 @@ import {
   ListTodo,
   Rocket,
   TrendingDown,
+  Search,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { WorkItemStatus } from "@/features/projects/api/project-resources-api";
 import { useMyWork } from "@/features/projects/hooks/use-my-work";
-
+import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 import { useProjectSprints } from "../hooks/use-sprint-reports";
 
 function statusValue(value: string | number) {
@@ -83,11 +85,70 @@ function chartDateLabel(date: Date) {
   }).format(date);
 }
 
+function statusLabel(value: string | number) {
+  const labels: Record<number, string> = {
+    [WorkItemStatus.Todo]: "To do",
+    [WorkItemStatus.InProgress]: "In progress",
+    [WorkItemStatus.InReview]: "In review",
+    [WorkItemStatus.Testing]: "Testing",
+    [WorkItemStatus.Done]: "Done",
+    [WorkItemStatus.Cancelled]: "Cancelled",
+  };
+
+  return labels[statusValue(value)] ?? "To do";
+}
+
+function priorityLabel(value: string | number) {
+  const labels: Record<string, string> = {
+    lowest: "Lowest",
+    low: "Low",
+    medium: "Medium",
+    high: "High",
+    highest: "Highest",
+  };
+
+  if (typeof value === "number") {
+    return (
+      {
+        1: "Lowest",
+        2: "Low",
+        3: "Medium",
+        4: "High",
+        5: "Highest",
+      }[value] ?? "Medium"
+    );
+  }
+
+  return labels[value.toLowerCase()] ?? "Medium";
+}
+
+function priorityClass(value: string | number) {
+  const priority = priorityLabel(value).toLowerCase();
+
+  if (priority === "highest") {
+    return "bg-red-50 text-red-700";
+  }
+
+  if (priority === "high") {
+    return "bg-orange-50 text-orange-700";
+  }
+
+  if (priority === "medium") {
+    return "bg-amber-50 text-amber-700";
+  }
+
+  return "bg-slate-100 text-slate-600";
+}
+
 export function SprintReportsPage() {
   const sprintsQuery = useProjectSprints();
   const myWorkQuery = useMyWork();
 
   const [selectedSprintId, setSelectedSprintId] = useState("");
+  const [workItemSearch, setWorkItemSearch] = useState("");
+    const [workItemStatus, setWorkItemStatus] = useState<
+    "all" | WorkItemStatus
+    >("all");
 
   const selectedSprint = useMemo(() => {
     if (selectedSprintId) {
@@ -270,6 +331,28 @@ const burndownPoints: BurndownPoint[] = Array.from(
       burndownPoints,
     };
   }, [myWorkQuery.items, selectedSprint]);
+
+  const visibleWorkItems = useMemo(() => {
+  if (!report) {
+    return [];
+  }
+
+  const search = workItemSearch.trim().toLowerCase();
+
+  return report.workItems.filter((item) => {
+    const matchesSearch =
+      !search ||
+      item.title.toLowerCase().includes(search) ||
+      item.key.toLowerCase().includes(search) ||
+      item.projectName.toLowerCase().includes(search);
+
+    const matchesStatus =
+      workItemStatus === "all" ||
+      statusValue(item.status) === workItemStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+}, [report, workItemSearch, workItemStatus]);
 
   function downloadCsv() {
     if (!selectedSprint || !report) {
@@ -598,6 +681,155 @@ const burndownPoints: BurndownPoint[] = Array.from(
                 <div className="mt-5">
                     <SprintBurndownChart points={report.burndownPoints} />
                 </div>
+            </section>
+
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-100 px-5 py-4">
+                    <h2 className="text-sm font-semibold text-slate-900">
+                    Sprint work items
+                    </h2>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                    Review the work currently included in this sprint.
+                    </p>
+
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <div className="relative flex-1">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                        <Input
+                        type="search"
+                        value={workItemSearch}
+                        placeholder="Search by title, key, or project..."
+                        className="pl-9"
+                        onChange={(event) =>
+                            setWorkItemSearch(event.target.value)
+                        }
+                        />
+                    </div>
+
+                    <select
+                        value={workItemStatus}
+                        onChange={(event) =>
+                        setWorkItemStatus(
+                            event.target.value === "all"
+                            ? "all"
+                            : (Number(event.target.value) as WorkItemStatus),
+                        )
+                        }
+                        className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                    >
+                        <option value="all">All statuses</option>
+                        <option value={WorkItemStatus.Todo}>To do</option>
+                        <option value={WorkItemStatus.InProgress}>
+                        In progress
+                        </option>
+                        <option value={WorkItemStatus.InReview}>
+                        In review
+                        </option>
+                        <option value={WorkItemStatus.Testing}>Testing</option>
+                        <option value={WorkItemStatus.Done}>Done</option>
+                        <option value={WorkItemStatus.Cancelled}>
+                        Cancelled
+                        </option>
+                    </select>
+                    </div>
+                </div>
+
+                {visibleWorkItems.length === 0 ? (
+                    <div className="px-5 py-14 text-center">
+                    <ListTodo className="mx-auto h-7 w-7 text-slate-400" />
+
+                    <p className="mt-3 text-sm font-medium text-slate-700">
+                        No work items found
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-400">
+                        Try changing your search or status filter.
+                    </p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                    <table className="w-full min-w-[760px] text-left">
+                        <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
+                        <tr>
+                            <th className="px-5 py-3 font-medium">Work item</th>
+                            <th className="px-4 py-3 font-medium">Status</th>
+                            <th className="px-4 py-3 font-medium">Priority</th>
+                            <th className="px-4 py-3 font-medium">Assignee</th>
+                            <th className="px-4 py-3 font-medium">Estimate</th>
+                            <th className="px-5 py-3 text-right font-medium">Due date</th>
+                        </tr>
+                        </thead>
+
+                        <tbody className="divide-y divide-slate-100">
+                        {visibleWorkItems.map((item) => (
+                            <tr
+                            key={item.id}
+                            className="transition-colors hover:bg-slate-50"
+                            >
+                            <td className="px-5 py-4">
+                                <Link
+                                to={`/projects/${item.projectId}`}
+                                className="block max-w-sm"
+                                >
+                                <p className="truncate text-sm font-medium text-slate-800 hover:text-[var(--devflow-primary)]">
+                                    {item.title}
+                                </p>
+
+                                <p className="mt-1 text-xs text-slate-500">
+                                    <span className="font-medium text-slate-600">
+                                    {item.key}
+                                    </span>
+                                    {" · "}
+                                    {item.projectName}
+                                </p>
+                                </Link>
+                            </td>
+
+                            <td className="px-4 py-4">
+                                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                                {statusLabel(item.status)}
+                                </span>
+                            </td>
+
+                            <td className="px-4 py-4">
+                                <span
+                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${priorityClass(
+                                    item.priority,
+                                )}`}
+                                >
+                                {priorityLabel(item.priority)}
+                                </span>
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-slate-600">
+                                {item.assigneeId
+                                ? `Member ${item.assigneeId.slice(0, 8)}`
+                                : "Unassigned"}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-medium text-slate-600">
+                                {item.estimateHours
+                                ? formatHours(item.estimateHours)
+                                : "—"}
+                            </td>
+
+                            <td className="px-5 py-4 text-right text-sm text-slate-600">
+                                {item.dueDate
+                                ? new Intl.DateTimeFormat(undefined, {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                    }).format(new Date(item.dueDate))
+                                : "—"}
+                            </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    </div>
+                )}
                 </section>
           </div>
         </>
