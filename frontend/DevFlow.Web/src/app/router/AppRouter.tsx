@@ -17,7 +17,7 @@ import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { SecurityPage } from "@/features/security/pages/SecurityPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
-
+import { MyTimePage } from "@/features/time/pages/MyTimePage";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -72,6 +72,10 @@ export function AppRouter() {
               element={<WorkPage />}
             />
 
+            <Route
+              path="/time"
+              element={<MyTimePage />}
+            />
             {/* ============================================================ */}
             {/* ACTIVITY                                                     */}
             {/* ============================================================ */}

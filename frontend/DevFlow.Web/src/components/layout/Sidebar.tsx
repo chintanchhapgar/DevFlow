@@ -6,6 +6,7 @@ import {
   Shield,
   User,
   Workflow,
+  Clock3,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -24,6 +25,11 @@ const navigation = [
     label: "Work",
     path: "/work",
     icon: Workflow,
+  },
+  {
+  label: "My Time",
+  path: "/time",
+  icon: Clock3,
   },
   {
     label: "Activity",

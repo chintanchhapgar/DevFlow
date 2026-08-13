@@ -66,3 +66,25 @@ export async function stopTimer(
 
   return response.data.data;
 }
+
+export async function updateWorklog(
+  worklogId: string,
+  request: {
+    description?: string | null;
+    startedAtUtc: string;
+    endedAtUtc: string;
+  },
+): Promise<Worklog> {
+  const response = await projectApiClient.put(
+    `/api/worklogs/${worklogId}`,
+    request,
+  );
+
+  return response.data.data;
+}
+
+export async function deleteWorklog(
+  worklogId: string,
+): Promise<void> {
+  await projectApiClient.delete(`/api/worklogs/${worklogId}`);
+}
