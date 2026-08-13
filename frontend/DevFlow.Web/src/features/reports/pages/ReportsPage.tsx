@@ -6,9 +6,10 @@ import {
   Download,
   FolderKanban,
   ListTodo,
+  Rocket,
   Users,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   WorkItemPriority,
@@ -344,15 +345,24 @@ export function ReportsPage() {
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          disabled={report.workItems.length === 0}
-          onClick={downloadCsv}
-        >
-          <Download className="h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" asChild>
+                <Link to="/reports/sprints">
+                <Rocket className="h-4 w-4" />
+                Sprint reports
+                </Link>
+            </Button>
+
+            <Button
+                type="button"
+                variant="outline"
+                disabled={report.workItems.length === 0}
+                onClick={downloadCsv}
+            >
+                <Download className="h-4 w-4" />
+                Export CSV
+            </Button>
+            </div>
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">

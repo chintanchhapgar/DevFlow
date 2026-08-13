@@ -1,15 +1,21 @@
+import { useState } from "react";
 import {
   Activity,
+  BarChart3,
+  ChevronDown,
+  Clock3,
+  FileBarChart,
   FolderKanban,
   LayoutDashboard,
   Settings,
   Shield,
   User,
   Workflow,
-  Clock3,
-  BarChart3,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import {
+  NavLink,
+  useLocation,
+} from "react-router-dom";
 
 const navigation = [
   {
@@ -28,19 +34,25 @@ const navigation = [
     icon: Workflow,
   },
   {
-  label: "My Time",
-  path: "/time",
-  icon: Clock3,
+    label: "My Time",
+    path: "/time",
+    icon: Clock3,
   },
-  {
-  label: "Reports",
-  path: "/reports",
-  icon: BarChart3,
-},
   {
     label: "Activity",
     path: "/activity",
     icon: Activity,
+  },
+];
+
+const reportNavigation = [
+  {
+    label: "Delivery overview",
+    path: "/reports",
+  },
+  {
+    label: "Sprint performance",
+    path: "/reports/sprints",
   },
 ];
 
@@ -87,63 +99,27 @@ function NavigationItem({
       }
     >
       <Icon className="h-[18px] w-[18px] shrink-0" />
-
       <span>{label}</span>
     </NavLink>
   );
 }
 
 export function Sidebar() {
+  const location = useLocation();
+  const isReportsActive = location.pathname.startsWith("/reports");
+
+  const [isReportsOpen, setIsReportsOpen] = useState(
+    isReportsActive,
+  );
+
   return (
-    <aside
-      className="
-        hidden
-        w-64
-        shrink-0
-        border-r
-        border-slate-200
-        bg-white
-        md:flex
-        md:flex-col
-      "
-    >
-      {/* Brand */}
-      <div
-        className="
-          flex
-          h-16
-          shrink-0
-          items-center
-          border-b
-          border-slate-200
-          px-5
-        "
-      >
-        <NavLink
-          to="/"
-          className="flex items-center gap-3"
-        >
-          {/* Logo */}
-          <div
-            className="
-              flex
-              h-9
-              w-9
-              items-center
-              justify-center
-              rounded-lg
-              bg-[#eef3f8]
-              text-sm
-              font-bold
-              text-[#456b9a]
-              ring-1
-              ring-[#dbe4ed]
-            "
-          >
-            ◆
+    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
+      <div className="flex h-16 shrink-0 items-center border-b border-slate-200 px-5">
+        <NavLink to="/" className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eef3f8] text-sm font-bold text-[#456b9a] ring-1 ring-[#dbe4ed]">
+            ◇
           </div>
 
-          {/* Brand Name */}
           <div>
             <div className="text-sm font-bold tracking-tight text-slate-900">
               DEVFLOW
@@ -156,9 +132,7 @@ export function Sidebar() {
         </NavLink>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-5">
-        {/* Main */}
         <div>
           <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             Workspace
@@ -171,13 +145,60 @@ export function Sidebar() {
                 {...item}
               />
             ))}
+
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setIsReportsOpen((current) => !current)
+                }
+                className={[
+                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isReportsActive
+                    ? "bg-[#eef3f8] text-[#456b9a]"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
+                ].join(" ")}
+                aria-expanded={isReportsOpen}
+              >
+                <BarChart3 className="h-[18px] w-[18px] shrink-0" />
+
+                <span className="flex-1 text-left">Reports</span>
+
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    isReportsOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {isReportsOpen && (
+                <div className="mt-1 space-y-1 border-l border-slate-200 pb-1 pl-4 ml-[21px]">
+                  {reportNavigation.map((item) => (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      end={item.path === "/reports"}
+                      className={({ isActive }) =>
+                        [
+                          "flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors",
+                          isActive
+                            ? "text-[#456b9a]"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
+                        ].join(" ")
+                      }
+                    >
+                      <FileBarChart className="h-3.5 w-3.5" />
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Divider */}
         <div className="my-6 border-t border-slate-100" />
 
-        {/* Account */}
         <div>
           <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             Account
@@ -194,7 +215,6 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* Bottom Status */}
       <div className="border-t border-slate-100 p-4">
         <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2.5">
           <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-500" />

@@ -6,6 +6,7 @@ import {
   Gauge,
   ListTodo,
   Rocket,
+  TrendingDown,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,22 @@ function daysRemaining(endDate: string) {
 
 function csvCell(value: string | number | null | undefined) {
   return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+type BurndownPoint = {
+  date: Date;
+  ideal: number;
+  actual: number | null;
+};
+
+function localDate(value: string) {
+  return new Date(`${value.slice(0, 10)}T00:00:00`);
+}
+
+function chartDateLabel(date: Date) {
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "short",
+  }).format(date);
 }
 
 export function SprintReportsPage() {
@@ -132,6 +149,67 @@ export function SprintReportsPage() {
       : 0;
 
     const remainingDays = daysRemaining(selectedSprint.endDate);
+    const sprintStart = localDate(selectedSprint.startDate);
+const sprintEnd = localDate(selectedSprint.endDate);
+const today = new Date();
+
+today.setHours(23, 59, 59, 999);
+
+const sprintDays = Math.max(
+  1,
+  Math.round(
+    (sprintEnd.getTime() - sprintStart.getTime()) /
+      86_400_000,
+  ) + 1,
+);
+
+const burndownPoints: BurndownPoint[] = Array.from(
+  { length: sprintDays },
+  (_, index) => {
+    const date = new Date(sprintStart);
+    date.setDate(date.getDate() + index);
+    date.setHours(23, 59, 59, 999);
+
+    const ideal =
+      sprintDays === 1
+        ? 0
+        : Math.max(
+            0,
+            plannedHours *
+              (1 - index / (sprintDays - 1)),
+          );
+
+    const actual =
+      date > today
+        ? null
+        : Math.max(
+            0,
+            plannedHours -
+              completedItems
+                .filter((item) => {
+                  if (!item.updatedOnUtc) {
+                    return false;
+                  }
+
+                  return (
+                    new Date(item.updatedOnUtc).getTime() <=
+                    date.getTime()
+                  );
+                })
+                .reduce(
+                  (total, item) =>
+                    total + (item.estimateHours ?? 0),
+                  0,
+                ),
+          );
+
+    return {
+      date,
+      ideal,
+      actual,
+    };
+  },
+);
     const totalDays = daysBetween(
       selectedSprint.startDate,
       selectedSprint.endDate,
@@ -189,6 +267,7 @@ export function SprintReportsPage() {
       remainingDays,
       totalDays,
       statusItems,
+      burndownPoints,
     };
   }, [myWorkQuery.items, selectedSprint]);
 
@@ -497,6 +576,29 @@ export function SprintReportsPage() {
                 })}
               </div>
             </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+                    <TrendingDown className="h-4 w-4" />
+                    </div>
+
+                    <div>
+                    <h2 className="text-sm font-semibold text-slate-900">
+                        Burndown
+                    </h2>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                        Remaining estimated hours across the sprint. Actual progress
+                        is estimated from completed work-item update dates.
+                    </p>
+                    </div>
+                </div>
+
+                <div className="mt-5">
+                    <SprintBurndownChart points={report.burndownPoints} />
+                </div>
+                </section>
           </div>
         </>
       )}
@@ -536,5 +638,187 @@ function SprintCard({
 
       <p className="mt-3 text-xs text-slate-400">{description}</p>
     </section>
+  );
+}
+
+function SprintBurndownChart({
+  points,
+}: {
+  points: BurndownPoint[];
+}) {
+  const width = 800;
+  const height = 260;
+  const padding = {
+    top: 18,
+    right: 20,
+    bottom: 34,
+    left: 42,
+  };
+
+  const maximum = Math.max(
+    ...points.flatMap((point) => [
+      point.ideal,
+      point.actual ?? 0,
+    ]),
+    1,
+  );
+
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  function x(index: number) {
+    if (points.length <= 1) {
+      return padding.left + chartWidth / 2;
+    }
+
+    return (
+      padding.left +
+      (index / (points.length - 1)) * chartWidth
+    );
+  }
+
+  function y(value: number) {
+    return (
+      padding.top +
+      chartHeight -
+      (value / maximum) * chartHeight
+    );
+  }
+
+  const idealPath = points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"} ${x(index)} ${y(
+          point.ideal,
+        )}`,
+    )
+    .join(" ");
+
+  const actualPoints = points
+    .map((point, index) => ({
+      index,
+      value: point.actual,
+    }))
+    .filter(
+      (
+        point,
+      ): point is {
+        index: number;
+        value: number;
+      } => point.value !== null,
+    );
+
+  const actualPath = actualPoints
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"} ${x(point.index)} ${y(
+          point.value,
+        )}`,
+    )
+    .join(" ");
+
+  const labelIndexes = Array.from(
+    new Set([
+      0,
+      Math.floor((points.length - 1) / 2),
+      points.length - 1,
+    ]),
+  );
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
+          Ideal remaining hours
+        </span>
+
+        <span className="inline-flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+          Actual remaining hours
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="min-w-[620px] w-full"
+          role="img"
+          aria-label="Sprint burndown chart"
+        >
+          {[0, 0.25, 0.5, 0.75, 1].map((step) => {
+            const lineY = padding.top + chartHeight * step;
+            const value = Math.round(maximum * (1 - step));
+
+            return (
+              <g key={step}>
+                <line
+                  x1={padding.left}
+                  x2={width - padding.right}
+                  y1={lineY}
+                  y2={lineY}
+                  stroke="#e2e8f0"
+                  strokeWidth="1"
+                />
+
+                <text
+                  x={padding.left - 10}
+                  y={lineY + 4}
+                  textAnchor="end"
+                  fontSize="11"
+                  fill="#94a3b8"
+                >
+                  {value}h
+                </text>
+              </g>
+            );
+          })}
+
+          <path
+            d={idealPath}
+            fill="none"
+            stroke="#94a3b8"
+            strokeWidth="2"
+            strokeDasharray="5 5"
+          />
+
+          {actualPath && (
+            <path
+              d={actualPath}
+              fill="none"
+              stroke="#0ea5e9"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+
+          {actualPoints.map((point) => (
+            <circle
+              key={point.index}
+              cx={x(point.index)}
+              cy={y(point.value)}
+              r="3.5"
+              fill="#0ea5e9"
+              stroke="white"
+              strokeWidth="2"
+            />
+          ))}
+
+          {labelIndexes.map((index) => (
+            <text
+              key={index}
+              x={x(index)}
+              y={height - 10}
+              textAnchor="middle"
+              fontSize="11"
+              fill="#94a3b8"
+            >
+              {chartDateLabel(points[index].date)}
+            </text>
+          ))}
+        </svg>
+      </div>
+    </div>
   );
 }
