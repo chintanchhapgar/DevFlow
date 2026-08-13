@@ -19,6 +19,7 @@ import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { MyTimePage } from "@/features/time/pages/MyTimePage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
+import { SprintReportsPage } from "@/features/reports/pages/SprintReportsPage";
 
 export function AppRouter() {
   return (
@@ -82,6 +83,11 @@ export function AppRouter() {
             <Route
               path="/reports"
               element={<ReportsPage />}
+            />
+
+            <Route
+              path="/reports/sprints"
+              element={<SprintReportsPage />}
             />
             {/* ============================================================ */}
             {/* ACTIVITY                                                     */}
