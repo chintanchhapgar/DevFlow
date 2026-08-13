@@ -17,12 +17,15 @@ import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
 import { downloadAttachment } from "../api/project-resources-api";
+import { useChangeWorkItemStatus } from "../hooks/use-project-resources";
 import { AttachmentsPanel } from "../components/AttachmentsPanel";
 import { MemberDialog } from "../components/MemberDialog";
 import { ProjectDialog } from "../components/ProjectDialog";
 import { WorkItemDialog } from "../components/WorkItemDialog";
 import { useProject } from "../hooks/use-project";
 import { useProjectWorkItems } from "../hooks/use-project-resources";
+import { LayoutList, PanelsTopLeft } from "lucide-react";
+import { WorkBoard } from "../components/WorkBoard";
 
 type Tab = "overview" | "members" | "work" | "attachments";
 
@@ -31,6 +34,7 @@ export function ProjectDetailPage() {
 
   const projectQuery = useProject(projectId);
   const workItemsQuery = useProjectWorkItems(projectId);
+  const changeWorkItemStatus = useChangeWorkItemStatus();
 
   const [activeTab, setActiveTab] =
     useState<Tab>("overview");
@@ -45,6 +49,8 @@ export function ProjectDetailPage() {
   const [selectedWorkItemId, setSelectedWorkItemId] =
     useState<string | null>(null);
 
+  const [workView, setWorkView] =
+    useState<"list" | "board">("board");
   const project = projectQuery.data;
   const workItems = workItemsQuery.data?.items ?? [];
 
@@ -205,14 +211,46 @@ export function ProjectDetailPage() {
               </p>
             </div>
 
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setIsCreateWorkItemOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              New work item
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <button
+                  type="button"
+                  title="Board view"
+                  aria-label="Board view"
+                  onClick={() => setWorkView("board")}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${
+                    workView === "board"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-400 hover:text-slate-700"
+                  }`}
+                >
+                  <PanelsTopLeft className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  title="List view"
+                  aria-label="List view"
+                  onClick={() => setWorkView("list")}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${
+                    workView === "list"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-400 hover:text-slate-700"
+                  }`}
+                >
+                  <LayoutList className="h-4 w-4" />
+                </button>
+              </div>
+
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setIsCreateWorkItemOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                New work item
+              </Button>
+            </div>
           </div>
 
           {workItemsQuery.isLoading && (
@@ -260,7 +298,28 @@ export function ProjectDetailPage() {
 
           {!workItemsQuery.isLoading &&
             !workItemsQuery.isError &&
-            workItems.length > 0 && (
+            workItems.length > 0 &&
+            workView === "board" && (
+              <WorkBoard
+                workItems={workItems}
+                members={members}
+                onSelect={(workItem) =>
+                  setSelectedWorkItemDetailId(workItem.id)
+                }
+                onMove={async (workItem, status) => {
+                  await changeWorkItemStatus.mutateAsync({
+                    projectId: project.projectId,
+                    workItemId: workItem.id,
+                    status,
+                  });
+                }}
+              />
+            )}
+
+          {!workItemsQuery.isLoading &&
+            !workItemsQuery.isError &&
+            workItems.length > 0 &&
+            workView === "list" && (
               <div className="divide-y divide-slate-100">
                 {workItems.map((workItem) => (
                   <button
@@ -268,8 +327,8 @@ export function ProjectDetailPage() {
                     type="button"
                     className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50"
                     onClick={() =>
-                        setSelectedWorkItemDetailId(workItem.id)
-                      }
+                      setSelectedWorkItemDetailId(workItem.id)
+                    }
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
                       <FileText className="h-4 w-4" />
