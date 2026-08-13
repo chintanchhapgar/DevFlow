@@ -1,5 +1,18 @@
 import { projectApiClient } from "@/lib/api/project-api-client";
 
+
+export const WorkItemStatus = {
+  Todo: 1,
+  InProgress: 2,
+  InReview: 3,
+  Testing: 4,
+  Done: 5,
+  Cancelled: 6,
+} as const;
+
+export type WorkItemStatus =
+  (typeof WorkItemStatus)[keyof typeof WorkItemStatus];
+
 export const WorkItemType = {
   Task: 1,
   Bug: 2,
@@ -10,16 +23,6 @@ export const WorkItemType = {
 
 export type WorkItemType =
   (typeof WorkItemType)[keyof typeof WorkItemType];
-
-export const WorkItemStatus = {
-  ToDo: 1,
-  InProgress: 2,
-  InReview: 3,
-  Done: 4,
-} as const;
-
-export type WorkItemStatus =
-  (typeof WorkItemStatus)[keyof typeof WorkItemStatus];
 
 export const WorkItemPriority = {
   Lowest: 1,
@@ -143,6 +146,36 @@ export async function updateWorkItem(
   );
 
   return response.data.data;
+}
+
+export async function changeWorkItemStatus(
+  workItemId: string,
+  status: WorkItemStatus,
+): Promise<void> {
+  await projectApiClient.put(
+    `/api/work-items/${workItemId}/status`,
+    { status },
+  );
+}
+
+export async function changeWorkItemPriority(
+  workItemId: string,
+  priority: WorkItemPriority,
+): Promise<void> {
+  await projectApiClient.put(
+    `/api/work-items/${workItemId}/priority`,
+    { priority },
+  );
+}
+
+export async function assignWorkItem(
+  workItemId: string,
+  assigneeId: string,
+): Promise<void> {
+  await projectApiClient.put(
+    `/api/work-items/${workItemId}/assign`,
+    { assigneeId },
+  );
 }
 
 export async function deleteWorkItem(

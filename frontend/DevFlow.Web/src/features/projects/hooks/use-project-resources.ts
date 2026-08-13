@@ -5,6 +5,9 @@ import {
 } from "@tanstack/react-query";
 
 import {
+  assignWorkItem,
+  changeWorkItemPriority,
+  changeWorkItemStatus,
   createWorkItem,
   deleteAttachment,
   deleteWorkItem,
@@ -15,6 +18,8 @@ import {
   type CreateWorkItemRequest,
   type GetWorkItemsParams,
   type UpdateWorkItemRequest,
+  type WorkItemPriority,
+  type WorkItemStatus,
 } from "../api/project-resources-api";
 
 import { projectKeys } from "./use-project";
@@ -176,6 +181,72 @@ export function useDeleteWorkItem() {
           ),
         }),
       ]),
+  });
+}
+
+export function useChangeWorkItemStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      workItemId,
+      status,
+    }: {
+      projectId: string;
+      workItemId: string;
+      status: WorkItemStatus;
+    }) => changeWorkItemStatus(workItemId, status),
+
+    onSuccess: (_, variables) =>
+      invalidateProjectWorkItems(
+        queryClient,
+        variables.projectId,
+      ),
+  });
+}
+
+export function useChangeWorkItemPriority() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      workItemId,
+      priority,
+    }: {
+      projectId: string;
+      workItemId: string;
+      priority: WorkItemPriority;
+    }) => changeWorkItemPriority(workItemId, priority),
+
+    onSuccess: (_, variables) =>
+      invalidateProjectWorkItems(
+        queryClient,
+        variables.projectId,
+      ),
+  });
+}
+
+export function useAssignWorkItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      workItemId,
+      assigneeId,
+    }: {
+      projectId: string;
+      workItemId: string;
+      assigneeId: string;
+    }) => assignWorkItem(workItemId, assigneeId),
+
+    onSuccess: (_, variables) =>
+      invalidateProjectWorkItems(
+        queryClient,
+        variables.projectId,
+      ),
   });
 }
 

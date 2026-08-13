@@ -15,7 +15,7 @@ import {
 import { useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-
+import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
 import { downloadAttachment } from "../api/project-resources-api";
 import { AttachmentsPanel } from "../components/AttachmentsPanel";
 import { MemberDialog } from "../components/MemberDialog";
@@ -40,8 +40,8 @@ export function ProjectDetailPage() {
     useState(false);
   const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] =
     useState(false);
-  const [workItemToEditId, setWorkItemToEditId] =
-    useState<string | null>(null);
+  const [selectedWorkItemDetailId, setSelectedWorkItemDetailId] =
+    useState<string | null>(null);  
   const [selectedWorkItemId, setSelectedWorkItemId] =
     useState<string | null>(null);
 
@@ -97,10 +97,11 @@ export function ProjectDetailPage() {
   }
 
   const members = project.members ?? [];
-  const workItemToEdit =
-    workItems.find(
-      (workItem) => workItem.id === workItemToEditId,
-    ) ?? null;
+  const selectedWorkItemDetail =
+  workItems.find(
+    (workItem) =>
+      workItem.id === selectedWorkItemDetailId,
+  ) ?? null;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -266,7 +267,9 @@ export function ProjectDetailPage() {
                     key={workItem.id}
                     type="button"
                     className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50"
-                    onClick={() => setWorkItemToEditId(workItem.id)}
+                    onClick={() =>
+                        setSelectedWorkItemDetailId(workItem.id)
+                      }
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
                       <FileText className="h-4 w-4" />
@@ -371,17 +374,17 @@ export function ProjectDetailPage() {
         projectId={project.projectId}
       />
 
-      {workItemToEdit && (
-        <WorkItemDialog
-          mode="edit"
+      {selectedWorkItemDetail && (
+        <WorkItemDetailDialog
           open
           onOpenChange={(open) => {
             if (!open) {
-              setWorkItemToEditId(null);
+              setSelectedWorkItemDetailId(null);
             }
           }}
           projectId={project.projectId}
-          workItem={workItemToEdit}
+          workItem={selectedWorkItemDetail}
+          members={members}
         />
       )}
     </div>
