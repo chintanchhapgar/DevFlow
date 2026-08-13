@@ -18,6 +18,8 @@ import { SecurityPage } from "@/features/security/pages/SecurityPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { MyTimePage } from "@/features/time/pages/MyTimePage";
+import { ReportsPage } from "@/features/reports/pages/ReportsPage";
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -75,6 +77,11 @@ export function AppRouter() {
             <Route
               path="/time"
               element={<MyTimePage />}
+            />
+
+            <Route
+              path="/reports"
+              element={<ReportsPage />}
             />
             {/* ============================================================ */}
             {/* ACTIVITY                                                     */}

@@ -7,6 +7,7 @@ import {
   User,
   Workflow,
   Clock3,
+  BarChart3,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -31,6 +32,11 @@ const navigation = [
   path: "/time",
   icon: Clock3,
   },
+  {
+  label: "Reports",
+  path: "/reports",
+  icon: BarChart3,
+},
   {
     label: "Activity",
     path: "/activity",
