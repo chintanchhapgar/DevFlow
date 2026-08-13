@@ -9,7 +9,7 @@ import {
   Pencil,
   UserRound,
 } from "lucide-react";
-
+import { WorklogPanel } from "./WorklogPanel";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -220,6 +220,10 @@ export function WorkItemDetailDialog({
               <AttachmentsPanel
                 workItemId={workItem.id}
                 workItemTitle={workItem.title}
+              />
+
+              <WorklogPanel 
+                workItemId={workItem.id} 
               />
             </div>
 
