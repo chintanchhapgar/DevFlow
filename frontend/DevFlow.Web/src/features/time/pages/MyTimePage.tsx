@@ -7,7 +7,7 @@ import {
   Timer,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import { TimeEntryActions } from "../components/TimeEntryActions";
 import { Button } from "@/components/ui/button";
 import { useMyTime } from "@/features/projects/hooks/use-my-time";
 
@@ -303,44 +303,53 @@ export function MyTimePage() {
           !myTimeQuery.isError &&
           summary.weekEntries.length > 0 && (
             <div className="divide-y divide-slate-100">
-              {summary.weekEntries.map((entry) => (
-                <Link
-                  key={entry.worklogId}
-                  to={`/projects/${entry.projectId}`}
-                  className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50"
+             {summary.weekEntries.map((entry) => (
+                <div
+                    key={entry.worklogId}
+                    className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-                    <FolderKanban className="h-4 w-4" />
-                  </div>
+                    <Link
+                    to={`/projects/${entry.projectId}`}
+                    className="flex min-w-0 flex-1 items-center gap-3"
+                    >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                        <FolderKanban className="h-4 w-4" />
+                    </div>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-800">
-                      {entry.workItemTitle}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-800">
+                        {entry.workItemTitle}
+                        </p>
 
-                    <p className="mt-1 text-xs text-slate-500">
-                      <span className="font-medium text-slate-600">
-                        {entry.workItemKey}
-                      </span>
-                      {" · "}
-                      {entry.projectName}
-                      {" · "}
-                      {new Intl.DateTimeFormat(undefined, {
-                        day: "numeric",
-                        month: "short",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      }).format(new Date(entry.startedAtUtc))}
-                    </p>
-                  </div>
+                        <p className="mt-1 text-xs text-slate-500">
+                        <span className="font-medium text-slate-600">
+                            {entry.workItemKey}
+                        </span>
+                        {" · "}
+                        {entry.projectName}
+                        {" · "}
+                        {new Intl.DateTimeFormat(undefined, {
+                            day: "numeric",
+                            month: "short",
+                            hour: "numeric",
+                            minute: "2-digit",
+                        }).format(new Date(entry.startedAtUtc))}
+                        </p>
+                    </div>
+                    </Link>
 
-                  <span className="shrink-0 text-sm font-semibold text-slate-700">
+                    <span className="shrink-0 text-sm font-semibold text-slate-700">
                     {entry.isRunning
-                      ? "Running"
-                      : formatMinutes(entry.minutesSpent)}
-                  </span>
-                </Link>
-              ))}
+                        ? "Running"
+                        : formatMinutes(entry.minutesSpent)}
+                    </span>
+
+                    <TimeEntryActions
+                    entry={entry}
+                    onChanged={myTimeQuery.refetch}
+                    />
+                </div>
+                ))}
             </div>
           )}
       </section>
