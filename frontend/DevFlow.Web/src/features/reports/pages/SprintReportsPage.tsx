@@ -16,7 +16,8 @@ import { useMyWork } from "@/features/projects/hooks/use-my-work";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { useProjectSprints } from "../hooks/use-sprint-reports";
-
+import { WorkItemDetailDialog } from "@/features/projects/components/WorkItemDetailDialog";
+import { useProject } from "@/features/projects/hooks/use-project";
 function statusValue(value: string | number) {
   if (typeof value === "number") {
     return value;
@@ -149,7 +150,8 @@ export function SprintReportsPage() {
     const [workItemStatus, setWorkItemStatus] = useState<
     "all" | WorkItemStatus
     >("all");
-
+const [selectedWorkItemId, setSelectedWorkItemId] =
+  useState<string | null>(null);
   const selectedSprint = useMemo(() => {
     if (selectedSprintId) {
       return (
@@ -354,6 +356,15 @@ const burndownPoints: BurndownPoint[] = Array.from(
   });
 }, [report, workItemSearch, workItemStatus]);
 
+const selectedWorkItem =
+  report?.workItems.find(
+    (item) => item.id === selectedWorkItemId,
+  ) ?? null;
+
+const selectedProjectQuery = useProject(
+  selectedWorkItem?.projectId,
+);
+
   function downloadCsv() {
     if (!selectedSprint || !report) {
       return;
@@ -459,6 +470,21 @@ const burndownPoints: BurndownPoint[] = Array.from(
           </select>
         </label>
       </section>
+
+       {selectedWorkItem && selectedProjectQuery.data && (
+        <WorkItemDetailDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedWorkItemId(null);
+              void myWorkQuery.refetch();
+            }
+          }}
+          projectId={selectedWorkItem.projectId}
+          workItem={selectedWorkItem}
+          members={selectedProjectQuery.data.members ?? []}
+        />
+      )}
 
       {isLoading && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -769,11 +795,12 @@ const burndownPoints: BurndownPoint[] = Array.from(
                             className="transition-colors hover:bg-slate-50"
                             >
                             <td className="px-5 py-4">
-                                <Link
-                                to={`/projects/${item.projectId}`}
-                                className="block max-w-sm"
+                               <button
+                                type="button"
+                                onClick={() => setSelectedWorkItemId(item.id)}
+                                className="block max-w-sm text-left"
                                 >
-                                <p className="truncate text-sm font-medium text-slate-800 hover:text-[var(--devflow-primary)]">
+                                <p className="truncate text-sm font-medium text-slate-800 transition-colors hover:text-[var(--devflow-primary)]">
                                     {item.title}
                                 </p>
 
@@ -784,7 +811,7 @@ const burndownPoints: BurndownPoint[] = Array.from(
                                     {" · "}
                                     {item.projectName}
                                 </p>
-                                </Link>
+                                </button>
                             </td>
 
                             <td className="px-4 py-4">
@@ -1051,6 +1078,9 @@ function SprintBurndownChart({
           ))}
         </svg>
       </div>
+
+      
     </div>
+    
   );
 }
