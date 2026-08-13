@@ -212,9 +212,97 @@ const [selectedWorkItemId, setSelectedWorkItemId] =
       : 0;
 
     const remainingDays = daysRemaining(selectedSprint.endDate);
+    const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const sprintStartDate = localDate(selectedSprint.startDate);
+const sprintEndDate = localDate(selectedSprint.endDate);
+
+const totalSprintDays = Math.max(
+  1,
+  Math.round(
+    (sprintEndDate.getTime() - sprintStartDate.getTime()) /
+      86_400_000,
+  ) + 1,
+);
+
+const elapsedSprintDays = Math.min(
+  totalSprintDays,
+  Math.max(
+    0,
+    Math.round(
+      (today.getTime() - sprintStartDate.getTime()) /
+        86_400_000,
+    ) + 1,
+  ),
+);
+
+const expectedCompletion = Math.round(
+  (elapsedSprintDays / totalSprintDays) * 100,
+);
+
+const overdueItems = activeItems.filter((item) => {
+  if (!item.dueDate) {
+    return false;
+  }
+
+  const dueDate = new Date(item.dueDate);
+  dueDate.setHours(0, 0, 0, 0);
+
+  return (
+    dueDate < today &&
+    statusValue(item.status) !== WorkItemStatus.Done
+  );
+});
+
+let health: {
+  status: "on-track" | "at-risk" | "off-track";
+  label: string;
+  description: string;
+};
+
+if (
+  remainingDays < 0 &&
+  completedItems.length < activeItems.length
+) {
+  health = {
+    status: "off-track",
+    label: "Off track",
+    description: `${activeItems.length - completedItems.length} unfinished work item${
+      activeItems.length - completedItems.length === 1 ? "" : "s"
+    } after the sprint end date.`,
+  };
+} else if (
+  overdueItems.length > 0 ||
+  completionPercentage + 15 < expectedCompletion
+) {
+  health = {
+    status: "at-risk",
+    label: "At risk",
+    description:
+      overdueItems.length > 0
+        ? `${overdueItems.length} overdue work item${
+            overdueItems.length === 1 ? "" : "s"
+          } need attention.`
+        : `${completionPercentage}% complete; ${expectedCompletion}% is expected by today.`,
+  };
+} else {
+  health = {
+    status: "on-track",
+    label: "On track",
+    description:
+      activeItems.length === 0
+        ? "No active work items have been added yet."
+        : `${completionPercentage}% complete with ${
+            Math.max(remainingDays, 0)
+          } day${Math.max(remainingDays, 0) === 1 ? "" : "s"} remaining.`,
+  };
+}
+
+
     const sprintStart = localDate(selectedSprint.startDate);
 const sprintEnd = localDate(selectedSprint.endDate);
-const today = new Date();
+
 
 today.setHours(23, 59, 59, 999);
 
@@ -331,6 +419,8 @@ const burndownPoints: BurndownPoint[] = Array.from(
       totalDays,
       statusItems,
       burndownPoints,
+      overdueItems,
+health,
     };
   }, [myWorkQuery.items, selectedSprint]);
 
@@ -522,8 +612,30 @@ const selectedProjectQuery = useProject(
 
                 <h2 className="mt-1 text-lg font-semibold text-slate-900">
                   {selectedSprint.name}
-                </h2>
+                                </h2>
+                                <div
+                className={`mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${
+                    report.health.status === "on-track"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : report.health.status === "at-risk"
+                        ? "bg-amber-50 text-amber-700"
+                        : "bg-red-50 text-red-700"
+                }`}
+                >
+                {report.health.status === "on-track" ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                    <AlertTriangle className="h-4 w-4" />
+                )}
 
+                <span>{report.health.label}</span>
+
+                <span className="h-1 w-1 rounded-full bg-current opacity-50" />
+
+                <span className="font-normal">
+                    {report.health.description}
+                </span>
+                </div>
                 {selectedSprint.goal && (
                   <p className="mt-1 text-sm text-slate-500">
                     {selectedSprint.goal}
