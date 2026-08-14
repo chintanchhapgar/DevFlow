@@ -20,7 +20,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { MyTimePage } from "@/features/time/pages/MyTimePage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SprintReportsPage } from "@/features/reports/pages/SprintReportsPage";
-
+import { WorkItemDetailPage } from "@/features/projects/pages/WorkItemDetailPage";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -64,6 +64,11 @@ export function AppRouter() {
             <Route
               path="/projects/:projectId"
               element={<ProjectDetailPage />}
+            />
+
+            <Route
+              path="/projects/:projectId/work-items/:workItemId"
+              element={<WorkItemDetailPage />}
             />
 
             {/* ============================================================ */}

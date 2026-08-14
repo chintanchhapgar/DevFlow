@@ -896,7 +896,9 @@ const selectedProjectQuery = useProject(
                             <th className="px-4 py-3 font-medium">Priority</th>
                             <th className="px-4 py-3 font-medium">Assignee</th>
                             <th className="px-4 py-3 font-medium">Estimate</th>
-                            <th className="px-5 py-3 text-right font-medium">Due date</th>
+                            <th className="px-5 py-3 text-right font-medium">
+                            Due date
+                            </th>
                         </tr>
                         </thead>
 
@@ -907,10 +909,9 @@ const selectedProjectQuery = useProject(
                             className="transition-colors hover:bg-slate-50"
                             >
                             <td className="px-5 py-4">
-                               <button
-                                type="button"
-                                onClick={() => setSelectedWorkItemId(item.id)}
-                                className="block max-w-sm text-left"
+                                <Link
+                                to={`/projects/${item.projectId}/work-items/${item.id}`}
+                                className="block max-w-sm"
                                 >
                                 <p className="truncate text-sm font-medium text-slate-800 transition-colors hover:text-[var(--devflow-primary)]">
                                     {item.title}
@@ -923,7 +924,7 @@ const selectedProjectQuery = useProject(
                                     {" · "}
                                     {item.projectName}
                                 </p>
-                                </button>
+                                </Link>
                             </td>
 
                             <td className="px-4 py-4">

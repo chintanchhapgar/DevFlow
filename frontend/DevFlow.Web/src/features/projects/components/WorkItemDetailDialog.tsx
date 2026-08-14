@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -9,7 +12,7 @@ import {
   Pencil,
   UserRound,
 } from "lucide-react";
-import { WorklogPanel } from "./WorklogPanel";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,9 +32,12 @@ import {
   useAssignWorkItem,
   useChangeWorkItemPriority,
   useChangeWorkItemStatus,
+  useMoveWorkItemToSprint,
 } from "../hooks/use-project-resources";
+import { useProjectSprints } from "../hooks/use-sprints";
 import { AttachmentsPanel } from "./AttachmentsPanel";
 import { WorkItemDialog } from "./WorkItemDialog";
+import { WorklogPanel } from "./WorklogPanel";
 
 type Member = {
   userId: string;
@@ -64,11 +70,40 @@ const priorityOptions = [
   { value: WorkItemPriority.Highest, label: "Highest" },
 ];
 
-function numericValue(
-  value: string | number,
-  fallback: number,
-) {
-  return typeof value === "number" ? value : fallback;
+function getStatusValue(value: string | number) {
+  if (typeof value === "number") {
+    return value as WorkItemStatus;
+  }
+
+  const values: Record<string, WorkItemStatus> = {
+    todo: WorkItemStatus.Todo,
+    "to do": WorkItemStatus.Todo,
+    inprogress: WorkItemStatus.InProgress,
+    "in progress": WorkItemStatus.InProgress,
+    inreview: WorkItemStatus.InReview,
+    "in review": WorkItemStatus.InReview,
+    testing: WorkItemStatus.Testing,
+    done: WorkItemStatus.Done,
+    cancelled: WorkItemStatus.Cancelled,
+  };
+
+  return values[value.toLowerCase()] ?? WorkItemStatus.Todo;
+}
+
+function getPriorityValue(value: string | number) {
+  if (typeof value === "number") {
+    return value as WorkItemPriority;
+  }
+
+  const values: Record<string, WorkItemPriority> = {
+    lowest: WorkItemPriority.Lowest,
+    low: WorkItemPriority.Low,
+    medium: WorkItemPriority.Medium,
+    high: WorkItemPriority.High,
+    highest: WorkItemPriority.Highest,
+  };
+
+  return values[value.toLowerCase()] ?? WorkItemPriority.Medium;
 }
 
 function labelFor(
@@ -76,12 +111,13 @@ function labelFor(
   options: { value: number; label: string }[],
   fallback: string,
 ) {
-  if (typeof value === "string") {
-    return value.replace(/([a-z])([A-Z])/g, "$1 $2");
-  }
+  const numericValue =
+    options === statusOptions
+      ? getStatusValue(value)
+      : getPriorityValue(value);
 
   return (
-    options.find((option) => option.value === value)?.label ??
+    options.find((option) => option.value === numericValue)?.label ??
     fallback
   );
 }
@@ -109,53 +145,86 @@ export function WorkItemDetailDialog({
   const changeStatus = useChangeWorkItemStatus();
   const changePriority = useChangeWorkItemPriority();
   const assignWorkItem = useAssignWorkItem();
+  const moveWorkItemToSprint = useMoveWorkItemToSprint();
+  const sprintsQuery = useProjectSprints(projectId);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [selectedStatus, setSelectedStatus] = useState(
+    getStatusValue(workItem.status),
+  );
+
+  const [selectedPriority, setSelectedPriority] = useState(
+    getPriorityValue(workItem.priority),
+  );
+
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState(
+    workItem.assigneeId ?? "",
+  );
+
+  const [selectedSprintId, setSelectedSprintId] = useState(
+    workItem.sprintId ?? "",
+  );
+
+  useEffect(() => {
+    setSelectedStatus(getStatusValue(workItem.status));
+    setSelectedPriority(getPriorityValue(workItem.priority));
+    setSelectedAssigneeId(workItem.assigneeId ?? "");
+    setSelectedSprintId(workItem.sprintId ?? "");
+  }, [
+    workItem.id,
+    workItem.status,
+    workItem.priority,
+    workItem.assigneeId,
+    workItem.sprintId,
+  ]);
+
   const isSaving =
     changeStatus.isPending ||
     changePriority.isPending ||
-    assignWorkItem.isPending;
-
-  const statusValue = numericValue(
-    workItem.status,
-    WorkItemStatus.Todo,
-  );
-  const priorityValue = numericValue(
-    workItem.priority,
-    WorkItemPriority.Medium,
-  );
+    assignWorkItem.isPending ||
+    moveWorkItemToSprint.isPending;
 
   const assignee =
     members.find(
-      (member) => member.userId === workItem.assigneeId,
+      (member) => member.userId === selectedAssigneeId,
     ) ?? null;
 
   async function handleStatusChange(value: string) {
+    const nextStatus = Number(value) as WorkItemStatus;
+    const previousStatus = selectedStatus;
+
     setError(null);
+    setSelectedStatus(nextStatus);
 
     try {
       await changeStatus.mutateAsync({
         projectId,
         workItemId: workItem.id,
-        status: Number(value) as WorkItemStatus,
+        status: nextStatus,
       });
     } catch {
+      setSelectedStatus(previousStatus);
       setError("Unable to update the work item status.");
     }
   }
 
   async function handlePriorityChange(value: string) {
+    const nextPriority = Number(value) as WorkItemPriority;
+    const previousPriority = selectedPriority;
+
     setError(null);
+    setSelectedPriority(nextPriority);
 
     try {
       await changePriority.mutateAsync({
         projectId,
         workItemId: workItem.id,
-        priority: Number(value) as WorkItemPriority,
+        priority: nextPriority,
       });
     } catch {
+      setSelectedPriority(previousPriority);
       setError("Unable to update the work item priority.");
     }
   }
@@ -165,7 +234,10 @@ export function WorkItemDetailDialog({
       return;
     }
 
+    const previousAssigneeId = selectedAssigneeId;
+
     setError(null);
+    setSelectedAssigneeId(value);
 
     try {
       await assignWorkItem.mutateAsync({
@@ -174,7 +246,30 @@ export function WorkItemDetailDialog({
         assigneeId: value,
       });
     } catch {
+      setSelectedAssigneeId(previousAssigneeId);
       setError("Unable to assign this work item.");
+    }
+  }
+
+  async function handleSprintChange(value: string) {
+    if (!value) {
+      return;
+    }
+
+    const previousSprintId = selectedSprintId;
+
+    setError(null);
+    setSelectedSprintId(value);
+
+    try {
+      await moveWorkItemToSprint.mutateAsync({
+        projectId,
+        workItemId: workItem.id,
+        sprintId: value,
+      });
+    } catch {
+      setSelectedSprintId(previousSprintId);
+      setError("Unable to move this work item to the sprint.");
     }
   }
 
@@ -198,7 +293,7 @@ export function WorkItemDetailDialog({
                 </DialogTitle>
 
                 <DialogDescription>
-                  Manage workflow, ownership, and files.
+                  Manage workflow, ownership, time, and files.
                 </DialogDescription>
               </div>
             </div>
@@ -222,9 +317,7 @@ export function WorkItemDetailDialog({
                 workItemTitle={workItem.title}
               />
 
-              <WorklogPanel 
-                workItemId={workItem.id} 
-              />
+              <WorklogPanel workItemId={workItem.id} />
             </div>
 
             <aside className="space-y-4">
@@ -239,12 +332,12 @@ export function WorkItemDetailDialog({
                     label="Status"
                   >
                     <select
-                      value={statusValue}
+                      value={selectedStatus}
                       disabled={isSaving}
                       onChange={(event) =>
                         handleStatusChange(event.target.value)
                       }
-                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
                     >
                       {statusOptions.map((option) => (
                         <option
@@ -262,12 +355,12 @@ export function WorkItemDetailDialog({
                     label="Priority"
                   >
                     <select
-                      value={priorityValue}
+                      value={selectedPriority}
                       disabled={isSaving}
                       onChange={(event) =>
                         handlePriorityChange(event.target.value)
                       }
-                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
                     >
                       {priorityOptions.map((option) => (
                         <option
@@ -285,12 +378,12 @@ export function WorkItemDetailDialog({
                     label="Assignee"
                   >
                     <select
-                      value={workItem.assigneeId ?? ""}
+                      value={selectedAssigneeId}
                       disabled={isSaving || members.length === 0}
                       onChange={(event) =>
                         handleAssigneeChange(event.target.value)
                       }
-                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
                     >
                       <option value="">
                         {assignee
@@ -306,6 +399,43 @@ export function WorkItemDetailDialog({
                           {member.memberName || member.userId}
                         </option>
                       ))}
+                    </select>
+                  </Property>
+
+                  <Property
+                    icon={<CalendarDays className="h-4 w-4" />}
+                    label="Sprint"
+                  >
+                    <select
+                      value={selectedSprintId}
+                      disabled={
+                        isSaving ||
+                        sprintsQuery.isLoading ||
+                        sprintsQuery.isError
+                      }
+                      onChange={(event) =>
+                        handleSprintChange(event.target.value)
+                      }
+                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    >
+                      <option value="">
+                        {sprintsQuery.isLoading
+                          ? "Loading sprints..."
+                          : sprintsQuery.isError
+                            ? "Unable to load sprints"
+                            : "Select a sprint"}
+                      </option>
+
+                      {(sprintsQuery.data?.items ?? []).map(
+                        (sprint) => (
+                          <option
+                            key={sprint.sprintId}
+                            value={sprint.sprintId}
+                          >
+                            {sprint.name}
+                          </option>
+                        ),
+                      )}
                     </select>
                   </Property>
 
@@ -344,11 +474,9 @@ export function WorkItemDetailDialog({
                   <div className="flex justify-between gap-3">
                     <dt className="text-slate-500">Type</dt>
                     <dd className="font-medium text-slate-700">
-                      {labelFor(
-                        workItem.type,
-                        [],
-                        "Work item",
-                      )}
+                      {typeof workItem.type === "string"
+                        ? workItem.type
+                        : "Work item"}
                     </dd>
                   </div>
 
@@ -356,7 +484,7 @@ export function WorkItemDetailDialog({
                     <dt className="text-slate-500">Status</dt>
                     <dd className="font-medium text-slate-700">
                       {labelFor(
-                        workItem.status,
+                        selectedStatus,
                         statusOptions,
                         "To do",
                       )}
@@ -367,7 +495,7 @@ export function WorkItemDetailDialog({
                     <dt className="text-slate-500">Priority</dt>
                     <dd className="font-medium text-slate-700">
                       {labelFor(
-                        workItem.priority,
+                        selectedPriority,
                         priorityOptions,
                         "Medium",
                       )}
@@ -376,11 +504,15 @@ export function WorkItemDetailDialog({
 
                   {assignee && (
                     <div className="flex items-center justify-between gap-3">
-                      <dt className="text-slate-500">Assigned to</dt>
+                      <dt className="text-slate-500">
+                        Assigned to
+                      </dt>
+
                       <dd className="flex items-center gap-1.5 font-medium text-slate-700">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[9px]">
                           {initials(assignee.memberName)}
                         </span>
+
                         <span className="max-w-28 truncate">
                           {assignee.memberName}
                         </span>

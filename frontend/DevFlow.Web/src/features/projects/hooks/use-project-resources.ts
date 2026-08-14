@@ -15,6 +15,7 @@ import {
   getWorkItems,
   updateWorkItem,
   uploadAttachment,
+  moveWorkItemToSprint,
   type CreateWorkItemRequest,
   type GetWorkItemsParams,
   type UpdateWorkItemRequest,
@@ -289,5 +290,26 @@ export function useDeleteAttachment() {
           variables.workItemId,
         ),
       }),
+  });
+}
+export function useMoveWorkItemToSprint() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      workItemId,
+      sprintId,
+    }: {
+      projectId: string;
+      workItemId: string;
+      sprintId: string;
+    }) => moveWorkItemToSprint(workItemId, sprintId),
+
+    onSuccess: (_, variables) =>
+      invalidateProjectWorkItems(
+        queryClient,
+        variables.projectId,
+      ),
   });
 }

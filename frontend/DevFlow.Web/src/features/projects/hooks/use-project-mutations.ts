@@ -22,6 +22,10 @@ import {
   type UpdateProjectRequest,
 } from "../api/projects-api";
 
+import {
+  moveWorkItemToSprint,
+} from "../api/project-resources-api";
+
 import { projectKeys } from "./use-project";
 
 /* -------------------------------------------------------------------------- */
@@ -364,5 +368,27 @@ export function useDeclineProjectInvitation() {
         queryKey: projectKeys.invitations(result.projectId),
       });
     },
+  });
+}
+
+export function useMoveWorkItemToSprint() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      workItemId,
+      sprintId,
+    }: {
+      projectId: string;
+      workItemId: string;
+      sprintId: string;
+    }) => moveWorkItemToSprint(workItemId, sprintId),
+
+    onSuccess: (_, variables) =>
+      invalidateProjectWorkItems(
+        queryClient,
+        variables.projectId,
+      ),
   });
 }

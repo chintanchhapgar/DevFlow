@@ -254,3 +254,13 @@ export async function downloadAttachment(
 
   URL.revokeObjectURL(url);
 }
+
+export async function moveWorkItemToSprint(
+  workItemId: string,
+  sprintId: string,
+): Promise<void> {
+  await projectApiClient.put(
+    `/api/work-items/${workItemId}/sprint`,
+    { sprintId },
+  );
+}
