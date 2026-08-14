@@ -12,26 +12,26 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-
-
 import {
   Link,
   useParams,
 } from "react-router-dom";
+import { LayoutList, PanelsTopLeft } from "lucide-react";
 
-import { ProjectInsightsTab } from "../components/ProjectInsightsTab";
 import { Button } from "@/components/ui/button";
-import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
-import { useChangeWorkItemStatus } from "../hooks/use-project-resources";
 import { AttachmentsPanel } from "../components/AttachmentsPanel";
 import { MemberDialog } from "../components/MemberDialog";
 import { ProjectDialog } from "../components/ProjectDialog";
+import { ProjectInsightsTab } from "../components/ProjectInsightsTab";
+import { ProjectSprintsTab } from "../components/ProjectSprintsTab";
+import { WorkBoard } from "../components/WorkBoard";
+import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
 import { WorkItemDialog } from "../components/WorkItemDialog";
 import { useProject } from "../hooks/use-project";
-import { useProjectWorkItems } from "../hooks/use-project-resources";
-import { LayoutList, PanelsTopLeft } from "lucide-react";
-import { WorkBoard } from "../components/WorkBoard";
-import { ProjectSprintsTab } from "../components/ProjectSprintsTab";
+import {
+  useChangeWorkItemStatus,
+  useProjectWorkItems,
+} from "../hooks/use-project-resources";
 
 type Tab =
   | "overview"
@@ -48,42 +48,49 @@ export function ProjectDetailPage() {
   const workItemsQuery = useProjectWorkItems(projectId);
   const changeWorkItemStatus = useChangeWorkItemStatus();
 
-  const [activeTab, setActiveTab] =
-    useState<Tab>("overview");
-  const [isEditProjectOpen, setIsEditProjectOpen] =
-    useState(false);
-  const [isMembersOpen, setIsMembersOpen] =
-    useState(false);
-  const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] =
-    useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [isEditProjectOpen, setIsEditProjectOpen] = useState(false);
+  const [isMembersOpen, setIsMembersOpen] = useState(false);
+  const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] = useState(false);
+
   const [selectedWorkItemDetailId, setSelectedWorkItemDetailId] =
-    useState<string | null>(null);  
-  const [selectedWorkItemId, setSelectedWorkItemId] =
     useState<string | null>(null);
 
-  const [workView, setWorkView] =
-    useState<"list" | "board">("board");
+  const [attachmentWorkItemId, setAttachmentWorkItemId] =
+    useState<string | null>(null);
+
+  const [workView, setWorkView] = useState<"list" | "board">("board");
+
   const project = projectQuery.data;
   const workItems = workItemsQuery.data?.items ?? [];
 
-  const selectedWorkItem = useMemo(
-    () =>
-      workItems.find(
-        (workItem) => workItem.id === selectedWorkItemId,
-      ) ?? null,
-    [selectedWorkItemId, workItems],
+  const selectedWorkItemDetail = useMemo(
+    () => workItems.find((w) => w.id === selectedWorkItemDetailId) ?? null,
+    [selectedWorkItemDetailId, workItems],
+  );
+
+  const attachmentWorkItem = useMemo(
+    () => workItems.find((w) => w.id === attachmentWorkItemId) ?? null,
+    [attachmentWorkItemId, workItems],
   );
 
   useEffect(() => {
     if (
-      selectedWorkItemId &&
-      !workItems.some(
-        (workItem) => workItem.id === selectedWorkItemId,
-      )
+      selectedWorkItemDetailId &&
+      !workItems.some((w) => w.id === selectedWorkItemDetailId)
     ) {
-      setSelectedWorkItemId(null);
+      setSelectedWorkItemDetailId(null);
     }
-  }, [selectedWorkItemId, workItems]);
+  }, [selectedWorkItemDetailId, workItems]);
+
+  useEffect(() => {
+    if (
+      attachmentWorkItemId &&
+      !workItems.some((w) => w.id === attachmentWorkItemId)
+    ) {
+      setAttachmentWorkItemId(null);
+    }
+  }, [attachmentWorkItemId, workItems]);
 
   if (projectQuery.isLoading) {
     return <ProjectDetailSkeleton />;
@@ -115,11 +122,6 @@ export function ProjectDetailPage() {
   }
 
   const members = project.members ?? [];
-  const selectedWorkItemDetail =
-  workItems.find(
-    (workItem) =>
-      workItem.id === selectedWorkItemDetailId,
-  ) ?? null;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -130,6 +132,7 @@ export function ProjectDetailPage() {
         <ArrowLeft className="h-4 w-4" />
         Back to projects
       </Link>
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 items-start gap-4">
@@ -389,7 +392,7 @@ export function ProjectDetailPage() {
                       size="sm"
                       onClick={(event) => {
                         event.stopPropagation();
-                        setSelectedWorkItemId(workItem.id);
+                        setAttachmentWorkItemId(workItem.id);
                         setActiveTab("attachments");
                       }}
                     >
@@ -426,10 +429,10 @@ export function ProjectDetailPage() {
                     key={workItem.id}
                     type="button"
                     onClick={() =>
-                      setSelectedWorkItemId(workItem.id)
+                      setAttachmentWorkItemId(workItem.id)
                     }
                     className={`w-full px-4 py-3 text-left text-sm transition-colors ${
-                      selectedWorkItemId === workItem.id
+                      attachmentWorkItemId === workItem.id
                         ? "bg-slate-100 text-slate-900"
                         : "text-slate-600 hover:bg-slate-50"
                     }`}
@@ -448,8 +451,8 @@ export function ProjectDetailPage() {
           </section>
 
           <AttachmentsPanel
-            workItemId={selectedWorkItem?.id}
-            workItemTitle={selectedWorkItem?.title}
+            workItemId={attachmentWorkItem?.id}
+            workItemTitle={attachmentWorkItem?.title}
           />
         </div>
       )}
@@ -576,9 +579,7 @@ function MembersTab({
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
         <div>
-          <h2 className="font-semibold text-slate-900">
-            Members
-          </h2>
+          <h2 className="font-semibold text-slate-900">Members</h2>
 
           <p className="mt-1 text-sm text-slate-500">
             People with access to this project.
@@ -744,14 +745,16 @@ function ProjectDetailSkeleton() {
 }
 
 function initials(value: string) {
-  return value
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase() || "U";
+  return (
+    value
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "U"
+  );
 }
 
 function enumLabel(value: string | number) {

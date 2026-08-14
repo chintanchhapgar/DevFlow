@@ -117,13 +117,23 @@ export function WorkItemDialog(
         estimateHours:
           props.workItem.estimateHours?.toString() ?? "",
       });
-      setSelectedSprintId(props.workItem.sprintId ?? "");
       return;
     }
 
     setValues(initialValues);
     setSelectedSprintId("");
   }, [props]);
+
+
+  useEffect(() => {
+  if (!props.open || !sprintsQuery.data) return;
+
+  if (props.mode === "edit") {
+    setSelectedSprintId(props.workItem.sprintId ?? "");
+  }
+}, [props.open, props.mode, 
+    props.mode === "edit" ? props.workItem?.sprintId : null, 
+    sprintsQuery.data]);
 
   const isSubmitting =
     createWorkItem.isPending ||

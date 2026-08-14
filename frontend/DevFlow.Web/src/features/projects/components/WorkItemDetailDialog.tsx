@@ -167,18 +167,27 @@ export function WorkItemDetailDialog({
     workItem.sprintId ?? "",
   );
 
+
+
+
+
   useEffect(() => {
     setSelectedStatus(getStatusValue(workItem.status));
     setSelectedPriority(getPriorityValue(workItem.priority));
     setSelectedAssigneeId(workItem.assigneeId ?? "");
-    setSelectedSprintId(workItem.sprintId ?? "");
   }, [
     workItem.id,
     workItem.status,
     workItem.priority,
     workItem.assigneeId,
-    workItem.sprintId,
   ]);
+
+
+    useEffect(() => {
+    if (!sprintsQuery.data) return; // Wait until sprints are loaded
+
+    setSelectedSprintId(workItem.sprintId ?? "");
+  }, [workItem.sprintId, sprintsQuery.data]);
 
   const isSaving =
     changeStatus.isPending ||

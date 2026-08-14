@@ -39,10 +39,13 @@ internal sealed class GetAllWorkItemsQueryHandler
                     x.Id.Value,
                     x.Key,
                     x.Title,
+                    x.Description,        // ✅ Added
                     x.Type,
                     x.Status,
                     x.Priority,
                     x.AssigneeId,
+                    x.SprintId,           // ✅ Added
+                    x.EstimateHours,      // ✅ Added
                     x.DueDate));
 
         return Result.Success(

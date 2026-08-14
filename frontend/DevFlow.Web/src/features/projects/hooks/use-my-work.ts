@@ -12,7 +12,12 @@ export type MyWorkItem = WorkItem & {
   projectName: string;
   projectKey: string;
 };
+export const myWorkKeys = {
+  all: ["my-work"] as const,
 
+  project: (projectId: string) =>
+    ["my-work", projectId] as const,
+};
 export function useMyWork() {
   const projectsQuery = useProjects({
     page: 1,
@@ -23,7 +28,7 @@ export function useMyWork() {
 
   const workItemQueries = useQueries({
     queries: projects.map((project) => ({
-      queryKey: ["my-work", project.projectId] as const,
+      queryKey: myWorkKeys.project(project.projectId),
 
       queryFn: async () => {
         const result = await getWorkItems(

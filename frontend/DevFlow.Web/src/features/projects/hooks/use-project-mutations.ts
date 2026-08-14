@@ -2,7 +2,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-
+import { myWorkKeys } from "./use-my-work";
 import {
   addProjectMember,
   archiveProject,
@@ -371,6 +371,7 @@ export function useDeclineProjectInvitation() {
   });
 }
 
+
 export function useMoveWorkItemToSprint() {
   const queryClient = useQueryClient();
 
@@ -386,9 +387,18 @@ export function useMoveWorkItemToSprint() {
     }) => moveWorkItemToSprint(workItemId, sprintId),
 
     onSuccess: (_, variables) =>
-      invalidateProjectWorkItems(
-        queryClient,
-        variables.projectId,
-      ),
+      Promise.all([
+        invalidateProjectWorkItems(
+          queryClient,
+          variables.projectId,
+        ),
+
+        queryClient.invalidateQueries({
+          queryKey: myWorkKeys.project(
+            variables.projectId,
+          ),
+        }),
+      ]),
   });
 }
+
