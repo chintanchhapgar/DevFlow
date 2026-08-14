@@ -21,8 +21,10 @@ import {
 import {
   useCreateWorkItem,
   useDeleteWorkItem,
+  useMoveWorkItemToSprint,
   useUpdateWorkItem,
 } from "../hooks/use-project-resources";
+import { useProjectSprints } from "../hooks/use-sprints";
 
 type WorkItemDialogProps =
   | {
@@ -79,12 +81,15 @@ export function WorkItemDialog(
   const createWorkItem = useCreateWorkItem();
   const updateWorkItem = useUpdateWorkItem();
   const deleteWorkItem = useDeleteWorkItem();
+  const moveWorkItemToSprint = useMoveWorkItemToSprint();
+  const sprintsQuery = useProjectSprints(props.projectId);
 
   const [values, setValues] =
     useState<FormValues>(initialValues);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] =
     useState(false);
+  const [selectedSprintId, setSelectedSprintId] = useState("");
 
   useEffect(() => {
     if (!props.open) {
@@ -112,16 +117,19 @@ export function WorkItemDialog(
         estimateHours:
           props.workItem.estimateHours?.toString() ?? "",
       });
+      setSelectedSprintId(props.workItem.sprintId ?? "");
       return;
     }
 
     setValues(initialValues);
+    setSelectedSprintId("");
   }, [props]);
 
   const isSubmitting =
     createWorkItem.isPending ||
     updateWorkItem.isPending ||
-    deleteWorkItem.isPending;
+    deleteWorkItem.isPending ||
+    moveWorkItemToSprint.isPending;
 
   function setValue<Key extends keyof FormValues>(
     key: Key,
@@ -170,8 +178,8 @@ export function WorkItemDialog(
     setError(null);
 
     try {
-      if (props.mode === "create") {
-        await createWorkItem.mutateAsync({
+      const result = props.mode === "create"
+        ? await createWorkItem.mutateAsync({
           projectId: props.projectId,
           request: {
             ...requestBody(),
@@ -179,12 +187,18 @@ export function WorkItemDialog(
             priority: values.priority,
             assigneeId: null,
           },
-        });
-      } else {
-        await updateWorkItem.mutateAsync({
+        })
+        : await updateWorkItem.mutateAsync({
           projectId: props.projectId,
           workItemId: props.workItem.id,
           request: requestBody(),
+        });
+
+      if (selectedSprintId) {
+        await moveWorkItemToSprint.mutateAsync({
+          projectId: props.projectId,
+          workItemId: result.workItemId,
+          sprintId: selectedSprintId,
         });
       }
 
@@ -427,6 +441,39 @@ export function WorkItemDialog(
                   }
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="work-sprint">Sprint</Label>
+
+              <select
+                id="work-sprint"
+                value={selectedSprintId}
+                disabled={sprintsQuery.isLoading || sprintsQuery.isError}
+                onChange={(event) =>
+                  setSelectedSprintId(event.target.value)
+                }
+                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+              >
+                <option value="">
+                  {sprintsQuery.isLoading
+                    ? "Loading sprints..."
+                    : sprintsQuery.isError
+                      ? "Unable to load sprints"
+                      : "Backlog (no sprint)"}
+                </option>
+
+                {(sprintsQuery.data?.items ?? []).map(
+                  (sprint) => (
+                    <option
+                      key={sprint.sprintId}
+                      value={sprint.sprintId}
+                    >
+                      {sprint.name}
+                    </option>
+                  ),
+                )}
+              </select>
             </div>
 
             {error && (

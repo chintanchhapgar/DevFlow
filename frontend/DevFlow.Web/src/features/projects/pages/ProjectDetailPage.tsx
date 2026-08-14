@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   FileText,
   FolderKanban,
-  LoaderCircle,
   Pencil,
   Plus,
   Users,
@@ -23,7 +22,6 @@ import {
 import { ProjectInsightsTab } from "../components/ProjectInsightsTab";
 import { Button } from "@/components/ui/button";
 import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
-import { downloadAttachment } from "../api/project-resources-api";
 import { useChangeWorkItemStatus } from "../hooks/use-project-resources";
 import { AttachmentsPanel } from "../components/AttachmentsPanel";
 import { MemberDialog } from "../components/MemberDialog";
@@ -33,11 +31,13 @@ import { useProject } from "../hooks/use-project";
 import { useProjectWorkItems } from "../hooks/use-project-resources";
 import { LayoutList, PanelsTopLeft } from "lucide-react";
 import { WorkBoard } from "../components/WorkBoard";
+import { ProjectSprintsTab } from "../components/ProjectSprintsTab";
 
 type Tab =
   | "overview"
   | "insights"
   | "members"
+  | "sprints"
   | "work"
   | "attachments";
 
@@ -195,6 +195,13 @@ export function ProjectDetailPage() {
             onClick={() => setActiveTab("work")}
           >
             Work ({workItemsQuery.data?.totalCount ?? 0})
+          </TabButton>
+
+          <TabButton
+            active={activeTab === "sprints"}
+            onClick={() => setActiveTab("sprints")}
+          >
+            Sprints
           </TabButton>
 
           <TabButton
@@ -393,6 +400,10 @@ export function ProjectDetailPage() {
               </div>
             )}
         </section>
+      )}
+
+      {activeTab === "sprints" && (
+        <ProjectSprintsTab projectId={project.projectId} />
       )}
 
       {activeTab === "attachments" && (
