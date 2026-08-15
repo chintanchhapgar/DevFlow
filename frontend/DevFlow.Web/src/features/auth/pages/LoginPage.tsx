@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
-import { login } from "@/features/auth/api/auth-api";
+import { completeMfaLogin, login } from "@/features/auth/api/auth-api";
 import { authStorage } from "@/features/auth/auth-storage";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ export function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaUserId, setMfaUserId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
@@ -47,10 +49,17 @@ export function LoginPage() {
         password,
       });
 
-      authStorage.setTokens(
-        result.accessToken,
-        result.refreshToken,
-      );
+      if (result.requiresTwoFactor && result.userId) {
+        setMfaUserId(result.userId);
+        return;
+      }
+
+      if (!result.accessToken || !result.refreshToken) {
+        setError("Unable to complete sign in.");
+        return;
+      }
+
+      authStorage.setTokens(result.accessToken, result.refreshToken);
 
       navigate("/", {
         replace: true,
@@ -67,6 +76,21 @@ export function LoginPage() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleMfaSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!mfaUserId) return;
+    setError(""); setIsSubmitting(true);
+    try {
+      const result = await completeMfaLogin(mfaUserId, mfaCode);
+      if (!result.accessToken || !result.refreshToken) throw new Error();
+      authStorage.setTokens(result.accessToken, result.refreshToken);
+      navigate("/", { replace: true });
+    } catch (caughtError) {
+      if (axios.isAxiosError(caughtError) && caughtError.response?.data?.message) setError(caughtError.response.data.message);
+      else setError("The verification code is invalid.");
+    } finally { setIsSubmitting(false); }
   }
 
   return (
@@ -168,29 +192,31 @@ export function LoginPage() {
 
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-                Welcome back
-              </h2>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900">{mfaUserId ? "Verify your identity" : "Welcome back"}</h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Sign in to continue to your DevFlow
-                workspace.
+                {mfaUserId ? "Enter the code from your authenticator app." : "Sign in to continue to your DevFlow workspace."}
               </p>
             </div>
 
             <Card className="border-slate-200 bg-white shadow-sm">
               <CardHeader className="space-y-1 border-b border-slate-100 px-6 py-5">
                 <CardTitle className="text-base font-semibold text-slate-800">
-                  Sign in
+                  {mfaUserId ? "Two-factor authentication" : "Sign in"}
                 </CardTitle>
 
                 <CardDescription className="text-slate-500">
-                  Enter your account credentials below.
+                  {mfaUserId ? "Use the current six-digit verification code." : "Enter your account credentials below."}
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="px-6 py-6">
-                <form
+                {mfaUserId ? <form onSubmit={handleMfaSubmit} className="space-y-5">
+                  {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">{error}</div>}
+                  <div className="space-y-2"><Label htmlFor="mfa-code" className="text-slate-700">Authentication code</Label><Input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={mfaCode} onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, ""))} required className="h-11 border-[#cbd5e1] bg-white text-center text-lg tracking-[0.4em] text-slate-900" /></div>
+                  <Button type="submit" disabled={isSubmitting || mfaCode.length !== 6} className="h-11 w-full bg-[#456b9a] hover:bg-[#3d608b]">{isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : "Verify and sign in"}</Button>
+                  <Button type="button" variant="ghost" onClick={() => { setMfaUserId(null); setError(""); setMfaCode(""); }} className="w-full">Use a different account</Button>
+                </form> : <form
                   onSubmit={handleSubmit}
                   className="space-y-5"
                 >
@@ -326,7 +352,7 @@ export function LoginPage() {
                       Your connection is secured
                     </span>
                   </div>
-                </form>
+                </form>}
               </CardContent>
             </Card>
 

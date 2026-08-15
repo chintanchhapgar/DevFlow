@@ -1,6 +1,7 @@
 import { Shield, LockKeyhole } from "lucide-react";
 
 import { SessionsList } from "../components/SessionsList";
+import { MfaSetupCard } from "../components/MfaSetupCard";
 
 export function SecurityPage() {
   return (
@@ -66,6 +67,8 @@ export function SecurityPage() {
           </div>
         </div>
       </section>
+
+      <MfaSetupCard />
 
       {/* Active Sessions */}
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

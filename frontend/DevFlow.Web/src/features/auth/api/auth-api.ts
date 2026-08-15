@@ -6,9 +6,11 @@ export interface LoginRequest {
 }
 
 export interface AuthenticationResponse {
-  accessToken: string;
-  refreshToken: string;
-  refreshTokenExpiresOnUtc: string;
+  requiresTwoFactor: boolean;
+  userId: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  refreshTokenExpiresOnUtc: string | null;
 }
 
 export interface RegisterRequest {
@@ -46,4 +48,32 @@ export async function resetPassword(
 
 export async function verifyEmail(token: string): Promise<void> {
   await apiClient.get("/api/auth/verify-email", { params: { token } });
+}
+
+export interface MfaSetupResponse {
+  manualEntryKey: string;
+  qrCodeUri: string;
+  qrCodeImage: string;
+}
+
+export async function completeMfaLogin(
+  userId: string,
+  code: string,
+): Promise<AuthenticationResponse> {
+  const response = await apiClient.post("/api/auth/mfa/login", {
+    userId,
+    code,
+    isRecoveryCode: false,
+  });
+  return response.data.data;
+}
+
+export async function setupMfa(): Promise<MfaSetupResponse> {
+  const response = await apiClient.post("/api/auth/mfa/setup");
+  return response.data.data;
+}
+
+export async function verifyMfaSetup(code: string): Promise<string[]> {
+  const response = await apiClient.post("/api/auth/mfa/verify", { code });
+  return response.data.data.recoveryCodes;
 }
