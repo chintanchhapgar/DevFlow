@@ -34,9 +34,11 @@
   --radius: 0.75rem;
 }
 
-/* Tailwind v4 border default */
-* {
-  border-color: var(--border);
+/* Keep the global fallback below utility classes so explicit component borders win. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 html {

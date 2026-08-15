@@ -234,7 +234,7 @@ export function LoginPage() {
                       autoComplete="email"
                       className="
                         h-11
-                        border-slate-200
+                        border-[#cbd5e1]
                         bg-white
                         text-slate-900
                         placeholder:text-slate-400
@@ -280,7 +280,7 @@ export function LoginPage() {
                       autoComplete="current-password"
                       className="
                         h-11
-                        border-slate-200
+                        border-[#cbd5e1]
                         bg-white
                         text-slate-900
                         focus-visible:border-[#7890aa]
