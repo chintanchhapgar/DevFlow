@@ -77,3 +77,13 @@ export async function verifyMfaSetup(code: string): Promise<string[]> {
   const response = await apiClient.post("/api/auth/mfa/verify", { code });
   return response.data.data.recoveryCodes;
 }
+
+export async function disableMfa(
+  code: string,
+  isRecoveryCode: boolean,
+): Promise<void> {
+  await apiClient.post("/api/auth/mfa/disable", {
+    code,
+    isRecoveryCode,
+  });
+}

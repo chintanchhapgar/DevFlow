@@ -7,6 +7,7 @@ export interface UserProfile {
   lastName: string;
   fullName: string;
   role: string;
+  isTwoFactorEnabled: boolean;
 }
 
 export async function getProfile(): Promise<UserProfile> {

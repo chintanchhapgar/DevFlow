@@ -17,16 +17,28 @@ internal sealed class ProfileEndpoint : IEndpoint
     {
         app.MapGet(
             "/api/auth/profile",
-            (ICurrentUser currentUser, HttpContext httpContext) =>
+            async (
+                ICurrentUser currentUser,
+                IUserRepository users,
+                HttpContext httpContext,
+                CancellationToken cancellationToken) =>
             {
-
                 var userId = new UserId(currentUser.UserId);
+                var user = await users.GetByIdAsync(
+                    userId,
+                    cancellationToken);
+
+                if (user is null)
+                {
+                    return Results.NotFound();
+                }
 
                 var response = new ProfileResponse(
-                    new UserId(currentUser.UserId),
+                    userId,
                     currentUser.Email,
                     currentUser.Name,
-                    currentUser.Role);
+                    currentUser.Role,
+                    user.IsTwoFactorEnabled);
 
                 return ApiResponseFactory.Success(
                     httpContext,

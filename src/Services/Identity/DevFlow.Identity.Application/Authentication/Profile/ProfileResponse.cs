@@ -9,4 +9,5 @@ public sealed record ProfileResponse(
     UserId UserId,
     string Email,
     string FullName,
-    string Role);
+    string Role,
+    bool IsTwoFactorEnabled);
