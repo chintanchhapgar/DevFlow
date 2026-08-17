@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle2,
@@ -24,6 +24,9 @@ import { Label } from "@/components/ui/label";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
+  const destination = returnTo?.startsWith("/") ? returnTo : "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +64,7 @@ export function LoginPage() {
 
       authStorage.setTokens(result.accessToken, result.refreshToken);
 
-      navigate("/", {
+      navigate(destination, {
         replace: true,
       });
     } catch (error) {
@@ -86,7 +89,7 @@ export function LoginPage() {
       const result = await completeMfaLogin(mfaUserId, mfaCode);
       if (!result.accessToken || !result.refreshToken) throw new Error();
       authStorage.setTokens(result.accessToken, result.refreshToken);
-      navigate("/", { replace: true });
+      navigate(destination, { replace: true });
     } catch (caughtError) {
       if (axios.isAxiosError(caughtError) && caughtError.response?.data?.message) setError(caughtError.response.data.message);
       else setError("The verification code is invalid.");
@@ -360,7 +363,7 @@ export function LoginPage() {
             <p className="mt-6 text-center text-sm text-slate-500">
               Don't have an account?{" "}
               <Link
-                to="/register"
+                to={returnTo ? `/register?returnTo=${encodeURIComponent(returnTo)}` : "/register"}
                 className="
                   font-medium
                   text-[#456b9a]

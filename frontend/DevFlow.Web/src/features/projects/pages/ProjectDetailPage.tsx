@@ -28,6 +28,8 @@ import { WorkBoard } from "../components/WorkBoard";
 import { WorkItemDetailDialog } from "../components/WorkItemDetailDialog";
 import { WorkItemDialog } from "../components/WorkItemDialog";
 import { useProject } from "../hooks/use-project";
+import { useProfile } from "@/features/auth/hooks/use-profile";
+import { canManageUsers } from "@/features/auth/user-roles";
 import {
   useChangeWorkItemStatus,
   useProjectWorkItems,
@@ -45,6 +47,7 @@ export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
 
   const projectQuery = useProject(projectId);
+  const profileQuery = useProfile();
   const workItemsQuery = useProjectWorkItems(projectId);
   const changeWorkItemStatus = useChangeWorkItemStatus();
 
@@ -122,6 +125,15 @@ export function ProjectDetailPage() {
   }
 
   const members = project.members ?? [];
+  const currentMember = members.find(
+    (member) => member.userId === profileQuery.data?.id,
+  );
+  const canManageProject =
+    canManageUsers(profileQuery.data?.role) ||
+    currentMember?.userId === project.ownerId ||
+    ["owner", "administrator", "admin"].includes(
+      currentMember?.role.toLowerCase() ?? "",
+    );
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -161,14 +173,16 @@ export function ProjectDetailPage() {
             </div>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsEditProjectOpen(true)}
-          >
-            <Pencil className="h-4 w-4" />
-            Edit project
-          </Button>
+          {canManageProject && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsEditProjectOpen(true)}
+            >
+              <Pencil className="h-4 w-4" />
+              Edit project
+            </Button>
+          )}
         </div>
 
         <div className="mt-6 flex gap-5 overflow-x-auto border-t border-slate-100">
@@ -179,19 +193,23 @@ export function ProjectDetailPage() {
             Overview
           </TabButton>
 
-          <TabButton
-            active={activeTab === "insights"}
-            onClick={() => setActiveTab("insights")}
-          >
-            Insights
-          </TabButton>
+          {canManageProject && (
+            <>
+              <TabButton
+                active={activeTab === "insights"}
+                onClick={() => setActiveTab("insights")}
+              >
+                Insights
+              </TabButton>
 
-          <TabButton
-            active={activeTab === "members"}
-            onClick={() => setActiveTab("members")}
-          >
-            Members ({members.length})
-          </TabButton>
+              <TabButton
+                active={activeTab === "members"}
+                onClick={() => setActiveTab("members")}
+              >
+                Members ({members.length})
+              </TabButton>
+            </>
+          )}
 
           <TabButton
             active={activeTab === "work"}
@@ -200,19 +218,23 @@ export function ProjectDetailPage() {
             Work ({workItemsQuery.data?.totalCount ?? 0})
           </TabButton>
 
-          <TabButton
-            active={activeTab === "sprints"}
-            onClick={() => setActiveTab("sprints")}
-          >
-            Sprints
-          </TabButton>
+          {canManageProject && (
+            <>
+              <TabButton
+                active={activeTab === "sprints"}
+                onClick={() => setActiveTab("sprints")}
+              >
+                Sprints
+              </TabButton>
 
-          <TabButton
-            active={activeTab === "attachments"}
-            onClick={() => setActiveTab("attachments")}
-          >
-            Attachments
-          </TabButton>
+              <TabButton
+                active={activeTab === "attachments"}
+                onClick={() => setActiveTab("attachments")}
+              >
+                Attachments
+              </TabButton>
+            </>
+          )}
         </div>
       </section>
 
@@ -223,6 +245,7 @@ export function ProjectDetailPage() {
           workItemCount={workItemsQuery.data?.totalCount ?? 0}
           onManageMembers={() => setIsMembersOpen(true)}
           onViewWork={() => setActiveTab("work")}
+          canManageProject={canManageProject}
         />
       )}
 
@@ -282,14 +305,16 @@ export function ProjectDetailPage() {
                 </button>
               </div>
 
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setIsCreateWorkItemOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-                New work item
-              </Button>
+              {canManageProject && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setIsCreateWorkItemOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  New work item
+                </Button>
+              )}
             </div>
           </div>
 
@@ -331,8 +356,12 @@ export function ProjectDetailPage() {
                 icon={<FileText className="h-6 w-6" />}
                 title="No work items yet"
                 description="Create a work item to start tracking work."
-                action="New work item"
-                onAction={() => setIsCreateWorkItemOpen(true)}
+                action={canManageProject ? "New work item" : undefined}
+                onAction={
+                  canManageProject
+                    ? () => setIsCreateWorkItemOpen(true)
+                    : undefined
+                }
               />
             )}
 
@@ -347,12 +376,14 @@ export function ProjectDetailPage() {
                   setSelectedWorkItemDetailId(workItem.id)
                 }
                 onMove={async (workItem, status) => {
+                  if (!canManageProject) return;
                   await changeWorkItemStatus.mutateAsync({
                     projectId: project.projectId,
                     workItemId: workItem.id,
                     status,
                   });
                 }}
+                canMove={canManageProject}
               />
             )}
 
@@ -386,18 +417,20 @@ export function ProjectDetailPage() {
                       </p>
                     </div>
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setAttachmentWorkItemId(workItem.id);
-                        setActiveTab("attachments");
-                      }}
-                    >
-                      Attachments
-                    </Button>
+                    {canManageProject && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setAttachmentWorkItemId(workItem.id);
+                          setActiveTab("attachments");
+                        }}
+                      >
+                        Attachments
+                      </Button>
+                    )}
                   </button>
                 ))}
               </div>
@@ -486,8 +519,9 @@ export function ProjectDetailPage() {
             }
           }}
           projectId={project.projectId}
-          workItem={selectedWorkItemDetail}
-          members={members}
+        workItem={selectedWorkItemDetail}
+        members={members}
+        canManage={canManageProject}
         />
       )}
     </div>
@@ -500,6 +534,7 @@ function OverviewTab({
   workItemCount,
   onManageMembers,
   onViewWork,
+  canManageProject,
 }: {
   project: {
     key: string;
@@ -512,6 +547,7 @@ function OverviewTab({
   workItemCount: number;
   onManageMembers: () => void;
   onViewWork: () => void;
+  canManageProject: boolean;
 }) {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -537,15 +573,17 @@ function OverviewTab({
         </h2>
 
         <div className="mt-4 space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full justify-start"
-            onClick={onManageMembers}
-          >
-            <Users className="h-4 w-4" />
-            Manage {memberCount} members
-          </Button>
+          {canManageProject && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start"
+              onClick={onManageMembers}
+            >
+              <Users className="h-4 w-4" />
+              Manage {memberCount} members
+            </Button>
+          )}
 
           <Button
             type="button"
@@ -703,8 +741,8 @@ function EmptyState({
   icon: React.ReactNode;
   title: string;
   description: string;
-  action: string;
-  onAction: () => void;
+  action?: string;
+  onAction?: () => void;
 }) {
   return (
     <div className="flex min-h-[250px] flex-col items-center justify-center px-5 text-center">
@@ -718,15 +756,17 @@ function EmptyState({
         {description}
       </p>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="mt-4"
-        onClick={onAction}
-      >
-        {action}
-      </Button>
+      {action && onAction && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-4"
+          onClick={onAction}
+        >
+          {action}
+        </Button>
+      )}
     </div>
   );
 }

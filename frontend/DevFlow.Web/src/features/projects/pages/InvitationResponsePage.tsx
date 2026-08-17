@@ -7,10 +7,12 @@ import {
 } from "lucide-react";
 import {
   Link,
+  useLocation,
   useSearchParams,
 } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { authStorage } from "@/features/auth/auth-storage";
 
 import {
   useAcceptProjectInvitation,
@@ -19,6 +21,7 @@ import {
 
 export function InvitationResponsePage() {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const token = searchParams.get("token");
 
   const acceptInvitation = useAcceptProjectInvitation();
@@ -32,6 +35,7 @@ export function InvitationResponsePage() {
   const isPending =
     acceptInvitation.isPending ||
     declineInvitation.isPending;
+  const returnTo = `${location.pathname}${location.search}`;
 
   async function handleAccept() {
     if (!token) {
@@ -73,6 +77,32 @@ export function InvitationResponsePage() {
         icon={<XCircle className="h-8 w-8 text-red-600" />}
         title="Invalid invitation link"
         description="This invitation link is missing its token."
+      />
+    );
+  }
+
+  if (!authStorage.isAuthenticated()) {
+    const redirectTo = encodeURIComponent(returnTo);
+
+    return (
+      <InvitationCard
+        icon={<Mail className="h-8 w-8 text-blue-600" />}
+        title="Sign in to respond"
+        description="Sign in or create an account to accept or decline this project invitation."
+        action={
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button asChild>
+              <Link to={`/login?returnTo=${redirectTo}`}>
+                Sign in
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to={`/register?returnTo=${redirectTo}`}>
+                Create account
+              </Link>
+            </Button>
+          </div>
+        }
       />
     );
   }

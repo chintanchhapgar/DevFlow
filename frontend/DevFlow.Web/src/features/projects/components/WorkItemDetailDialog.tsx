@@ -51,6 +51,7 @@ type WorkItemDetailDialogProps = {
   projectId: string;
   workItem: WorkItem;
   members: Member[];
+  canManage: boolean;
 };
 
 const statusOptions = [
@@ -141,6 +142,7 @@ export function WorkItemDetailDialog({
   projectId,
   workItem,
   members,
+  canManage,
 }: WorkItemDetailDialogProps) {
   const changeStatus = useChangeWorkItemStatus();
   const changePriority = useChangeWorkItemPriority();
@@ -321,10 +323,12 @@ export function WorkItemDetailDialog({
                 </p>
               </section>
 
-              <AttachmentsPanel
-                workItemId={workItem.id}
-                workItemTitle={workItem.title}
-              />
+              {canManage && (
+                <AttachmentsPanel
+                  workItemId={workItem.id}
+                  workItemTitle={workItem.title}
+                />
+              )}
 
               <WorklogPanel workItemId={workItem.id} />
             </div>
@@ -342,7 +346,7 @@ export function WorkItemDetailDialog({
                   >
                     <select
                       value={selectedStatus}
-                      disabled={isSaving}
+                      disabled={!canManage || isSaving}
                       onChange={(event) =>
                         handleStatusChange(event.target.value)
                       }
@@ -365,7 +369,7 @@ export function WorkItemDetailDialog({
                   >
                     <select
                       value={selectedPriority}
-                      disabled={isSaving}
+                      disabled={!canManage || isSaving}
                       onChange={(event) =>
                         handlePriorityChange(event.target.value)
                       }
@@ -388,7 +392,7 @@ export function WorkItemDetailDialog({
                   >
                     <select
                       value={selectedAssigneeId}
-                      disabled={isSaving || members.length === 0}
+                      disabled={!canManage || isSaving || members.length === 0}
                       onChange={(event) =>
                         handleAssigneeChange(event.target.value)
                       }
@@ -418,6 +422,7 @@ export function WorkItemDetailDialog({
                     <select
                       value={selectedSprintId}
                       disabled={
+                        !canManage ||
                         isSaving ||
                         sprintsQuery.isLoading ||
                         sprintsQuery.isError
@@ -555,13 +560,15 @@ export function WorkItemDetailDialog({
               Close
             </Button>
 
-            <Button
-              type="button"
-              onClick={() => setIsEditOpen(true)}
-            >
-              <Pencil className="h-4 w-4" />
-              Edit work item
-            </Button>
+            {canManage && (
+              <Button
+                type="button"
+                onClick={() => setIsEditOpen(true)}
+              >
+                <Pencil className="h-4 w-4" />
+                Edit work item
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

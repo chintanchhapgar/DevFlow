@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { register } from "@/features/auth/api/auth-api";
@@ -14,6 +14,11 @@ function errorMessage(error: unknown, fallback: string) {
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
+  const loginPath = returnTo?.startsWith("/")
+    ? `/login?returnTo=${encodeURIComponent(returnTo)}`
+    : "/login";
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +30,7 @@ export function RegisterPage() {
     setError(""); setIsSubmitting(true);
     try {
       await register({ email: form.email, password: form.password, firstName: form.firstName, lastName: form.lastName });
-      navigate("/login", { replace: true });
+      navigate(loginPath, { replace: true });
     } catch (caughtError) { setError(errorMessage(caughtError, "Unable to create your account.")); }
     finally { setIsSubmitting(false); }
   }
@@ -40,6 +45,6 @@ export function RegisterPage() {
       <AuthFormField id="confirmPassword" label="Confirm password" type="password" value={form.confirmPassword} onChange={update("confirmPassword")} autoComplete="new-password" />
       <Button type="submit" disabled={isSubmitting} className="h-11 w-full bg-[#456b9a] hover:bg-[#3d608b]">{isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : <>Create account <ArrowRight className="ml-2 h-4 w-4" /></>}</Button>
     </form></CardContent></Card>
-    <p className="mt-6 text-center text-sm text-slate-500">Already have an account? <Link to="/login" className="font-medium text-[#456b9a] hover:underline">Sign in</Link></p>
+    <p className="mt-6 text-center text-sm text-slate-500">Already have an account? <Link to={loginPath} className="font-medium text-[#456b9a] hover:underline">Sign in</Link></p>
   </AuthPageLayout>;
 }

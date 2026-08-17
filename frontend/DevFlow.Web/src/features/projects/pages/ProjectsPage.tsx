@@ -12,6 +12,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { useProfile } from "@/features/auth/hooks/use-profile";
+import {
+  canCreateProjects,
+  isMember,
+} from "@/features/auth/user-roles";
+
 import { ProjectDialog } from "../components/ProjectDialog";
 import { useDebounce } from "../hooks/use-debounce";
 import { useProjects } from "../hooks/use-projects";
@@ -20,6 +26,7 @@ const PAGE_SIZE = 20;
 
 export function ProjectsPage() {
   const navigate = useNavigate();
+  const profileQuery = useProfile();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
@@ -36,6 +43,8 @@ export function ProjectsPage() {
   const projects = projectsQuery.data?.items ?? [];
   const totalCount = projectsQuery.data?.totalCount ?? 0;
   const totalPages = projectsQuery.data?.totalPages ?? 0;
+  const canCreate = canCreateProjects(profileQuery.data?.role);
+  const assignedProjectsOnly = isMember(profileQuery.data?.role);
 
   function clearSearch() {
     setSearchInput("");
@@ -52,22 +61,26 @@ export function ProjectsPage() {
 
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-              Projects
+              {assignedProjectsOnly ? "Assigned projects" : "Projects"}
             </h1>
 
             <p className="mt-1 text-sm text-slate-500">
-              Manage and organize your projects.
+              {assignedProjectsOnly
+                ? "Projects you have been assigned to."
+                : "Manage and organize your projects."}
             </p>
           </div>
         </div>
 
-        <Button
-          type="button"
-          onClick={() => setIsCreateOpen(true)}
-        >
-          <Plus className="h-4 w-4" />
-          New project
-        </Button>
+        {canCreate && (
+          <Button
+            type="button"
+            onClick={() => setIsCreateOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            New project
+          </Button>
+        )}
       </div>
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -156,22 +169,26 @@ export function ProjectsPage() {
               <p className="mt-1 max-w-sm text-sm text-slate-500">
                 {search
                   ? `No projects match "${search}".`
-                  : "Create your first project to get started."}
+                  : assignedProjectsOnly
+                    ? "You have not been assigned to any projects yet."
+                    : "Create your first project to get started."}
               </p>
 
-              <Button
-                type="button"
-                variant={search ? "outline" : "default"}
-                size="sm"
-                className="mt-4"
-                onClick={
-                  search
-                    ? clearSearch
-                    : () => setIsCreateOpen(true)
-                }
-              >
-                {search ? "Clear search" : "New project"}
-              </Button>
+              {canCreate && (
+                <Button
+                  type="button"
+                  variant={search ? "outline" : "default"}
+                  size="sm"
+                  className="mt-4"
+                  onClick={
+                    search
+                      ? clearSearch
+                      : () => setIsCreateOpen(true)
+                  }
+                >
+                  {search ? "Clear search" : "New project"}
+                </Button>
+              )}
             </div>
           )}
 
@@ -270,14 +287,16 @@ export function ProjectsPage() {
           )}
       </section>
 
-      <ProjectDialog
-        mode="create"
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onCreated={(projectId) =>
-          navigate(`/projects/${projectId}`)
-        }
-      />
+      {canCreate && (
+        <ProjectDialog
+          mode="create"
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+          onCreated={(projectId) =>
+            navigate(`/projects/${projectId}`)
+          }
+        />
+      )}
     </div>
   );
 }

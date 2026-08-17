@@ -29,6 +29,7 @@ public interface IProjectRepository
     Task<PagedList<ProjectAggregate>> GetPagedAsync(
         PaginationRequest pagination,
         string? search,
+        Guid? memberId,
         CancellationToken cancellationToken = default);
 
     Task<ProjectAggregate?> GetByInvitationTokenAsync(

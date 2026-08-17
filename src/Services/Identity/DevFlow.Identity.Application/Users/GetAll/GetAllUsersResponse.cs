@@ -5,7 +5,8 @@ public sealed record UserItemResponse(
     string Email,
     string FirstName,
     string LastName,
-    string FullName);
+    string FullName,
+    string Role);
 
 public sealed record GetAllUsersResponse(
     IReadOnlyList<UserItemResponse> Users,

@@ -1,8 +1,10 @@
 using DevFlow.Project.Application.Common.Abstractions.Identity;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Project.Domain.Projects.Errors;
 using DevFlow.Project.Domain.Projects.ValueObjects;
 using DevFlow.SharedKernel.Results;
+using DevFlow.SharedKernel.Common;
 using MediatR;
 
 namespace DevFlow.Project.Application.Projects.GetById;
@@ -14,13 +16,16 @@ internal sealed class GetProjectByIdQueryHandler
 {
     private readonly IProjectRepository _projectRepository;
     private readonly IUserLookupService _userLookupService;
+    private readonly ICurrentUser _currentUser;
 
     public GetProjectByIdQueryHandler(
         IProjectRepository projectRepository,
-        IUserLookupService userLookupService)
+        IUserLookupService userLookupService,
+        ICurrentUser currentUser)
     {
         _projectRepository = projectRepository;
         _userLookupService = userLookupService;
+        _currentUser = currentUser;
     }
 
     public async Task<Result<GetProjectResponse>> Handle(
@@ -36,6 +41,12 @@ internal sealed class GetProjectByIdQueryHandler
         {
             return Result.Failure<GetProjectResponse>(
                 ProjectErrors.NotFound);
+        }
+
+        if (_currentUser.Role == UserRole.Member.ToString() &&
+            project.Members.All(member => member.UserId != _currentUser.UserId))
+        {
+            return Result.Failure<GetProjectResponse>(ProjectErrors.Forbidden);
         }
 
         // Collect owner + member IDs and remove duplicates.

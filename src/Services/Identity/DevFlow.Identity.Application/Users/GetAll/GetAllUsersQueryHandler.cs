@@ -32,7 +32,8 @@ internal sealed class GetAllUsersQueryHandler
                 x.Email,
                 x.FirstName,
                 x.LastName,
-                x.FullName))
+                x.FullName,
+                x.Role.ToString()))
             .ToList(),
             request.Page,
             request.PageSize,

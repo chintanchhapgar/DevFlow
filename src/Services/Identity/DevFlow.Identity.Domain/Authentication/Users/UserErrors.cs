@@ -61,6 +61,11 @@ public static class UserErrors
             "Users.InvalidCurrentPassword",
             "Current password is incorrect.");
 
+    public static readonly AppError InvalidRole =
+        AppError.Validation(
+            "Users.InvalidRole",
+            "The requested user role is invalid.");
+
     public static readonly AppError InvalidVerificationToken =
     AppError.NotFound(
         "Users.InvalidVerificationToken",

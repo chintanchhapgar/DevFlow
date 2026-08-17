@@ -10,12 +10,19 @@ import {
   Settings,
   Shield,
   User,
+  Users,
   Workflow,
 } from "lucide-react";
 import {
   NavLink,
   useLocation,
 } from "react-router-dom";
+import { useProfile } from "@/features/auth/hooks/use-profile";
+import {
+  canViewReports,
+  canManageUsers,
+  isMember,
+} from "@/features/auth/user-roles";
 
 const navigation = [
   {
@@ -106,7 +113,11 @@ function NavigationItem({
 
 export function Sidebar() {
   const location = useLocation();
+  const profileQuery = useProfile();
   const isReportsActive = location.pathname.startsWith("/reports");
+  const role = profileQuery.data?.role;
+  const canAccessReports = canViewReports(role);
+  const canAccessUserManagement = canManageUsers(role);
 
   const [isReportsOpen, setIsReportsOpen] = useState(
     isReportsActive,
@@ -142,11 +153,18 @@ export function Sidebar() {
             {navigation.map((item) => (
               <NavigationItem
                 key={item.path}
-                {...item}
+                label={
+                  item.path === "/projects" && isMember(role)
+                    ? "Assigned projects"
+                    : item.label
+                }
+                path={item.path}
+                icon={item.icon}
               />
             ))}
 
-            <div className="pt-1">
+            {canAccessReports && (
+              <div className="pt-1">
               <button
                 type="button"
                 onClick={() =>
@@ -193,7 +211,16 @@ export function Sidebar() {
                   ))}
                 </div>
               )}
-            </div>
+              </div>
+            )}
+
+            {canAccessUserManagement && (
+              <NavigationItem
+                label="User management"
+                path="/users"
+                icon={Users}
+              />
+            )}
           </div>
         </div>
 

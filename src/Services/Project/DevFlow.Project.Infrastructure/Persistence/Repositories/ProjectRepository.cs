@@ -76,12 +76,19 @@ internal sealed class ProjectRepository
     public async Task<PagedList<ProjectAggregate>> GetPagedAsync(
     PaginationRequest pagination,
     string? search,
+    Guid? memberId,
     CancellationToken cancellationToken = default)
     {
         IQueryable<ProjectAggregate> query =
             _context.Projects
                 .Include(x => x.Members)
                 .AsNoTracking();
+
+        if (memberId.HasValue)
+        {
+            query = query.Where(x =>
+                x.Members.Any(member => member.UserId == memberId.Value));
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {

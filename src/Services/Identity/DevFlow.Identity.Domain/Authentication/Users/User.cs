@@ -198,6 +198,12 @@ public sealed partial class User : AggregateRoot<UserId>
         UpdatedOnUtc = DateTime.UtcNow;
     }
 
+    public void ChangeRole(UserRole role)
+    {
+        Role = role;
+        UpdatedOnUtc = DateTime.UtcNow;
+    }
+
     public void Activate()
     {
         Status = UserStatus.Active;

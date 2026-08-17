@@ -1,4 +1,6 @@
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.Users;
+using DevFlow.SharedKernel.Common;
 using DevFlow.SharedKernel.Pagination;
 using DevFlow.SharedKernel.Results;
 using MediatR;
@@ -11,11 +13,14 @@ internal sealed class GetProjectsQueryHandler
         Result<PagedList<ProjectListItemResponse>>>
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly ICurrentUser _currentUser;
 
     public GetProjectsQueryHandler(
-        IProjectRepository projectRepository)
+        IProjectRepository projectRepository,
+        ICurrentUser currentUser)
     {
         _projectRepository = projectRepository;
+        _currentUser = currentUser;
     }
 
     public async Task<Result<PagedList<ProjectListItemResponse>>> Handle(
@@ -26,6 +31,9 @@ internal sealed class GetProjectsQueryHandler
             await _projectRepository.GetPagedAsync(
                 request.Pagination,
                 request.Search,
+                _currentUser.Role == UserRole.Member.ToString()
+                    ? _currentUser.UserId
+                    : null,
                 cancellationToken);
 
         var response =

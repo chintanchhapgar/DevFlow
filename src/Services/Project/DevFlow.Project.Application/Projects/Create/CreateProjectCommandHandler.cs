@@ -1,4 +1,5 @@
 using DevFlow.Identity.Application.Common.Abstractions.Persistence;
+using DevFlow.Identity.Domain.Authentication.Users;
 using DevFlow.Project.Application.Common.Abstractions.Persistence;
 using DevFlow.Project.Domain.Projects.Entities;
 using DevFlow.Project.Domain.Projects.Errors;
@@ -29,6 +30,14 @@ internal sealed class CreateProjectCommandHandler
         CreateProjectCommand request,
         CancellationToken cancellationToken)
     {
+        if (_currentUser.Role is not (
+            nameof(UserRole.ProjectManager) or
+            nameof(UserRole.Administrator) or
+            nameof(UserRole.SystemAdministrator)))
+        {
+            return Result.Failure<CreateProjectResponse>(ProjectErrors.Forbidden);
+        }
+
         var exists = await _projectRepository.ExistsByKeyAsync(
             request.Key,
             cancellationToken);

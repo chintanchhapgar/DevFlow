@@ -6,6 +6,8 @@ public static class PolicyNames
 
     public const string Member = nameof(Member);
 
+    public const string UserRoleManager = nameof(UserRoleManager);
+
     public const string ProjectOwner = nameof(ProjectOwner);
 
     public const string ProjectEditor = nameof(ProjectEditor);

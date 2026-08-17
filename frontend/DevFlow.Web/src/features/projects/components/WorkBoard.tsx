@@ -126,6 +126,7 @@ export function WorkBoard({
   members,
   onSelect,
   onMove,
+  canMove,
 }: {
   workItems: WorkItem[];
   members: Member[];
@@ -134,6 +135,7 @@ export function WorkBoard({
     workItem: WorkItem,
     status: WorkItemStatus,
     ) => Promise<void>;
+  canMove: boolean;
 }) {
 
     const [draggedWorkItemId, setDraggedWorkItemId] =
@@ -155,11 +157,13 @@ export function WorkBoard({
           <div
             key={column.status}
             onDragOver={(event) => {
+                if (!canMove) return;
                 event.preventDefault();
                 setDropTarget(column.status);
             }}
             onDragLeave={() => setDropTarget(null)}
             onDrop={async (event) => {
+                if (!canMove) return;
                 event.preventDefault();
 
                 const workItem = workItems.find(
@@ -209,8 +213,8 @@ export function WorkBoard({
                   <button
                     key={workItem.id}
                     type="button"
-                    draggable
-                    onDragStart={() => setDraggedWorkItemId(workItem.id)}
+                    draggable={canMove}
+                    onDragStart={() => canMove && setDraggedWorkItemId(workItem.id)}
                     onDragEnd={() => {
                         setDraggedWorkItemId(null);
                         setDropTarget(null);

@@ -25,6 +25,7 @@ import { MyTimePage } from "@/features/time/pages/MyTimePage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SprintReportsPage } from "@/features/reports/pages/SprintReportsPage";
 import { WorkItemDetailPage } from "@/features/projects/pages/WorkItemDetailPage";
+import { UsersPage } from "@/features/users/pages/UsersPage";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -41,6 +42,10 @@ export function AppRouter() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route
+          path="/invitations/respond"
+          element={<InvitationResponsePage />}
+        />
 
         {/* ================================================================== */}
         {/* PROTECTED ROUTES                                                  */}
@@ -62,11 +67,6 @@ export function AppRouter() {
             <Route
               path="/projects"
               element={<ProjectsPage />}
-            />
-
-            <Route
-              path="/invitations/respond"
-              element={<InvitationResponsePage />}
             />
 
             <Route
@@ -136,6 +136,11 @@ export function AppRouter() {
             <Route
               path="/settings"
               element={<SettingsPage />}
+            />
+
+            <Route
+              path="/users"
+              element={<UsersPage />}
             />
 
           </Route>

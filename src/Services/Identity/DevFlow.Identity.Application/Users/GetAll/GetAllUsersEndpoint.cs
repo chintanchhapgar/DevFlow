@@ -35,6 +35,6 @@ public sealed class GetAllUsersEndpoint : IEndpoint
         .WithSummary("Get users")
         .WithDescription("Returns paged users with optional search.")
         .Produces<GetAllUsersResponse>(StatusCodes.Status200OK)
-        .RequireAuthorization();
+        .RequireAuthorization("UserRoleManager");
     }
 }
