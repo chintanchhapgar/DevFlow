@@ -32,6 +32,6 @@ public sealed class GetWorkloadEndpoint : IEndpoint
             .WithSummary("Project workload")
             .WithDescription("Returns workload grouped by assignee.")
             .Produces<GetWorkloadResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization(PolicyNames.ProjectViewer);
+            .RequireAuthorization(PolicyNames.Reports);
     }
 }

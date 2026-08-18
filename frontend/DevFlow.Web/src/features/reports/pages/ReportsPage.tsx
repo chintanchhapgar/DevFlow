@@ -17,6 +17,11 @@ import {
 } from "@/features/projects/api/project-resources-api";
 import { useMyWork } from "@/features/projects/hooks/use-my-work";
 import { useProjects } from "@/features/projects/hooks/use-projects";
+import {
+  useProjectReportSummary,
+  useProjectVelocity,
+  useProjectWorkload,
+} from "../hooks/use-project-reports";
 
 type StatusSummary = {
   label: string;
@@ -105,6 +110,10 @@ export function ReportsPage() {
   const myWorkQuery = useMyWork();
 
   const [projectId, setProjectId] = useState("all");
+  const selectedProjectId = projectId === "all" ? null : projectId;
+  const summaryQuery = useProjectReportSummary(selectedProjectId);
+  const velocityQuery = useProjectVelocity(selectedProjectId);
+  const workloadQuery = useProjectWorkload(selectedProjectId);
 
   const report = useMemo(() => {
     const workItems = myWorkQuery.items.filter(
@@ -277,6 +286,30 @@ export function ReportsPage() {
     };
   }, [myWorkQuery.items, projectId]);
 
+  const summary = summaryQuery.data;
+  const statusSummaries = summary
+    ? [
+        { label: "To do", value: summary.todoCount, color: "bg-slate-400" },
+        { label: "In progress", value: summary.inProgressCount, color: "bg-sky-500" },
+        { label: "In review", value: summary.reviewCount, color: "bg-violet-500" },
+        { label: "Done", value: summary.doneCount, color: "bg-emerald-500" },
+      ]
+    : report.statusSummaries;
+  const workload = workloadQuery.data
+    ? workloadQuery.data.map((member) => ({
+        assignee: `Member ${member.userId.slice(0, 8)}`,
+        assigned: member.totalWorkItems,
+        completed: 0,
+        inProgress: 0,
+        estimateHours: member.totalEstimateHours,
+      }))
+    : report.workload.map((member) => ({ ...member, estimateHours: undefined }));
+  const totalWorkItems = summary?.totalWorkItems ?? report.workItems.length;
+  const completedItems = summary?.doneCount ?? report.completedItems.length;
+  const completionPercentage = totalWorkItems
+    ? Math.round((completedItems / totalWorkItems) * 100)
+    : 0;
+
   function downloadCsv() {
     const headers = [
       "Key",
@@ -325,8 +358,9 @@ export function ReportsPage() {
     URL.revokeObjectURL(url);
   }
 
-  const isLoading =
-    projectsQuery.isLoading || myWorkQuery.isLoading;
+  const isLoading = projectsQuery.isLoading || myWorkQuery.isLoading ||
+    Boolean(selectedProjectId && (summaryQuery.isLoading || velocityQuery.isLoading || workloadQuery.isLoading));
+  const reportError = Boolean(selectedProjectId && (summaryQuery.isError || velocityQuery.isError || workloadQuery.isError));
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -401,14 +435,20 @@ export function ReportsPage() {
         </div>
       )}
 
-      {!isLoading && (
+      {reportError && (
+        <section className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          Unable to load the server report for this project. Please try again.
+        </section>
+      )}
+
+      {!isLoading && !reportError && (
         <>
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <ReportCard
               icon={ListTodo}
               iconClassName="bg-sky-50 text-sky-600"
               label="Total work items"
-              value={report.workItems.length}
+              value={totalWorkItems}
               description="Items in the selected report"
             />
 
@@ -416,8 +456,8 @@ export function ReportsPage() {
               icon={CheckCircle2}
               iconClassName="bg-emerald-50 text-emerald-600"
               label="Completion"
-              value={`${report.completionPercentage}%`}
-              description={`${report.completedItems.length} completed items`}
+              value={`${completionPercentage}%`}
+              description={`${completedItems} completed items`}
             />
 
             <ReportCard
@@ -432,7 +472,7 @@ export function ReportsPage() {
               icon={Users}
               iconClassName="bg-violet-50 text-violet-600"
               label="Contributors"
-              value={report.workload.length}
+              value={summary?.totalMembers ?? workload.length}
               description="Members with assigned work"
             />
           </section>
@@ -441,8 +481,8 @@ export function ReportsPage() {
             <ReportBreakdown
               title="Work status"
               description="Distribution of work by current status."
-              items={report.statusSummaries}
-              total={report.workItems.length}
+              items={statusSummaries}
+              total={totalWorkItems}
             />
 
             <ReportBreakdown
@@ -452,6 +492,41 @@ export function ReportsPage() {
               total={report.workItems.length}
             />
           </div>
+
+          {selectedProjectId && (velocityQuery.data?.length ?? 0) > 0 && (
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 py-4">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Sprint velocity
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Completed work compared with the sprint commitment.
+                </p>
+              </div>
+
+              <div className="divide-y divide-slate-100">
+                {velocityQuery.data?.map((sprint) => {
+                  const completion = sprint.committed
+                    ? Math.round((sprint.completed / sprint.committed) * 100)
+                    : 0;
+
+                  return (
+                    <div key={sprint.sprintId} className="grid gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_110px_1fr] sm:items-center">
+                      <p className="truncate text-sm font-medium text-slate-800">
+                        {sprint.sprintName}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {sprint.completed}/{sprint.committed} done
+                      </p>
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-full rounded-full bg-blue-500" style={{ width: `${Math.min(completion, 100)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4">
@@ -470,7 +545,7 @@ export function ReportsPage() {
               </div>
             </div>
 
-            {report.workload.length === 0 ? (
+            {workload.length === 0 ? (
               <div className="px-5 py-14 text-center">
                 <FolderKanban className="mx-auto h-7 w-7 text-slate-400" />
 
@@ -484,7 +559,7 @@ export function ReportsPage() {
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {report.workload.map((member) => {
+                {workload.map((member) => {
                   const completion = member.assigned
                     ? Math.round(
                         (member.completed / member.assigned) * 100,
@@ -513,7 +588,7 @@ export function ReportsPage() {
                         </p>
 
                         <p className="mt-1 text-sm font-semibold text-slate-700">
-                          {member.inProgress}
+                          {member.inProgress || "—"}
                         </p>
                       </div>
 
@@ -523,7 +598,7 @@ export function ReportsPage() {
                         </p>
 
                         <p className="mt-1 text-sm font-semibold text-slate-700">
-                          {member.completed}
+                          {member.completed || "—"}
                         </p>
                       </div>
 
@@ -534,7 +609,9 @@ export function ReportsPage() {
                           </span>
 
                           <span className="font-semibold text-slate-600">
-                            {completion}%
+                            {member.estimateHours
+                              ? `${member.estimateHours}h estimated`
+                              : `${completion}%`}
                           </span>
                         </div>
 

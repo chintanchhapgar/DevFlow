@@ -32,6 +32,6 @@ public sealed class GetProjectSummaryEndpoint : IEndpoint
             .WithSummary("Get project summary report")
             .WithDescription("Returns project summary metrics.")
             .Produces<GetProjectSummaryResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization(PolicyNames.ProjectViewer);
+            .RequireAuthorization(PolicyNames.Reports);
     }
 }

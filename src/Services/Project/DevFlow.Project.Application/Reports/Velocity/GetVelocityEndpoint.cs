@@ -32,6 +32,6 @@ public sealed class GetVelocityEndpoint : IEndpoint
             .WithSummary("Project velocity")
             .WithDescription("Returns sprint velocity for the project.")
             .Produces<GetVelocityResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization(PolicyNames.ProjectViewer);
+            .RequireAuthorization(PolicyNames.Reports);
     }
 }

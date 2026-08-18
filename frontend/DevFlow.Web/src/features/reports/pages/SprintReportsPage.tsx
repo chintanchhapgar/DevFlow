@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useProjectSprints } from "../hooks/use-sprint-reports";
 import { WorkItemDetailDialog } from "@/features/projects/components/WorkItemDetailDialog";
 import { useProject } from "@/features/projects/hooks/use-project";
+import { useSprintBurndown } from "../hooks/use-project-reports";
 function statusValue(value: string | number) {
   if (typeof value === "number") {
     return value;
@@ -171,6 +172,9 @@ const [selectedWorkItemId, setSelectedWorkItemId] =
       null
     );
   }, [selectedSprintId, sprintsQuery.sprints]);
+  const burndownQuery = useSprintBurndown(
+    selectedSprint?.sprintId ?? null,
+  );
 
   const report = useMemo(() => {
     if (!selectedSprint) {
@@ -424,6 +428,14 @@ health,
     };
   }, [myWorkQuery.items, selectedSprint]);
 
+  const burndownPoints = burndownQuery.data
+    ? burndownQuery.data.points.map((point) => ({
+        date: new Date(`${point.date}T00:00:00`),
+        ideal: point.ideal,
+        actual: point.remaining,
+      }))
+    : report?.burndownPoints ?? [];
+
   const visibleWorkItems = useMemo(() => {
   if (!report) {
     return [];
@@ -502,7 +514,8 @@ const selectedProjectQuery = useProject(
   }
 
   const isLoading =
-    sprintsQuery.isLoading || myWorkQuery.isLoading;
+    sprintsQuery.isLoading || myWorkQuery.isLoading ||
+    Boolean(selectedSprint && burndownQuery.isLoading);
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -817,7 +830,7 @@ const selectedProjectQuery = useProject(
                 </div>
 
                 <div className="mt-5">
-                    <SprintBurndownChart points={report.burndownPoints} />
+                    <SprintBurndownChart points={burndownPoints} />
                 </div>
             </section>
 

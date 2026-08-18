@@ -31,6 +31,6 @@ public sealed class GetBurndownEndpoint : IEndpoint
             .WithName("GetBurndown")
             .WithSummary("Sprint burndown")
             .Produces<GetBurndownResponse>(StatusCodes.Status200OK)
-            .RequireAuthorization(PolicyNames.ProjectViewer);
+            .RequireAuthorization(PolicyNames.Reports);
     }
 }

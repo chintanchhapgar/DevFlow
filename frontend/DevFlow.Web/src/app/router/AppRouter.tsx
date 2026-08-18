@@ -26,6 +26,7 @@ import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SprintReportsPage } from "@/features/reports/pages/SprintReportsPage";
 import { WorkItemDetailPage } from "@/features/projects/pages/WorkItemDetailPage";
 import { UsersPage } from "@/features/users/pages/UsersPage";
+import { ReportsRoute } from "@/features/reports/components/ReportsRoute";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -93,15 +94,17 @@ export function AppRouter() {
               element={<MyTimePage />}
             />
 
-            <Route
-              path="/reports"
-              element={<ReportsPage />}
-            />
+            <Route element={<ReportsRoute />}>
+              <Route
+                path="/reports"
+                element={<ReportsPage />}
+              />
 
-            <Route
-              path="/reports/sprints"
-              element={<SprintReportsPage />}
-            />
+              <Route
+                path="/reports/sprints"
+                element={<SprintReportsPage />}
+              />
+            </Route>
             {/* ============================================================ */}
             {/* ACTIVITY                                                     */}
             {/* ============================================================ */}

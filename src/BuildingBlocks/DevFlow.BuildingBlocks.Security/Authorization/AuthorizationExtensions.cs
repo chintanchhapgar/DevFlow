@@ -36,6 +36,17 @@ public static class AuthorizationExtensions
                 });
 
             options.AddPolicy(
+                PolicyNames.Reports,
+                policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireRole(
+                        "ProjectManager",
+                        "Administrator",
+                        "SystemAdministrator");
+                });
+
+            options.AddPolicy(
                 PolicyNames.ProjectOwner,
                 policy =>
                 {
