@@ -6,9 +6,11 @@ import {
 
 import {
   createWorklog,
+  deleteWorklog,
   getWorklogs,
   startTimer,
   stopTimer,
+  updateWorklog,
   type CreateWorklogRequest,
 } from "../api/worklogs-api";
 
@@ -89,5 +91,25 @@ export function useCreateWorklog() {
 
     onSuccess: (_, variables) =>
       invalidateWorklogs(queryClient, variables.workItemId),
+  });
+}
+
+export function useUpdateWorklog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workItemId, worklogId, request }: { workItemId: string; worklogId: string; request: { description?: string | null; startedAtUtc: string; endedAtUtc: string } }) =>
+      updateWorklog(worklogId, request),
+    onSuccess: (_, variables) => invalidateWorklogs(queryClient, variables.workItemId),
+  });
+}
+
+export function useDeleteWorklog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workItemId, worklogId }: { workItemId: string; worklogId: string }) =>
+      deleteWorklog(worklogId),
+    onSuccess: (_, variables) => invalidateWorklogs(queryClient, variables.workItemId),
   });
 }

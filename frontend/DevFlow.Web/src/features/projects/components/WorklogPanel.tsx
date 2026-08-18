@@ -4,17 +4,23 @@ import {
   LoaderCircle,
   Pause,
   Play,
+  Pencil,
   Plus,
+  Trash2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import {
   useCreateWorklog,
+  useDeleteWorklog,
   useStartTimer,
   useStopTimer,
+  useUpdateWorklog,
   useWorklogs,
 } from "../hooks/use-worklogs";
+import { useProfile } from "@/features/auth/hooks/use-profile";
+import type { Worklog } from "../api/worklogs-api";
 
 function formatDuration(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3_600);
@@ -51,6 +57,9 @@ export function WorklogPanel({
   const stopTimer = useStopTimer();
 
   const createWorklog = useCreateWorklog();
+  const updateWorklog = useUpdateWorklog();
+  const deleteWorklog = useDeleteWorklog();
+  const profileQuery = useProfile();
 
     const [isManualEntryOpen, setIsManualEntryOpen] =
     useState(false);
@@ -60,6 +69,8 @@ export function WorklogPanel({
     );
     const [hours, setHours] = useState("");
     const [minutes, setMinutes] = useState("");
+  const [editingWorklog, setEditingWorklog] =
+    useState<Worklog | null>(null);
 
   const [now, setNow] = useState(() => Date.now());
   const [error, setError] = useState<string | null>(null);
@@ -119,9 +130,11 @@ export function WorklogPanel({
   }
 
   const isSaving =
-  startTimer.isPending ||
-  stopTimer.isPending ||
-  createWorklog.isPending;
+    startTimer.isPending ||
+    stopTimer.isPending ||
+    createWorklog.isPending ||
+    updateWorklog.isPending ||
+    deleteWorklog.isPending;
 
   async function handleManualEntry(
   event: React.FormEvent<HTMLFormElement>,
@@ -150,16 +163,29 @@ export function WorklogPanel({
   );
 
   try {
-    await createWorklog.mutateAsync({
-      workItemId,
-      description: description.trim() || null,
-      startedAtUtc: startedAt.toISOString(),
-      endedAtUtc: endedAt.toISOString(),
-    });
+    if (editingWorklog) {
+      await updateWorklog.mutateAsync({
+        workItemId,
+        worklogId: editingWorklog.worklogId,
+        request: {
+          description: description.trim() || null,
+          startedAtUtc: startedAt.toISOString(),
+          endedAtUtc: endedAt.toISOString(),
+        },
+      });
+    } else {
+      await createWorklog.mutateAsync({
+        workItemId,
+        description: description.trim() || null,
+        startedAtUtc: startedAt.toISOString(),
+        endedAtUtc: endedAt.toISOString(),
+      });
+    }
 
     setDescription("");
     setHours("");
     setMinutes("");
+    setEditingWorklog(null);
     setIsManualEntryOpen(false);
   } catch {
     setError("Unable to log time. Please try again.");
@@ -188,8 +214,11 @@ export function WorklogPanel({
             variant="outline"
             disabled={isSaving}
             onClick={() => {
-            setError(null);
-            setIsManualEntryOpen((current) => !current);
+             setError(null);
+            setIsManualEntryOpen((current) => {
+              if (current) setEditingWorklog(null);
+              return !current;
+            });
             }}
         >
             {isManualEntryOpen ? (
@@ -198,7 +227,7 @@ export function WorklogPanel({
             <Plus className="h-4 w-4" />
             )}
 
-            Log time
+            {editingWorklog ? "Cancel edit" : "Log time"}
         </Button>
 
         <Button
@@ -226,6 +255,9 @@ export function WorklogPanel({
             onSubmit={handleManualEntry}
             className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3"
         >
+            <p className="mb-3 text-sm font-medium text-slate-800">
+              {editingWorklog ? "Edit time entry" : "Log time"}
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-medium text-slate-600">
                 Date
@@ -283,16 +315,19 @@ export function WorklogPanel({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setIsManualEntryOpen(false)}
+                onClick={() => {
+                  setIsManualEntryOpen(false);
+                  setEditingWorklog(null);
+                }}
             >
                 Cancel
             </Button>
 
             <Button type="submit" size="sm" disabled={isSaving}>
-                {createWorklog.isPending && (
+                {(createWorklog.isPending || updateWorklog.isPending) && (
                 <LoaderCircle className="h-4 w-4 animate-spin" />
                 )}
-                Save entry
+                {editingWorklog ? "Save changes" : "Save entry"}
             </Button>
             </div>
         </form>
@@ -363,6 +398,34 @@ export function WorklogPanel({
                       ? "Running"
                       : formatMinutes(worklog.minutesSpent)}
                   </span>
+
+                  {!worklog.isRunning &&
+                    worklog.userId === profileQuery.data?.id && (
+                    <div className="flex shrink-0 gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={isSaving}
+                        aria-label="Edit time entry"
+                        onClick={() => startEditing(worklog)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-red-600 hover:bg-red-50 hover:text-red-700"
+                        disabled={isSaving}
+                        aria-label="Delete time entry"
+                        onClick={() => void handleDelete(worklog)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -378,3 +441,30 @@ export function WorklogPanel({
     
   );
 }
+
+  function startEditing(worklog: Worklog) {
+    setEditingWorklog(worklog);
+    setDescription(worklog.description ?? "");
+    setEntryDate(worklog.startedAtUtc.slice(0, 10));
+    setHours(String(Math.floor(worklog.minutesSpent / 60)));
+    setMinutes(String(worklog.minutesSpent % 60));
+    setError(null);
+    setIsManualEntryOpen(true);
+  }
+
+  async function handleDelete(worklog: Worklog) {
+    if (!window.confirm("Delete this time entry? This cannot be undone.")) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      await deleteWorklog.mutateAsync({
+        workItemId,
+        worklogId: worklog.worklogId,
+      });
+    } catch {
+      setError("Unable to delete this time entry. Please try again.");
+    }
+  }

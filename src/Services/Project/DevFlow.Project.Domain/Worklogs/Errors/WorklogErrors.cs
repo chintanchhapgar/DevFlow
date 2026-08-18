@@ -5,6 +5,11 @@ namespace DevFlow.Project.Domain.Worklogs.Errors;
 
 public static class WorklogErrors
 {
+    public static readonly AppError Forbidden = new(
+        "Worklogs.Forbidden",
+        "You can only manage your own worklogs.",
+        ErrorType.Forbidden);
+
     public static readonly AppError NotFound =
         AppError.NotFound(
             "Worklogs.NotFound",

@@ -4,6 +4,7 @@ using DevFlow.Project.Domain.Worklogs.Errors;
 using DevFlow.Project.Domain.Worklogs.Repositories;
 using DevFlow.Project.Domain.Worklogs.ValueObjects;
 using DevFlow.SharedKernel.Results;
+using DevFlow.SharedKernel.Common;
 using MediatR;
 
 namespace DevFlow.Project.Application.Worklogs.Update;
@@ -15,13 +16,16 @@ internal sealed class UpdateWorklogCommandHandler
 {
     private readonly IWorklogRepository _worklogRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUser _currentUser;
 
     public UpdateWorklogCommandHandler(
         IWorklogRepository worklogRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser)
     {
         _worklogRepository = worklogRepository;
         _unitOfWork = unitOfWork;
+        _currentUser = currentUser;
     }
 
     public async Task<Result<UpdateWorklogResponse>> Handle(
@@ -37,6 +41,12 @@ internal sealed class UpdateWorklogCommandHandler
         {
             return Result.Failure<UpdateWorklogResponse>(
                 WorklogErrors.NotFound);
+        }
+
+        if (worklog.UserId != _currentUser.UserId)
+        {
+            return Result.Failure<UpdateWorklogResponse>(
+                WorklogErrors.Forbidden);
         }
 
         worklog.Update(
