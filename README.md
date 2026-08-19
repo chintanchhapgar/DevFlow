@@ -354,15 +354,21 @@ src/Services/Notification/
 
 ### 🏃 Sprint Management
 
-![DevFlow Sprints](./docs/screenshots/sprints.png)
+![DevFlow Sprints](./docs/screenshots/project-sprints.png)
+
+### 🏃 Work-item Management
+
+![DevFlow Project Work-item](./docs/screenshots/project-workitems.png)
 
 ### 📊 Reports
 
-![DevFlow Reports](./docs/screenshots/reports.png)
+![DevFlow Reports](./docs/screenshots/sprint-performance-report.png)
+
+![DevFlow Reports](./docs/screenshots/delivery-overview-report.png)
 
 ### ⏱️ Time Tracking
 
-![DevFlow Time Tracking](./docs/screenshots/time-tracking.png)
+![DevFlow Time Tracking](./docs/screenshots/mytime.png)
 
 ### 🔐 Security & MFA
 
