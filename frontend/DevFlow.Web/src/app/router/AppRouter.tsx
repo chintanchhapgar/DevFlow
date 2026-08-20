@@ -27,6 +27,7 @@ import { SprintReportsPage } from "@/features/reports/pages/SprintReportsPage";
 import { WorkItemDetailPage } from "@/features/projects/pages/WorkItemDetailPage";
 import { UsersPage } from "@/features/users/pages/UsersPage";
 import { ReportsRoute } from "@/features/reports/components/ReportsRoute";
+import { LandingPage } from "@/features/landing/pages/LandingPage";
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -39,6 +40,7 @@ export function AppRouter() {
           path="/login"
           element={<LoginPage />}
         />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -57,7 +59,7 @@ export function AppRouter() {
 
             {/* Dashboard */}
             <Route
-              path="/"
+              path="/dashboard"
               element={<DashboardPage />}
             />
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 
 interface AuthPageLayoutProps {
@@ -40,5 +41,5 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
 }
 
 function Brand({ centered = false }: { centered?: boolean }) {
-  return <div className={`flex items-center gap-3 ${centered ? "justify-center" : ""}`}><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#456b9a] text-lg font-bold text-white shadow-sm">◆</div><div><div className="text-lg font-bold tracking-tight text-slate-800">DEVFLOW</div><div className="text-xs text-slate-500">Project Management</div></div></div>;
+  return <Link to="/" className={`flex items-center gap-3 ${centered ? "justify-center" : ""}`} aria-label="Go to DevFlow home"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#456b9a] text-lg font-bold text-white shadow-sm">◆</div><div><div className="text-lg font-bold tracking-tight text-slate-800">DEVFLOW</div><div className="text-xs text-slate-500">Project Management</div></div></Link>;
 }

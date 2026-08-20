@@ -26,7 +26,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
-  const destination = returnTo?.startsWith("/") ? returnTo : "/";
+  const destination = returnTo?.startsWith("/") ? returnTo : "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -108,7 +108,7 @@ export function LoginPage() {
 
           <div className="relative flex w-full flex-col justify-between p-12 xl:p-16">
             {/* Brand */}
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3" aria-label="Go to DevFlow home">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#456b9a] text-lg font-bold text-white shadow-sm">
                 ◆
               </div>
@@ -122,7 +122,7 @@ export function LoginPage() {
                   Project Management
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Main message */}
             <div className="max-w-lg">
@@ -177,7 +177,7 @@ export function LoginPage() {
         <div className="flex min-h-screen items-center justify-center bg-white px-5 py-10 sm:px-8">
           <div className="w-full max-w-md">
             {/* Mobile Brand */}
-            <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
+            <Link to="/" className="mb-10 flex items-center justify-center gap-3 lg:hidden" aria-label="Go to DevFlow home">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#456b9a] text-lg font-bold text-white shadow-sm">
                 ◆
               </div>
@@ -191,7 +191,7 @@ export function LoginPage() {
                   Project Management
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Header */}
             <div className="mb-8">

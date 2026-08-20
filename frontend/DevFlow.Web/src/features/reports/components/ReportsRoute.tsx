@@ -12,5 +12,5 @@ export function ReportsRoute() {
 
   return canViewReports(profileQuery.data?.role)
     ? <Outlet />
-    : <Navigate to="/" replace />;
+    : <Navigate to="/dashboard" replace />;
 }

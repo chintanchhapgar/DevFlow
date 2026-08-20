@@ -27,7 +27,7 @@ import {
 const navigation = [
   {
     label: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -95,7 +95,7 @@ function NavigationItem({
   return (
     <NavLink
       to={path}
-      end={path === "/"}
+      end={path === "/dashboard"}
       className={({ isActive }) =>
         [
           "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
@@ -126,7 +126,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
       <div className="flex h-16 shrink-0 items-center border-b border-slate-200 px-5">
-        <NavLink to="/" className="flex items-center gap-3">
+        <NavLink to="/dashboard" className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eef3f8] text-sm font-bold text-[#456b9a] ring-1 ring-[#dbe4ed]">
             ◇
           </div>
